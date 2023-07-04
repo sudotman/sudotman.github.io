@@ -40,33 +40,35 @@
 							<section id="one">
 								<div class="inner">
 									<header class="major">
-										<h2>HMG - MR Simulator</h2>
+										<h2>2D-3D Floor Plan Generator</h2>
 									</header>
-									
-									<p>A MR based Machine Gun simulator made for the Varjo XR-3. The experience is setup with a green screen on which the MR content is displayed. Features a real gun from which trigger, position data is recieved and reflected inside of the simulator [serial ports].</p>
-									<p>The specifications have to be as generic as possible because of an signed NDA: The ballistics have been coded to simulate real gun's ballistics as much as possible. From the gun's specifications to the bullet's specifications are all accurately done.</p>
-									<p>The bullet has a specified ballistic coeffecient: takes in form factor, mass, diameter etc.</p>
-									<p>The gun also can have additional spread, different fire modes, switching of the ammo/bullet-types depending on the configuration.</p>
-									<p>Has multiple modes of training too, from zeroing to tactical marksmanship all in accordance to the [redacted] Army specifications.</p>
-									<p>The full interface also has CRC-16 checksums at both the reciever and the sender to ensure full data integrity.</p>
+									  
+									<p>A tool that attempts to save time for architectures in having to visualize house/floor plans for clients in 3D.</p>
+									<p>Elaborating on the problem statement a little more, architects usually design house plans in 2D using some CAD software. These CAD files (.dwg,.cad,.dxf) are great and serve most realistic purposes but home owners like to visualize their homes in a proper 3D manner before settling down on one. This in turn, entails the architects having to make 3D models themselves or having to ask people to make 3D models for them.</p>
+									<p>The manual 3D modelling usually takes up about 1-2 hours of the architects time.</p>
+									<p>The solution cuts down on the time required from prep from 1-2 hours down to 5-10 minutes and automates most of the 3D generation.</p>
+									<p>The user imports the 2D floor plan from a simple .exe and then in turn recieve a complete 3D model that is viewable in VR right out the gate with proper materials/textures assigned to it.</p>
+									<p>Uses Python as the backend to parse the CAD files and then uses Unreal to swap in models/textures/material from a huge library of presets.</p>
 
-									<!--Triangle animations-->
+	
 									<header class="major">
-										<h2>Some Screenshots</h2>
+										<h2>Demo of the working:</h2>
 									</header>
-									<span class="image main"><img src="https://raw.githubusercontent.com/sudotman/OpenGl-Experiments/main/Outputs/BresenhamCircle.gif" alt="Boundary Fill"/></span>
+									<h3>Original Floor Plan</h3>
+									<span class="image main"><img src="images/floor_original.png" alt="Original Floor Plan"/></span>
 
 
-									<!--SpiderWeb-->
-									<header class="major">
-										<h2>Sutherland-Hodgamn Polygon Clipping</h2>
-									</header>
-									<span class="image main"><img src="https://raw.githubusercontent.com/sudotman/OpenGl-Experiments/main/Outputs/PolygonClippingUser.gif" alt="DiscordBot Demo"/></span>
+									<h3>3D Elevated Model</h3>
+									<span class="image main"><img src="images/floor.png" alt="3D Elevated Model"/></span>
 
-									
-									<ul class="actions">
-										<li><a href="https://github.com/sudotman/OpenGl-Experiments" class="button">See more on GitHub</a></li>
-									</ul>
+									<h3>Screenshot at a random point of processing</h3>
+									<span class="image main"><img src="images/floor_working.png" alt="Working of the model"/></span>
+
+									<span class="image main"><img src="images/floor_working2.png" alt="Working of the model"/></span>
+
+									<h3>Intermediary formed before final material/texture/modular swapping</h3>
+									<span class="image main"><img src="images/floor_intermediary.png" alt="Intermediary"/></span>
+
 								</div>
 							</section>
 

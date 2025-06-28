@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Markets: Earnings Surprise Impact Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Analyst's Desk -->
+    <!-- Application Structure Plan: A top-down, single-page dashboard designed for guided discovery. The structure starts with high-level concepts (the 'what' and 'why'), then flows into an interactive case study dashboard (the 'how'), followed by a focused analysis on a secondary effect (volatility), and concludes with actionable takeaways. A sticky navigation allows experts to jump directly to sections. This structure was chosen over mirroring the report's academic layout because it caters to multiple user journeys: a linear, educational path for novices and a direct, tool-based path for analysts who want to immediately explore the case study data. The interactive dashboard is the core, allowing users to actively compare companies rather than passively reading separate sections. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core concepts (Surprise, PEAD, Asymmetry). Goal: Inform. Viz: Simple bar charts (Chart.js) and HTML/CSS diagrams. Interaction: Static. Justification: Quickly establish fundamental knowledge for the user. Library/Method: Chart.js, Tailwind CSS.
+        - Report Info: Case study data (Reliance, TCS, HDFC). Goal: Compare & Find Relationships. Viz: A dynamic combination bar-and-line chart (Chart.js) to correlate EPS surprise with immediate (T+1) and long-term (T+60) price drift. Interaction: User clicks company buttons to update the chart, table, and a qualitative insights panel simultaneously. Justification: This is the most effective way to show the relationship between multiple data points and allow direct, interactive comparison between companies, which is the report's central analysis. Library/Method: Chart.js, Vanilla JS DOM manipulation.
+        - Report Info: Volatility shifts (Table 5.3.1). Goal: Show Change. Viz: Interactive bar chart (Chart.js). Interaction: Linked to the main company selector. Justification: Visualizes the abstract concept of a shift in baseline volatility, making the data from the report's table immediately understandable. Library/Method: Chart.js, Vanilla JS.
+        - Report Info: Strategic implications. Goal: Organize & Conclude. Viz: HTML/CSS card layout. Interaction: Static. Justification: Provides a clean, scannable summary of the report's conclusions. Library/Method: Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .company-btn { transition: all 0.3s; }
+        .company-btn.active { background-color: #1e40af; color: white; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-900">Earnings Surprise Analyzer</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" class="nav-link font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Overview</a>
+                    <a href="#casestudies" class="nav-link font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Case Studies</a>
+                    <a href="#volatility" class="nav-link font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Volatility</a>
+                    <a href="#takeaways" class="nav-link font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Takeaways</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="overview" class="my-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">The Market's Reaction to Earnings News</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-12">
+                This analysis explores how corporate earnings announcements impact stock prices in the Indian market (NSE/BSE). We dissect the concept of an "earnings surprise," the subsequent price drift, and the crucial role of volatility, based on the findings of the source report.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-3 text-slate-900">The Asymmetric Reaction</h3>
+                    <p class="text-slate-600 mb-4">The market punishes negative surprises more severely than it rewards positive ones. This principle, known as loss aversion, is a consistent behavioral bias.</p>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="asymmetryChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-3 text-slate-900">Post-Earnings-Announcement Drift (PEAD)</h3>
+                    <p class="text-slate-600 mb-4">Contrary to efficient market theory, stock prices don't react instantly. They tend to drift in the direction of the surprise for weeks or months, a phenomenon known as PEAD.</p>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="peadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="casestudies" class="my-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Interactive Case Studies: Nifty 50 Giants</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-8">
+                Select a company to analyze its earnings surprise history. The chart below correlates the quarterly EPS surprise (%) with the immediate stock price reaction (T+1) and the longer-term abnormal return over 60 days (PEAD). This interactive view helps visualize the core findings of the report.
+            </p>
+
+            <div class="flex justify-center items-center space-x-2 md:space-x-4 mb-8">
+                <button id="btn-RELIANCE" class="company-btn bg-white shadow py-2 px-4 md:px-6 rounded-full font-semibold text-slate-700 hover:bg-blue-500 hover:text-white">Reliance</button>
+                <button id="btn-TCS" class="company-btn bg-white shadow py-2 px-4 md:px-6 rounded-full font-semibold text-slate-700 hover:bg-blue-500 hover:text-white">TCS</button>
+                <button id="btn-HDFCBANK" class="company-btn bg-white shadow py-2 px-4 md:px-6 rounded-full font-semibold text-slate-700 hover:bg-blue-500 hover:text-white">HDFC Bank</button>
+            </div>
+
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                 <div class="chart-container">
+                    <canvas id="caseStudyChart"></canvas>
+                </div>
+                <div class="mt-6 p-4 bg-slate-100 rounded-lg">
+                    <h4 class="font-bold text-lg text-slate-800">Analyst's Insight:</h4>
+                    <p id="insightText" class="text-slate-700 mt-2"></p>
+                </div>
+            </div>
+
+            <div class="mt-8 overflow-x-auto">
+                <h3 id="tableTitle" class="text-2xl font-bold text-slate-900 mb-4"></h3>
+                <table class="min-w-full bg-white rounded-lg shadow">
+                    <thead class="bg-slate-200">
+                        <tr>
+                            <th class="text-left font-semibold p-3">Period End</th>
+                            <th class="text-left font-semibold p-3">Announce Date</th>
+                            <th class="text-right font-semibold p-3">Forecast EPS (₹)</th>
+                            <th class="text-right font-semibold p-3">Actual EPS (₹)</th>
+                            <th class="text-right font-semibold p-3">Surprise %</th>
+                            <th class="text-right font-semibold p-3">T+1 Price Change %</th>
+                            <th class="text-right font-semibold p-3">T+60 Day AR %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="caseStudyTableBody">
+                    </tbody>
+                </table>
+                 <p class="text-sm text-slate-500 mt-2">Abnormal Return (AR) is the stock's return minus the Nifty 50's return, isolating company-specific performance.</p>
+            </div>
+        </section>
+
+        <section id="volatility" class="my-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Volatility Dynamics</h2>
+             <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-12">
+                Earnings announcements drastically change a stock's risk profile. A large surprise can cause a lasting shift in baseline volatility, indicating the market perceives greater uncertainty about the company's future. The chart below shows this shift for the selected company's largest recent positive and negative surprises.
+            </p>
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                 <div class="chart-container">
+                    <canvas id="volatilityChart"></canvas>
+                </div>
+                 <p class="text-center mt-4 text-slate-600">Change in 30-Day Historical Volatility (HV) before and after major earnings news.</p>
+            </div>
+        </section>
+
+        <section id="takeaways" class="my-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Strategic Takeaways for Investors</h2>
+             <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-12">
+                The report's findings highlight several strategies for navigating earnings season, moving beyond simple headline numbers to a more nuanced, holistic approach.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl mb-4 text-blue-600">📈</div>
+                    <h3 class="text-xl font-semibold mb-2 text-slate-900">Leverage the PEAD</h3>
+                    <p class="text-slate-600">The post-announcement drift is a documented market inefficiency. High-quality, revenue-driven surprises often lead to sustained price momentum over weeks, a pattern that can inform trading strategies.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl mb-4 text-blue-600">⚡️</div>
+                    <h3 class="text-xl font-semibold mb-2 text-slate-900">Analyze Volatility Shifts</h3>
+                    <p class="text-slate-600">Use the predictable "IV crush" for options strategies. More importantly, analyze shifts in baseline historical volatility post-announcement to gauge the market's updated assessment of the company's risk profile.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl mb-4 text-blue-600">🔍</div>
+                    <h3 class="text-xl font-semibold mb-2 text-slate-900">Go Beyond the Numbers</h3>
+                    <p class="text-slate-600">Forward-looking guidance and the "quality" of the earnings beat are often more important than the headline EPS number. A holistic analysis of the full report and investor call is critical.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>Interactive report generated based on the source document "The Impact and Predictability of Earnings Surprises in the Indian Stock Market".</p>
+            <p class="text-sm text-slate-400 mt-2">This application is for informational purposes only and does not constitute financial advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const reportData = {
+                RELIANCE: {
+                    name: "Reliance Industries Ltd.",
+                    insight: "For a complex conglomerate like Reliance, the medium-term price is often more influenced by segment news (telecom, retail) or capex plans than by the headline earnings surprise itself. Note how small misses in late 2023 were followed by significant positive drift.",
+                    table: [
+                        { period: 'Mar 2023', date: '20-Apr-23', forecast: 13.37, actual: 14.25, surprise: 6.58, t1: 0.41, t60: -5.80 },
+                        { period: 'Jun 2023', date: '20-Jul-23', forecast: 12.56, actual: 11.85, surprise: -5.65, t1: -1.98, t60: 2.15 },
+                        { period: 'Sep 2023', date: '26-Oct-23', forecast: 13.01, actual: 12.85, surprise: -1.23, t1: -0.85, t60: 10.50 },
+                        { period: 'Dec 2023', date: '18-Jan-24', forecast: 12.75, actual: 12.75, surprise: 0.00, t1: -1.20, t60: 12.30 },
+                        { period: 'Mar 2024', date: '21-Apr-24', forecast: 14.31, actual: 14.00, surprise: -2.17, t1: 0.65, t60: 8.90 },
+                        { period: 'Jun 2024', date: '18-Jul-24', forecast: 11.18, actual: 11.20, surprise: 0.18, t1: -0.50, t60: NaN },
+                        { period: 'Sep 2024', date: '13-Oct-24', forecast: 12.42, actual: 12.25, surprise: -1.37, t1: 0.70, t60: NaN },
+                        { period: 'Dec 2024', date: '15-Jan-25', forecast: 14.46, actual: 13.70, surprise: -5.26, t1: -1.30, t60: NaN },
+                        { period: 'Mar 2025', date: '24-Apr-25', forecast: 12.72, actual: 14.30, surprise: 12.42, t1: 0.95, t60: NaN }
+                    ],
+                    volatility: {
+                        positive: { label: 'Mar 2025 (+12.42%)', pre: 18.5, post: 22.1 },
+                        negative: { label: 'Dec 2024 (-5.26%)', pre: 16.2, post: 19.8 }
+                    }
+                },
+                TCS: {
+                    name: "Tata Consultancy Services Ltd.",
+                    insight: "TCS demonstrates a more classic reaction. The significant +6.11% beat in Dec 2023 was met with a strong immediate price increase and sustained positive drift (PEAD). This shows the market rewarding a high-quality surprise from a market leader.",
+                    table: [
+                        { period: 'Mar 2023', date: '12-Apr-23', forecast: 31.14, actual: 31.14, surprise: 0.00, t1: -1.50, t60: -4.50 },
+                        { period: 'Jun 2023', date: '11-Jul-23', forecast: 30.26, actual: 30.26, surprise: 0.00, t1: 0.80, t60: 3.10 },
+                        { period: 'Sep 2023', date: '10-Oct-23', forecast: 31.00, actual: 31.00, surprise: 0.00, t1: -1.75, t60: 5.50 },
+                        { period: 'Dec 2023', date: '10-Jan-24', forecast: 30.29, actual: 32.14, surprise: 6.11, t1: 2.85, t60: 8.20 },
+                        { period: 'Mar 2024', date: '10-Apr-24', forecast: 34.37, actual: 34.37, surprise: 0.00, t1: 0.50, t60: -3.70 },
+                        { period: 'Jun 2024', date: '10-Jul-24', forecast: 33.28, actual: 33.28, surprise: 0.00, t1: 0.75, t60: NaN },
+                        { period: 'Sep 2024', date: '09-Oct-24', forecast: 34.64, actual: 32.92, surprise: -4.97, t1: -1.90, t60: NaN },
+                        { period: 'Dec 2024', date: '08-Jan-25', forecast: 34.30, actual: 34.21, surprise: -0.26, t1: 2.10, t60: NaN },
+                        { period: 'Mar 2025', date: '09-Apr-25', forecast: 35.00, actual: 33.79, surprise: -3.46, t1: -0.50, t60: NaN }
+                    ],
+                    volatility: {
+                        positive: { label: 'Dec 2023 (+6.11%)', pre: 14.8, post: 17.5 },
+                        negative: { label: 'Sep 2024 (-4.97%)', pre: 15.5, post: 18.1 }
+                    }
+                },
+                HDFCBANK: {
+                    name: "HDFC Bank Ltd.",
+                    insight: "HDFC Bank is a powerful example of qualitative factors overriding quantitative results. The massive -8.4% price drop after the Dec 2023 results, despite an insignificant EPS miss, was driven entirely by analyst concerns over post-merger margins (NIMs).",
+                    table: [
+                        { period: 'Mar 2023', date: '14-Apr-23', forecast: 21.63, actual: 21.60, surprise: -0.14, t1: -1.20, t60: 3.60 },
+                        { period: 'Jun 2023', date: '16-Jul-23', forecast: 21.14, actual: 21.15, surprise: 0.05, t1: 0.50, t60: -8.50 },
+                        { period: 'Sep 2023', date: '15-Oct-23', forecast: 21.07, actual: 21.10, surprise: 0.14, t1: -0.45, t60: -12.10 },
+                        { period: 'Dec 2023', date: '15-Jan-24', forecast: 21.66, actual: 21.60, surprise: -0.28, t1: -8.40, t60: -5.20 },
+                        { period: 'Mar 2024', date: '14-Apr-24', forecast: 21.75, actual: 21.70, surprise: -0.23, t1: 0.30, t60: 15.40 },
+                        { period: 'Jun 2024', date: '19-Jul-24', forecast: 21.20, actual: 21.30, surprise: 0.47, t1: 0.90, t60: NaN },
+                        { period: 'Sep 2024', date: '18-Oct-24', forecast: 21.30, actual: 22.00, surprise: 3.29, t1: 1.50, t60: NaN },
+                        { period: 'Dec 2024', date: '21-Jan-25', forecast: 22.20, actual: 21.90, surprise: -1.35, t1: -2.10, t60: NaN },
+                        { period: 'Mar 2025', date: '18-Apr-25', forecast: 22.43, actual: 23.00, surprise: 2.54, t1: 0.80, t60: NaN }
+                    ],
+                    volatility: {
+                        positive: { label: 'Mar 2025 (+2.54%)', pre: 24.1, post: 21.5 },
+                        negative: { label: 'Dec 2023 (NIM Concern)', pre: 19.8, post: 28.5 }
+                    }
+                }
+            };
+            
+            let currentCompany = 'RELIANCE';
+            let caseStudyChart, volatilityChart;
+
+            const updateActiveButton = (companyId) => {
+                document.querySelectorAll('.company-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(`btn-${companyId}`).classList.add('active');
+            };
+
+            const populateTable = (data) => {
+                const tableBody = document.getElementById('caseStudyTableBody');
+                tableBody.innerHTML = '';
+                data.table.forEach(row => {
+                    const surpriseClass = row.surprise > 0 ? 'text-green-600' : 'text-red-600';
+                    const t1Class = row.t1 > 0 ? 'text-green-600' : 'text-red-600';
+                    const t60Class = row.t60 > 0 ? 'text-green-600' : 'text-red-600';
+                    
+                    const tableRow = `
+                        <tr class="border-b border-slate-200">
+                            <td class="p-3">${row.period}</td>
+                            <td class="p-3">${row.date}</td>
+                            <td class="text-right p-3">${row.forecast.toFixed(2)}</td>
+                            <td class="text-right p-3">${row.actual.toFixed(2)}</td>
+                            <td class="text-right p-3 font-semibold ${surpriseClass}">${row.surprise.toFixed(2)}%</td>
+                            <td class="text-right p-3 ${t1Class}">${row.t1.toFixed(2)}%</td>
+                            <td class="text-right p-3 ${t60Class}">${isNaN(row.t60) ? 'N/A' : row.t60.toFixed(2) + '%'}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += tableRow;
+                });
+            };
+
+            const createCaseStudyChart = (data) => {
+                const ctx = document.getElementById('caseStudyChart').getContext('2d');
+                
+                caseStudyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.table.map(d => d.period),
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'EPS Surprise %',
+                                data: data.table.map(d => d.surprise),
+                                backgroundColor: data.table.map(d => d.surprise >= 0 ? 'rgba(22, 163, 74, 0.6)' : 'rgba(220, 38, 38, 0.6)'),
+                                borderColor: data.table.map(d => d.surprise >= 0 ? 'rgb(22, 163, 74)' : 'rgb(220, 38, 38)'),
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'T+1 Price Change %',
+                                data: data.table.map(d => d.t1),
+                                borderColor: 'rgb(37, 99, 235)',
+                                backgroundColor: 'rgba(37, 99, 235, 0.5)',
+                                tension: 0.1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'T+60 Day AR % (PEAD)',
+                                data: data.table.map(d => d.t60),
+                                borderColor: 'rgb(234, 88, 12)',
+                                backgroundColor: 'rgba(234, 88, 12, 0.5)',
+                                tension: 0.1,
+                                yAxisID: 'y',
+                                borderDash: [5, 5],
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Percentage (%)' }
+                            }
+                        },
+                        plugins: {
+                            title: { display: true, text: 'EPS Surprise vs. Price Reaction', font: { size: 16 } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toFixed(2) + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const updateCaseStudyChart = (data) => {
+                if (!caseStudyChart) {
+                    createCaseStudyChart(data);
+                    return;
+                }
+                caseStudyChart.data.labels = data.table.map(d => d.period);
+                caseStudyChart.data.datasets[0].data = data.table.map(d => d.surprise);
+                caseStudyChart.data.datasets[0].backgroundColor = data.table.map(d => d.surprise >= 0 ? 'rgba(22, 163, 74, 0.6)' : 'rgba(220, 38, 38, 0.6)');
+                caseStudyChart.data.datasets[0].borderColor = data.table.map(d => d.surprise >= 0 ? 'rgb(22, 163, 74)' : 'rgb(220, 38, 38)');
+                caseStudyChart.data.datasets[1].data = data.table.map(d => d.t1);
+                caseStudyChart.data.datasets[2].data = data.table.map(d => d.t60);
+                caseStudyChart.update();
+            };
+            
+            const createVolatilityChart = (data) => {
+                const ctx = document.getElementById('volatilityChart').getContext('2d');
+                volatilityChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Positive Surprise', 'Negative Surprise'],
+                        datasets: [
+                            {
+                                label: 'Pre-Event HV',
+                                data: [data.volatility.positive.pre, data.volatility.negative.pre],
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Post-Event HV',
+                                data: [data.volatility.positive.post, data.volatility.negative.post],
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Annualized Volatility (%)' } }
+                        },
+                        plugins: {
+                            title: { display: true, text: `Baseline Volatility Shift: ${data.name}`, font: { size: 16 } },
+                             tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        return index === 0 ? data.volatility.positive.label : data.volatility.negative.label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const updateVolatilityChart = (data) => {
+                if (!volatilityChart) {
+                    createVolatilityChart(data);
+                    return;
+                }
+                volatilityChart.data.datasets[0].data = [data.volatility.positive.pre, data.volatility.negative.pre];
+                volatilityChart.data.datasets[1].data = [data.volatility.positive.post, data.volatility.negative.post];
+                volatilityChart.options.plugins.title.text = `Baseline Volatility Shift: ${data.name}`;
+                volatilityChart.options.plugins.tooltip.callbacks.title = (tooltipItems) => {
+                    const index = tooltipItems[0].dataIndex;
+                    return index === 0 ? data.volatility.positive.label : data.volatility.negative.label;
+                };
+                volatilityChart.update();
+            };
+
+            const updateView = (companyId) => {
+                currentCompany = companyId;
+                const data = reportData[companyId];
+                
+                updateActiveButton(companyId);
+                
+                document.getElementById('tableTitle').textContent = `${data.name} - Earnings Surprise vs. Stock Reaction`;
+                document.getElementById('insightText').textContent = data.insight;
+
+                populateTable(data);
+                updateCaseStudyChart(data);
+                updateVolatilityChart(data);
+            };
+
+            document.querySelectorAll('.company-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const companyId = e.target.id.split('-')[1];
+                    updateView(companyId);
+                });
+            });
+
+            // Initial setup
+            updateView('RELIANCE');
+            
+            // Overview Charts
+            new Chart(document.getElementById('asymmetryChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Positive Surprise (Beat)', 'Negative Surprise (Miss)'],
+                    datasets: [{
+                        label: 'Average Price Impact',
+                        data: [2.4, -3.5],
+                        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)'],
+                        borderColor: ['rgb(75, 192, 192)', 'rgb(255, 99, 132)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, title: {display: true, text: 'Based on US S&P 500 Data'} },
+                    scales: { y: { title: { display: true, text: 'Avg. Price Change (%)' } } }
+                }
+            });
+
+            new Chart(document.getElementById('peadChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['T-5', 'Announce', 'T+5', 'T+15', 'T+30', 'T+60'],
+                    datasets: [
+                        { label: 'Positive Surprise Drift', data: [-0.2, 0, 1.5, 2.5, 3.5, 5.0], borderColor: 'rgb(75, 192, 192)', tension: 0.1, fill: true, backgroundColor: 'rgba(75, 192, 192, 0.2)'},
+                        { label: 'Negative Surprise Drift', data: [0.1, 0, -1.8, -2.8, -4.0, -5.5], borderColor: 'rgb(255, 99, 132)', tension: 0.1, fill: true, backgroundColor: 'rgba(255, 99, 132, 0.2)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Illustrative Price Drift Post-Announcement' } },
+                    scales: { y: { title: { display: true, text: 'Cumulative Abnormal Return (%)' } } }
+                }
+            });
+
+            // Nav link active state on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -75,6 +75,10 @@ function initGlowingInteractiveDotsGrid() {
       });
     }
 
+    // expose control helpers
+    container._rebuildGrid = buildGrid;
+    container._origFs = parseFloat(getComputedStyle(container).fontSize);
+
     window.addEventListener("resize", buildGrid);
     buildGrid();
 
@@ -1295,6 +1299,17 @@ function initColorSampler() {
       asciiBtn.addEventListener('click', () => {
         asciiActive = !asciiActive;
         asciiBtn.classList.toggle('active', asciiActive);
+
+        document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
+          if (asciiActive) {
+            const newSize = cont._origFs * 0.4; // denser grid
+            cont.style.fontSize = newSize + 'px';
+          } else {
+            cont.style.fontSize = cont._origFs + 'px';
+          }
+          if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
+        });
+
         if (asciiActive) {
           document.body.classList.add('ascii-mode');
           asciiLoop();
@@ -1353,6 +1368,10 @@ function initColorSampler() {
       document.body.classList.remove('ascii-mode');
       if (asciiBtn) asciiBtn.classList.remove('active');
       resetDotsAppearance();
+      document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
+        cont.style.fontSize = cont._origFs + 'px';
+        if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
+      });
     }
     applyColour('#245E51');
   }

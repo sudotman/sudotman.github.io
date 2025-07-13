@@ -3,6 +3,8 @@ gsap.registerPlugin(InertiaPlugin);
 function initGlowingInteractiveDotsGrid() {
   document.querySelectorAll('[data-dots-container-init]').forEach(container => {
     const colors         = { base: "#245E51", active: "#A8FF51" };
+    window.__DOT_GRIDS = window.__DOT_GRIDS || [];
+    window.__DOT_GRIDS.push(colors);
     const threshold      = 200;
     const speedThreshold = 100;
     const shockRadius    = 325;
@@ -158,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadProfileData();
   initTabSwitching();
   initScrollBasedDotAnimation();
+  initColorSampler();
 });
 
 // Tab Switching Functionality
@@ -1168,3 +1171,160 @@ async function loadProjects() {
 }
 
 // ------------------- End Dynamic Projects Loader --------------- 
+
+// Color Sampler for Interactive Dots
+function legacyColorSampler() {
+  const dots = document.querySelectorAll('.dots-container .dot');
+  const colors = window.__DOT_GRIDS[window.__DOT_GRIDS.length - 1]; // Get the last added colors
+
+  dots.forEach(dot => {
+    dot.addEventListener('mouseenter', () => {
+      const rect = dot.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const color = getColorAtPixel(x, y);
+      if (color) {
+        dot.style.backgroundColor = color;
+      }
+    });
+
+    dot.addEventListener('mouseleave', () => {
+      dot.style.backgroundColor = colors.base;
+    });
+  });
+}
+
+function getColorAtPixel(x, y) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, 1, 1);
+
+  const imageData = ctx.getImageData(0, 0, 1, 1);
+  const data = imageData.data;
+
+  // Assuming the dot is on a transparent background, we need to get the pixel from the parent container
+  // This is a simplified approach and might need adjustment based on actual container structure
+  const parent = dot.parentElement;
+  if (!parent) return null;
+
+  const rect = parent.getBoundingClientRect();
+  const containerX = rect.left + window.scrollX;
+  const containerY = rect.top + window.scrollY;
+
+  const pixelX = x - containerX;
+  const pixelY = y - containerY;
+
+  // This is a very basic implementation. For a more robust solution,
+  // you'd need to draw the dots onto a canvas and then read pixel data.
+  // For now, we'll just return a placeholder or null.
+  // A proper implementation would involve a canvas overlay or a different approach.
+  // For this example, we'll just return a placeholder.
+  return null; // Placeholder for actual pixel reading
+} 
+
+/* ------------------- Real-Time Colour Sampler ------------------- */
+function initColorSampler() {
+  const supportsMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const btn = document.createElement('button');
+  btn.className = 'color-sampler-btn';
+  btn.title = 'Enable real-time colour mood';
+  btn.innerHTML = '🎥';
+  document.body.appendChild(btn);
+
+  let active = false;
+  let videoStream = null;
+  let videoEl, canvasEl, ctx;
+  let lastColour = '#245E51';
+
+  btn.addEventListener('click', async () => {
+    if (active) {
+      stopSampling();
+      return;
+    }
+
+    if (supportsMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        startSampling(stream);
+      } catch (err) {
+        console.warn('Webcam permission denied or unavailable, using fallback colour', err);
+        fallbackSample();
+      }
+    } else {
+      fallbackSample();
+    }
+  });
+
+  function startSampling(stream) {
+    active = true;
+    btn.classList.add('active');
+    videoStream = stream;
+
+    videoEl = document.createElement('video');
+    videoEl.style.display = 'none';
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.srcObject = stream;
+    videoEl.play();
+    document.body.appendChild(videoEl);
+
+    canvasEl = document.createElement('canvas');
+    ctx = canvasEl.getContext('2d');
+
+    sampleLoop();
+  }
+
+  function sampleLoop() {
+    if (!active) return;
+    if (videoEl.readyState >= 2) {
+      canvasEl.width = videoEl.videoWidth;
+      canvasEl.height = videoEl.videoHeight;
+      ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+      const data = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 40) { // sample subset for performance
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+      const rgb = `rgb(${r}, ${g}, ${b})`;
+      applyColour(rgb);
+    }
+    requestAnimationFrame(sampleLoop);
+  }
+
+  function applyColour(colour) {
+    if (colour === lastColour) return;
+    lastColour = colour;
+    if (typeof gsap !== 'undefined') {
+      gsap.to('.dot', { backgroundColor: colour, duration: 0.6 });
+    } else {
+      document.querySelectorAll('.dot').forEach(d => d.style.backgroundColor = colour);
+    }
+    if (window.__DOT_GRIDS) {
+      window.__DOT_GRIDS.forEach(c => c.base = colour);
+    }
+  }
+
+  function stopSampling() {
+    active = false;
+    btn.classList.remove('active');
+    if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+    if (videoEl) videoEl.remove();
+    applyColour('#245E51');
+  }
+
+  function fallbackSample() {
+    btn.classList.add('active');
+    const computed = getComputedStyle(document.body).backgroundColor || '#245E51';
+    applyColour(computed);
+  }
+}
+/* ----------------- End Real-Time Colour Sampler ----------------- */ 

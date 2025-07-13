@@ -2574,3 +2574,33 @@ body.modal-open {
   visibility: visible;
   transform: translate(-50%, -50%) scale(1.02);
 }
+
+/* Real-Time Colour Sampler Button */
+.color-sampler-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(19, 19, 19, 0.7);
+  border: 2px solid #A8FF51;
+  color: #A8FF51;
+  font-size: 1.4rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100000;
+  transition: all 0.3s ease;
+}
+.color-sampler-btn:hover {
+  background: rgba(168, 255, 81, 0.15);
+  box-shadow: 0 0 15px rgba(168, 255, 81, 0.4);
+}
+.color-sampler-btn.active {
+  background: #A8FF51;
+  color: #131313;
+  box-shadow: 0 0 20px rgba(168, 255, 81, 0.6);
+}

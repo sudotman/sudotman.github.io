@@ -1249,7 +1249,8 @@ function initColorSampler() {
   let asciiActive = false;
   let asciiBtn;
 
-  const asciiChars = ' .:-=+*#%@';
+  const asciiChars = ' .,:;i1tfLCG08@'; // richer ramp, dark → light
+  let asciiFrame = 0; // frame throttling
 
   btn.addEventListener('click', async () => {
     if (active) {
@@ -1302,7 +1303,7 @@ function initColorSampler() {
 
         document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
           if (asciiActive) {
-            const newSize = cont._origFs * 0.4; // denser grid
+            const newSize = cont._origFs * 0.3; // denser grid (was 0.4)
             cont.style.fontSize = newSize + 'px';
           } else {
             cont.style.fontSize = cont._origFs + 'px';
@@ -1384,6 +1385,13 @@ function initColorSampler() {
 
   function asciiLoop() {
     if (!asciiActive) return;
+    // throttle to every 2nd animation frame to improve performance
+    asciiFrame = (asciiFrame + 1) % 2;
+    if (asciiFrame !== 0) {
+      requestAnimationFrame(asciiLoop);
+      return;
+    }
+
     if (videoEl.readyState >= 2) {
       canvasEl.width = videoEl.videoWidth;
       canvasEl.height = videoEl.videoHeight;
@@ -1393,8 +1401,8 @@ function initColorSampler() {
       dots.forEach(dot => {
         if (dot._isHole) return;
         const parent = dot.parentElement;
-        const cols = parent? parent._cols || 1 : 1;
-        const rows = parent? parent._rows || 1 : 1;
+        const cols = parent ? parent._cols || 1 : 1;
+        const rows = parent ? parent._rows || 1 : 1;
         const col = dot._col || 0;
         const row = dot._row || 0;
         const x = Math.floor(col / cols * canvasEl.width);
@@ -1403,8 +1411,9 @@ function initColorSampler() {
         const r = frame[idx];
         const g = frame[idx + 1];
         const b = frame[idx + 2];
-        const brightness = (r + g + b) / 3 / 255;
-        const charIndex = Math.min(asciiChars.length - 1, Math.floor(brightness * (asciiChars.length - 1)));
+        // perceived luminance for better brightness mapping
+        const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        const charIndex = Math.min(asciiChars.length - 1, Math.round(brightness * (asciiChars.length - 1)));
         const char = asciiChars[charIndex];
         dot.textContent = char;
         dot.style.color = `rgb(${r},${g},${b})`;

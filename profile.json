@@ -1,0 +1,77 @@
+{
+  "workExperience": [
+    {
+      "organization": "Parallax Labs",
+      "website": "https://parallax.co.in/",
+      "period": "2021 - Present",
+      "roles": [
+        { "title": "Lead XR Developer", "period": "2023 - Present" },
+        { "title": "Senior XR Developer", "period": "2022 - 2023" },
+        { "title": "Associate XR Developer", "period": "2021 - 2022" }
+      ],
+      "summary": "Developed and shipped XR projects for defence, pharma and manufacturing sectors, built training solutions, managed a team of developers and handled client interactions."
+    },
+    {
+      "organization": "Code Crust",
+      "website": "https://codecrust.com/",
+      "period": "2020 - 2021",
+      "roles": [
+        { "title": "Unity Developer", "period": "2020 - 2021" }
+      ],
+      "summary": "Developed various levels and mini-games for an online multiplayer party game using miniscript-based multiplayer coding and research."
+    },
+    {
+      "organization": "Freelance",
+      "website": "https://github.com/sudotman",
+      "period": "2018 - 2022",
+      "roles": [
+        { "title": "Android Developer", "period": "2018 - 2019" },
+        { "title": "Unity Developer", "period": "2018 - 2021" },
+        { "title": "Unreal Developer", "period": "2020 - 2022" },
+        { "title": "Video Editor", "period": "2018 - 2022" },
+        { "title": "Pinescript Coder", "period": "2020 - 2022" }
+      ],
+      "summary": "Delivered Android apps, Unity & Unreal projects, video edits and Pinescript indicators/strategies for various clients."
+    }
+  ],
+
+  "education": [
+    {
+      "degree": "B.Tech in Computer Science (Graphics & Gaming)",
+      "institution": "University of Petroleum and Energy Studies",
+      "period": "2018 - 2022",
+      "summary": "Completed undergraduate studies while interning during the final year."
+    },
+    {
+      "qualification": "Higher Secondary Education",
+      "institution": "Sigma School of Science",
+      "period": "2016 - 2018",
+      "summary": "Studied Maths, Physics and Chemistry; received 'Best Student' certificate."
+    }
+  ],
+
+  "techStack": {
+    "gameEngines": ["Unity", "Unreal", "Godot (basic)"],
+    "languages": ["C++", "C", "C#", "Python", "Pinescript"],
+    "tools": ["Adobe Premiere Pro", "Adobe Photoshop", "Linux (various distros)"]
+  },
+
+  "interests": {
+    "cinema": {
+      "letterboxd": "https://letterboxd.com/actuallysatyam/",
+      "description": "Passionate about world cinema, analysing shots and metaphors; favourite directors include Satyajit Ray, Lars von Trier, Park Chan-wook, Martin Scorsese, Bong Joon-ho, David Lynch, Stanley Kubrick, Ingmar Bergman, and more."
+    },
+    "music": {
+      "lastfm": "https://www.last.fm/user/satyams",
+      "topster": "https://media.discordapp.net/attachments/560082745255133205/882249185351569428/topsters2.jpg?width=712&height=670",
+      "description": "Enjoys diverse and experimental music; favourite artists include Death Grips, Jagjit Singh, The Microphones, Have A Nice Life, Kendrick Lamar."
+    },
+    "books": {
+      "description": "Enjoys reading; favourite authors are Fyodor Dostoevsky, Franz Kafka and Oscar Wilde."
+    },
+    "games": {
+      "gamesPage": "game.html",
+      "description": "Long-time gamer who favours innovative design; favourite developers FromSoftware and Nintendo; favourite games include Hollow Knight, Celeste, Dark Souls, Super Mario Galaxy, Bloodborne, Outer Wilds and Portal."
+    }
+  }
+} 

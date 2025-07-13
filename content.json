@@ -1,0 +1,173 @@
+{
+  "siteHeader": {
+    "title": "Satyam Kashyap Portfolio",
+    "subtitle": "Computer Science Engineer with a focus on XR/Game Development.",
+    "bannerImage": "images/banner.jpg"
+  },
+  "projects": [
+    {
+      "id": "g_unwind",
+      "category": "game",
+      "title": "Unlearn",
+      "short": "A 2D puzzle-platformer that pits you against your own keyboard.",
+      "long": "Keys change behaviour forcing you to un-learn muscle memory while unfolding a metafictional narrative.",
+      "image": "images/unlearn1.png",
+      "gallery": ["images/unlearn1.png", "images/unlearn2.png"]
+    },
+    {
+      "id": "g_shiva",
+      "category": "art",
+      "title": "Shiva",
+      "short": "3D Hack-n-Slash/RPG inspired by Hindu mythology.",
+      "long": "Multi-chapter action RPG built with Unity URP, exploring timelines through stylised combat.",
+      "image": "images/shiva_main.png",
+      "gallery": ["images/shiva_main.png"]
+    },
+    {
+      "id": "g_coffee",
+      "category": "game",
+      "title": "zzz…",
+      "short": "Jam game: clear caffeine from Bob’s brain so he can sleep.",
+      "long": "Prototype made in 48h where you roam neural pathways eliminating caffeine molecules.",
+      "image": "images/g_zzz.png",
+      "gallery": ["images/g_zzz.png"]
+    },
+    {
+      "id": "g_saaya",
+      "category": "game",
+      "title": "Saaya",
+      "short": "Psychological horror game set in Himachal Pradesh.",
+      "long": "Ambient narrative horror inspired by PT; uncover the tragic truth behind your missing son.",
+      "image": "images/g_saaya.jpg"
+    },
+    {
+      "id": "g_space",
+      "category": "game",
+      "title": "All Mans Space",
+      "short": "CRT-styled arcade shooter built in 93 minutes.",
+      "long": "Dodge and shoot missiles to rack up a high score in this retro homage.",
+      "image": "images/g_space.png"
+    },
+    {
+      "id": "g_snake",
+      "category": "game",
+      "title": "Snakes and Ladders",
+      "short": "Classic board game re-imagined on screen — built in 46 minutes.",
+      "long": "Simple dice mechanics with quick colourful visuals.",
+      "image": "images/g_snake.png"
+    },
+    {
+      "id": "g_tower",
+      "category": "game",
+      "title": "Tower Power",
+      "short": "One-week tower-defence project inspired by Brackeys.",
+      "long": "Balance economy and turret synergy to survive incoming waves.",
+      "image": "images/g_tower.png"
+    },
+
+    {
+      "id": "p_betterUnity",
+      "category": "programming",
+      "title": "BetterUnity",
+      "short": "Extensions and helpers that supercharge the Unity editor.",
+      "long": "Quality-of-life tools, template scenes and performance helpers.",
+      "image": "images/betterunity.png"
+    },
+    {
+      "id": "p_hmg",
+      "category": "programming",
+      "title": "MR HMG Simulator",
+      "short": "Mixed-reality heavy-machine-gun simulator for Varjo-XR 3.",
+      "long": "Full-scale replica gun with real-time XR feedback and ballistics.",
+      "image": "images/zer.png"
+    },
+    {
+      "id": "p_floorPlanGenerator",
+      "category": "programming",
+      "title": "2D-3D Floor-Plan Generator",
+      "short": "Turns CAD floor-plans into textured 3D VR-ready models.",
+      "long": "Detects walls, doors, windows; extrudes geometry and assigns PBR materials for VR walkthroughs.",
+      "image": "images/floor.png"
+    },
+    {
+      "id": "p_fireSafety",
+      "category": "programming",
+      "title": "VR Fire Safety Training",
+      "short": "Interactive VR module teaching extinguisher usage.",
+      "long": "Simulates multiple fire classes, tracks user performance and provides real-time feedback.",
+      "image": "images/fire.png"
+    },
+    {
+      "id": "p_opengl",
+      "category": "programming",
+      "title": "OpenGL Experiments",
+      "short": "Graphics algorithms and demos in C/OpenGL.",
+      "long": "Custom rasteriser, shader playground and real-time lighting maths.",
+      "image": "images/opengl.jpg"
+    },
+    {
+      "id": "a_confidential",
+      "category": "programming",
+      "title": "Confidential App Storage",
+      "short": "Android vault app using AES-256 and 2FA.",
+      "long": "Stores sensitive data like debit-card and PAN numbers securely.",
+      "image": "images/encrypt.jpeg"
+    },
+    {
+      "id": "a_wusic",
+      "category": "programming",
+      "title": "wusic — Minimal Music Player",
+      "short": "Distraction-free, Lo-fi streaming player.",
+      "long": "Strips UI to essentials and streams curated low-fidelity playlists.",
+      "image": "images/wusic.jpg"
+    },
+    {
+      "id": "p_caesar",
+      "category": "programming",
+      "title": "Encryption Algorithms",
+      "short": "Implementations of classic ciphers (e.g., Caesar).",
+      "long": "Educational CLI demos of multiple encryption/decryption algorithms.",
+      "image": "images/caesar.png"
+    },
+    {
+      "id": "c_sentience",
+      "category": "programming",
+      "title": "CoinSentience",
+      "short": "Cryptocurrency data suite for analysis and trading.",
+      "long": "Historical price scraping, custom indicators and exchange order execution.",
+      "image": "images/Backtester1.png"
+    },
+    {
+      "id": "c_indicators",
+      "category": "programming",
+      "title": "Custom Indicators",
+      "short": "TradingView scripts supporting various strategies.",
+      "long": "Includes volume-weighted EMA combiner and range premium visualiser.",
+      "image": "images/Premium1.png"
+    },
+    {
+      "id": "p_keras",
+      "category": "programming",
+      "title": "Facial Expression Recognition",
+      "short": "Keras/CNN model recognising seven basic emotions.",
+      "long": "OpenCV face detection with lightweight CNN trained on FER-2013 dataset.",
+      "image": "images/facialRec.png"
+    },
+    {
+      "id": "p_discordbot",
+      "category": "programming",
+      "title": "Discord Bot",
+      "short": "Node.js bot providing role management and music playback.",
+      "long": "Watches chat and responds with helpful tools and custom commands.",
+      "image": "images/discord.jpg"
+    },
+    {
+      "id": "p_selfdriving",
+      "category": "programming",
+      "title": "Self-Driving Car (Genetic Algorithms)",
+      "short": "Unity simulation that evolves cars to drive autonomously.",
+      "long": "Genetic algorithm mutates sensor weights, improving navigation each generation.",
+      "image": "images/selfdriving.png"
+    }
+  ]
+} 

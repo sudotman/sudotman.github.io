@@ -1,0 +1,139 @@
+/* ------------------------- Osmo [https://osmo.supply/] ------------------------- */
+/* ------------------------- Osmo - UI Webflow ----------------------------------- */
+
+body {
+  background-color: var(--color-neutral-900);
+  color: var(--color-light);
+  font-size: var(--size-font);
+}
+
+.cloneable {
+  padding: var(--section-padding) var(--container-padding);
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  position: relative;
+}
+
+.nav-logo-row .nav-logo__icon {
+  transition: transform var(--animation-default);
+  transform: rotate(0.001deg);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .nav-logo-row:hover .nav-logo__icon {
+    transform: rotate(180deg);
+  }
+}
+
+.website-link::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0px;
+  left: 0px;
+  transform-origin: center left;
+  transition: transform var(--animation-default);
+  background: currentColor;
+  transform: scale(1, 1);
+}
+
+.website-link.is--alt::after {
+  transform-origin: center right;
+  transform: scale(0, 1);
+}
+
+.website-link__arrow-svg {
+  transition: transform var(--animation-default);
+  transform: translateX(0%) rotate(0.001deg);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .website-link:hover::after {
+    transform-origin: center right;
+    transform: scale(0, 1);
+  }
+
+  .website-link.is--alt:hover::after {
+    transform-origin: center left;
+    transform: scale(1, 1);
+  }
+
+  .website-link:hover .website-link__arrow-svg,
+  a:hover .website-link__arrow-svg{
+    transform: translateX(100%) rotate(0.001deg);
+  }
+}
+
+.clone-in-webflow svg * {
+  transition: fill 0.2s ease;
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .clone-in-webflow:hover svg * {
+    fill: #146ef5;
+  }
+}
+
+/* ------------------------- Dark Mode ------------------------- */
+
+.body.is--dark {
+  background-color: var(--color-black);
+  color: var(--color-light);
+}
+
+body.is--dark .clone-in-webflow {
+  background-color: var(--color-dark);
+}
+
+body.is--dark .osmo-ui__bg {
+  background-color: var(--color-neutral-900);
+  border-color: var(--color-neutral-600);
+}
+
+body.is--dark .cloneable-title__gradient {
+  background-image: linear-gradient(270deg, var(--color-neutral-800), transparent);
+}
+
+
+/* ------------------------- Big Pixel Cursor ------------------------- */
+
+/* Default cursor */
+body.is--cursor,
+body.is--cursor * {
+  cursor: url("https://cdn.prod.website-files.com/6708f85ff3d3cba6aff436fb/671251b239d7aeb290a31ac5_cursor-default%402x.svg") 2 0, auto;
+}
+
+/* Text cursor */
+body.is--cursor p,
+body.is--cursor h1,
+body.is--cursor h2,
+body.is--cursor h3,
+body.is--cursor h4,
+body.is--cursor h5,
+body.is--cursor h6,
+body.is--cursor input[type="text"],
+body.is--cursor input[type="email"],
+body.is--cursor textarea,
+body.is--cursor [data-text] {
+  cursor: url("https://cdn.prod.website-files.com/6708f85ff3d3cba6aff436fb/6714e4e1f367de40becf9029_cursor-text%402x.svg") 9 19, text;
+}
+
+/* Hover cursor */
+body.is--cursor a,
+body.is--cursor a *,
+body.is--cursor button,
+body.is--cursor button *,
+body.is--cursor input[type="submit"],
+body.is--cursor input[type="submit"] *,
+body.is--cursor input[type="button"],
+body.is--cursor input[type="button"] *,
+body.is--cursor [data-submit],
+body.is--cursor [data-submit] *,
+body.is--cursor [data-hover],
+body.is--cursor [data-hover] * {
+  cursor: url("https://cdn.prod.website-files.com/6708f85ff3d3cba6aff436fb/671251b212e6b71494aa67ff_cursor-pointer%402x.svg") 12 0, pointer;
+}

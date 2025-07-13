@@ -1243,16 +1243,20 @@ function initColorSampler() {
   btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 640" style="enable-background:new 0 0 512 512;" xml:space="preserve"><g><path fill="currentColor" d="M471.6,250.8c-3.9-3.9-97.7-95-215.6-95s-211.6,91.1-215.6,95c-1.4,1.4-2.2,3.2-2.2,5.2s0.8,3.8,2.2,5.2   c3.9,3.9,97.7,95,215.6,95s211.6-91.1,215.6-95c1.4-1.4,2.2-3.2,2.2-5.2S473,252.2,471.6,250.8z M256,341.6   c-96,0-177.9-66.3-199.7-85.6c2.4-2.1,5.5-4.8,9.2-7.9c0.8-0.7,1.6-1.3,2.5-2c0.3-0.2,0.6-0.5,0.9-0.7c0.6-0.5,1.2-1,1.8-1.4   c0.3-0.2,0.6-0.5,0.9-0.7c0.6-0.5,1.3-1,1.9-1.5c3.6-2.8,7.6-5.8,11.9-8.9c0.8-0.6,1.6-1.1,2.4-1.7c1.2-0.9,2.5-1.7,3.7-2.6   c0.4-0.3,0.9-0.6,1.3-0.9c1.7-1.2,3.5-2.4,5.3-3.6c1.4-0.9,2.7-1.8,4.1-2.7c0.9-0.6,1.9-1.2,2.8-1.8c2.9-1.8,5.8-3.6,8.9-5.5   c1-0.6,2-1.2,3.1-1.8c1-0.6,2.1-1.2,3.1-1.8c0.5-0.3,1.1-0.6,1.6-0.9c1.1-0.6,2.1-1.2,3.2-1.8c35.7-19.7,81.4-37.4,131-37.4   s95.3,17.6,131,37.4c1.1,0.6,2.2,1.2,3.2,1.8c0.5,0.3,1.1,0.6,1.6,0.9c1,0.6,2.1,1.2,3.1,1.8c1,0.6,2.1,1.2,3.1,1.8   c3,1.8,6,3.6,8.9,5.5c1,0.6,1.9,1.2,2.8,1.8c1.4,0.9,2.8,1.8,4.1,2.7c1.8,1.2,3.6,2.4,5.3,3.6c0.4,0.3,0.9,0.6,1.3,0.9   c1.3,0.9,2.5,1.7,3.7,2.6c0.8,0.6,1.6,1.1,2.4,1.7c4.3,3.1,8.3,6.1,11.9,8.9c0.6,0.5,1.3,1,1.9,1.5c0.3,0.2,0.6,0.5,0.9,0.7   c0.6,0.5,1.2,1,1.8,1.4c0.3,0.2,0.6,0.5,0.9,0.7c0.9,0.7,1.7,1.4,2.5,2c3.8,3.1,6.9,5.8,9.2,7.9C433.9,275.3,352,341.6,256,341.6z"/><ellipse cx="256" cy="256" rx="54.5" ry="54.5" fill="currentColor"/></g></svg><span>mood</span>';
   document.body.appendChild(btn);
 
+  // ASCII button (initially hidden)
+  const asciiBtn = document.createElement('button');
+  asciiBtn.className = 'ascii-sampler-btn';
+  asciiBtn.title = 'Enable ASCII camera view';
+  asciiBtn.style.display = 'none';
+  asciiBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3L11 7H13L11 3H9ZM13 8H11L9 12H11L13 8ZM15 13H13L11 17H13L15 13ZM7 8H5L3 12H5L7 8ZM5 13H3L1 17H3L5 13ZM19 8H17L15 12H17L19 8ZM17 13H15L13 17H15L17 13ZM21 8H19L17 12H19L21 8Z"/></svg><span>ascii</span>';
+  document.body.appendChild(asciiBtn);
+
   let active = false;
+  let asciiActive = false;
   let videoStream = null;
   let videoEl, canvasEl, ctx;
   let lastColour = '#245E51';
-  let asciiActive = false;
-  let asciiBtn;
-  let asciiOverlay;
 
-  const asciiChars = ' .,:;i1tfLCG08@'; // richer ramp, dark → light
-  let asciiFrame = 0; // frame throttling
 
   // helper to measure monospace character metrics at given font size
   function measureChar(px=6) {
@@ -1290,9 +1294,30 @@ function initColorSampler() {
     }
   });
 
+  asciiBtn.addEventListener('click', () => {
+    if (!active) return; // Only works when mood is active
+    
+    asciiActive = !asciiActive;
+    asciiBtn.classList.toggle('active', asciiActive);
+    
+    const container = document.querySelector('[data-dots-container-init]');
+    if (container) {
+      container.classList.toggle('ascii-active', asciiActive);
+      // Rebuild grid with new spacing
+      if (container._rebuildGrid) {
+        container._rebuildGrid();
+      }
+    }
+    
+    if (!asciiActive) {
+      resetDotsAppearance();
+    }
+  });
+
   function startSampling(stream) {
     active = true;
     btn.classList.add('active');
+    asciiBtn.style.display = 'block'; // Show ASCII button
     videoStream = stream;
 
     videoEl = document.createElement('video');
@@ -1308,83 +1333,10 @@ function initColorSampler() {
 
     sampleLoop();
 
-    // Create secret ASCII toggle button if it doesn't exist
-    if (!asciiBtn) {
-      asciiBtn = document.createElement('button');
-      asciiBtn.className = 'ascii-toggle-btn';
-      asciiBtn.textContent = 'ASCII';
-      document.body.appendChild(asciiBtn);
-      setTimeout(() => asciiBtn.classList.add('show'), 100); // Fade in
-
-      asciiBtn.addEventListener('click', () => {
-        asciiActive = !asciiActive;
-        asciiBtn.classList.toggle('active', asciiActive);
-
-        document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
-          if (asciiActive) {
-            cont.classList.add('ascii-active');
-            const newSize = cont._origFs * 0.3; // denser grid (was 0.4)
-            cont.style.fontSize = newSize + 'px';
-          } else {
-            cont.style.fontSize = cont._origFs + 'px';
-            cont.classList.remove('ascii-active');
-          }
-          if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
-        });
-
-        if (asciiActive) {
-          document.body.classList.add('ascii-mode');
-          // visually hide dot grids while preserving layout so their dimensions stay intact
-          document.querySelectorAll('[data-dots-container-init]').forEach(c => {
-            c.style.opacity = '0';
-            c.style.pointerEvents = 'none';
-          });
-          if (asciiOverlay) asciiOverlay.style.display = 'block';
-          asciiLoop();
-        } else {
-          document.body.classList.remove('ascii-mode');
-          resetDotsAppearance();
-          // restore dots
-          document.querySelectorAll('[data-dots-container-init]').forEach(c => {
-            c.style.opacity = '';
-            c.style.pointerEvents = '';
-            c.classList.remove('ascii-active');
-            c.style.fontSize = c._origFs + 'px';
-            if (typeof c._rebuildGrid === 'function') {
-              // defer rebuild to ensure layout is visible
-              setTimeout(() => c._rebuildGrid(), 40);
-            }
-          });
-          if (asciiOverlay) asciiOverlay.style.display = 'none';
-        }
-      });
-    }
-    // Create ASCII overlay once
-    if (!asciiOverlay) {
-      asciiOverlay = document.createElement('pre');
-      asciiOverlay.id = 'ascii-overlay';
-      Object.assign(asciiOverlay.style, {
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        width: '100vw',
-        height: '100vh',
-        margin: '0',
-        padding: '0',
-        whiteSpace: 'pre',
-        fontFamily: 'Courier, monospace',
-        fontSize: '6px',
-        lineHeight: '6px',
-        color: '#A8FF51',
-        background: 'transparent',
-        zIndex: '100000',
-        pointerEvents: 'none',
-        display: 'none',
-        overflow: 'hidden'
-      });
-      document.body.appendChild(asciiOverlay);
-    }
   }
+
+  // ASCII character map for different brightness levels
+  const asciiChars = '@%#*+=-:. ';
 
   function sampleLoop() {
     if (!active) return;
@@ -1392,25 +1344,80 @@ function initColorSampler() {
       canvasEl.width = videoEl.videoWidth;
       canvasEl.height = videoEl.videoHeight;
       ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
-      const data = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
-      let r = 0, g = 0, b = 0, count = 0;
-      for (let i = 0; i < data.length; i += 40) { // sample subset for performance
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-        count++;
+      
+      if (asciiActive) {
+        applyAsciiToDots();
+      } else {
+        const data = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 40) { // sample subset for performance
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+        const rgb = `rgb(${r}, ${g}, ${b})`;
+        applyColour(rgb);
       }
-      r = Math.round(r / count);
-      g = Math.round(g / count);
-      b = Math.round(b / count);
-      const rgb = `rgb(${r}, ${g}, ${b})`;
-      applyColour(rgb);
     }
     requestAnimationFrame(sampleLoop);
   }
 
+  function applyAsciiToDots() {
+    const container = document.querySelector('[data-dots-container-init]');
+    if (!container) return;
+    
+    const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+    if (!dots.length) return;
+
+    const cols = container._cols || Math.sqrt(dots.length);
+    const rows = container._rows || Math.ceil(dots.length / cols);
+    
+    // Create a smaller canvas for ASCII sampling that matches dot grid dimensions
+    const asciiCanvas = document.createElement('canvas');
+    const asciiCtx = asciiCanvas.getContext('2d');
+    asciiCanvas.width = cols;
+    asciiCanvas.height = rows;
+    
+    // Draw the video frame scaled to match the dot grid
+    asciiCtx.drawImage(videoEl, 0, 0, cols, rows);
+    const imageData = asciiCtx.getImageData(0, 0, cols, rows);
+    const data = imageData.data;
+    
+    // Convert each pixel to ASCII character
+    dots.forEach((dot, index) => {
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+      const pixelIndex = (row * cols + col) * 4;
+      
+      if (pixelIndex < data.length) {
+        const r = data[pixelIndex];
+        const g = data[pixelIndex + 1];
+        const b = data[pixelIndex + 2];
+        
+        // Calculate brightness (invert so darker areas get denser characters)
+        const brightness = (r + g + b) / 3;
+        const charIndex = Math.floor(((255 - brightness) / 255) * (asciiChars.length - 1));
+        const char = asciiChars[charIndex];
+        
+        // Apply ASCII character to dot
+        dot.textContent = char;
+        dot.style.backgroundColor = 'transparent';
+        dot.style.color = lastColour;
+        dot.style.fontFamily = 'Courier, monospace';
+        dot.style.fontSize = 'inherit';
+        dot.style.display = 'flex';
+        dot.style.alignItems = 'center';
+        dot.style.justifyContent = 'center';
+        dot.style.lineHeight = '1';
+      }
+    });
+  }
+
   function applyColour(colour) {
-    if (asciiActive) return; // Don't change background during ASCII mode
     if (colour === lastColour) return;
     lastColour = colour;
     if (typeof gsap !== 'undefined') {
@@ -1425,20 +1432,24 @@ function initColorSampler() {
 
   function stopSampling() {
     active = false;
+    asciiActive = false;
     btn.classList.remove('active');
+    asciiBtn.classList.remove('active');
+    asciiBtn.style.display = 'none'; // Hide ASCII button
+    
+    const container = document.querySelector('[data-dots-container-init]');
+    if (container) {
+      container.classList.remove('ascii-active');
+      // Rebuild grid with normal spacing
+      if (container._rebuildGrid) {
+        container._rebuildGrid();
+      }
+    }
+    
     if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     if (videoEl) videoEl.remove();
-    if (asciiActive) {
-      asciiActive = false;
-      document.body.classList.remove('ascii-mode');
-      if (asciiBtn) asciiBtn.classList.remove('active');
-      resetDotsAppearance();
-      document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
-        cont.style.fontSize = cont._origFs + 'px';
-        if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
-      });
-      if (asciiOverlay) asciiOverlay.style.display = 'none';
-    }
+    
+    resetDotsAppearance();
     applyColour('#245E51');
   }
 
@@ -1448,44 +1459,6 @@ function initColorSampler() {
     applyColour(computed);
   }
 
-  function asciiLoop() {
-    if (!asciiActive) return;
-    // throttle
-    asciiFrame = (asciiFrame + 1) % 2;
-    if (asciiFrame !== 0) {
-      requestAnimationFrame(asciiLoop);
-      return;
-    }
-
-    if (videoEl.readyState >= 2) {
-      const charPx = 6; // font-size matches overlay style
-      const { w:charW, h:charH } = measureChar(charPx);
-      const targetWidth = Math.floor(window.innerWidth / charW);
-      const aspect = videoEl.videoHeight / videoEl.videoWidth;
-      const targetHeight = Math.floor((window.innerHeight / charH));
-
-      canvasEl.width = targetWidth;
-      canvasEl.height = targetHeight;
-      ctx.drawImage(videoEl, 0, 0, targetWidth, targetHeight);
-      const frame = ctx.getImageData(0, 0, targetWidth, targetHeight).data;
-
-      let asciiStr = '';
-      for (let y = 0; y < targetHeight; y++) {
-        for (let x = 0; x < targetWidth; x++) {
-          const idx = (y * targetWidth + x) * 4;
-          const r = frame[idx];
-          const g = frame[idx + 1];
-          const b = frame[idx + 2];
-          const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          const charIndex = Math.min(asciiChars.length - 1, Math.round(brightness * (asciiChars.length - 1)));
-          asciiStr += asciiChars[charIndex];
-        }
-        asciiStr += '\n';
-      }
-      if (asciiOverlay) asciiOverlay.textContent = asciiStr;
-    }
-    requestAnimationFrame(asciiLoop);
-  }
 
   function resetDotsAppearance() {
     const dots = document.querySelectorAll('.dots-container .dot');
@@ -1493,6 +1466,12 @@ function initColorSampler() {
       dot.textContent = '';
       dot.style.color = '';
       dot.style.backgroundColor = lastColour;
+      dot.style.fontFamily = '';
+      dot.style.fontSize = '';
+      dot.style.display = '';
+      dot.style.alignItems = '';
+      dot.style.justifyContent = '';
+      dot.style.lineHeight = '';
     });
   }
 }

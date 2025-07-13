@@ -2638,57 +2638,86 @@ body.modal-open {
   transform: scale(1, 1);
 }
 
-/* ASCII Mode Styles */
-.ascii-mode .dot {
-  background: transparent !important;
-  border-radius: 0 !important;
-  width: 1em;
-  height: 1em;
-  font-family: monospace;
-  font-size: 0.85em;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-/* Secret ASCII Toggle Button */
-.ascii-toggle-btn {
+/* ASCII Sampler Button */
+.ascii-sampler-btn {
   position: fixed;
-  bottom: 80px; /* Above the colour sampler button */
+  bottom: 70px; /* Position above the mood button */
   right: 24px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: rgba(19, 19, 19, 0.7);
-  border: 2px solid #ff4c24;
-  color: #ff4c24;
-  font-size: 0.9rem;
-  font-family: monospace;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #FF6B47;
+  font-size: 1rem;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   z-index: 100000;
   transition: all 0.3s ease;
+  text-decoration: none;
+  transform: none;
   opacity: 0;
-  pointer-events: none;
+  visibility: hidden;
+  transform: translateY(10px);
 }
-.ascii-toggle-btn.show {
+
+.ascii-sampler-btn[style*="display: block"] {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
+  transform: translateY(0);
 }
-.ascii-toggle-btn:hover {
-  background: rgba(255, 76, 36, 0.15);
-  box-shadow: 0 0 15px rgba(255, 76, 36, 0.4);
+
+.ascii-sampler-btn::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0px;
+  left: 0px;
+  transform-origin: center right;
+  transition: transform 0.3s ease;
+  background: currentColor;
+  transform: scale(0, 1);
 }
-.ascii-toggle-btn.active {
-  background: #ff4c24;
-  color: #131313;
-  box-shadow: 0 0 20px rgba(255, 76, 36, 0.6);
+
+.ascii-sampler-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
 }
+
+.ascii-sampler-btn:hover::after {
+  transform-origin: center left;
+  transform: scale(1, 1);
+}
+
+.ascii-sampler-btn:hover svg {
+  transform: translateX(2px);
+}
+
+.ascii-sampler-btn:hover {
+  color: #ffffff;
+}
+
+.ascii-sampler-btn.active {
+  color: #FF6B47;
+  text-shadow: 0 0 10px rgba(255, 107, 71, 0.5);
+}
+
+.ascii-sampler-btn.active::after {
+  transform: scale(1, 1);
+}
+
+/* Dots container spacing adjustments for ASCII mode */
+.dots-container.ascii-active .dot {
+  font-size: inherit;
+  line-height: 1;
+  text-align: center;
+  overflow: hidden;
+}
+
 
 /* Card controls (stack/shuffle) */
 .cards-actions {

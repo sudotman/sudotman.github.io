@@ -336,20 +336,56 @@ body.modal-open {
 /* Projects Header with Tabs */
 .projects-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 2rem 0;
+  padding: 1.5rem 0 5rem 0; /* increased bottom padding to move divider down */
   border-bottom: 2px solid rgba(168, 255, 81, 0.1);
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: nowrap;
+  gap: 2rem;
+  position: relative;
+}
+
+.projects-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #A8FF51;
+  margin: 0;
+  text-shadow: 0 0 20px rgba(168, 255, 81, 0.35);
+  text-align: left;
+  flex-shrink: 0;
 }
 
 .projects-tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin-bottom: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.projects-return-btn {
   position: relative;
+  top: unset;
+  right: unset;
+  margin-left: unset;
+  margin-top: 2rem;
+  flex-shrink: 0;
+  background: rgba(168, 255, 81, 0.1);
+  border: 1px solid rgba(168, 255, 81, 0.3);
+  color: #A8FF51;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
 }
 
 /* Tab Content */
@@ -1793,33 +1829,7 @@ body.modal-open {
   }
 }
 
-.projects-title {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 2.2rem; /* smaller */
-  font-weight: 300;
-  color: #A8FF51;
-  margin: 0;
-  text-shadow: 0 0 20px rgba(168, 255, 81, 0.35);
-  text-align: center;
-}
 
-.projects-return-btn {
-  position: absolute;
-  top: 3rem;  /* move slightly down */
-  right: 1.5rem;
-  background: rgba(168, 255, 81, 0.1);
-  border: 1px solid rgba(168, 255, 81, 0.3);
-  color: #A8FF51;
-  cursor: pointer;
-  padding: 0.5rem; /* smaller */
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
-  z-index: 1000;
-}
 
 .projects-return-btn:hover {
   background: #A8FF51;
@@ -1839,6 +1849,7 @@ body.modal-open {
   flex-wrap: wrap;
   justify-content: center;
   gap: 2rem;
+  padding-top: 2rem;
   padding-bottom: 4rem;
 }
 
@@ -2677,4 +2688,49 @@ body.modal-open {
   background: #ff4c24;
   color: #131313;
   box-shadow: 0 0 20px rgba(255, 76, 36, 0.6);
+}
+
+/* Card controls (stack/shuffle) */
+.cards-actions {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+.cards-action-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: #A8FF51;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: color 0.3s ease;
+}
+
+.cards-action-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.cards-action-btn:hover {
+  color: #ffffff;
+}
+
+.cards-action-btn:hover::after {
+  width: 100%;
 }

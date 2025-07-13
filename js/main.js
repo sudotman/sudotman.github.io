@@ -1423,3 +1423,119 @@ function initColorSampler() {
   }
 }
 /* ----------------- End Real-Time Colour Sampler ----------------- */ 
+
+// --------------- Card Action Sound Helper -----------------
+function playCardActionSound() {
+  try {
+    // Re-use a single AudioContext if possible (some browsers limit concurrent contexts)
+    const ctx = playCardActionSound._ctx || (playCardActionSound._ctx = new (window.AudioContext || window.webkitAudioContext)());
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    // Configure oscillator for a pleasant, short pluck
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(520, ctx.currentTime);
+
+    // ADSR-style envelope for a quick, satisfying click
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (err) {
+    // If AudioContext fails (e.g., due to browser policies), silently ignore.
+    console.warn('Audio playback failed:', err);
+  }
+}
+// ------------- End Card Action Sound Helper -------------
+
+/* ------------------- Card Stack & Shuffle Controls ------------------- */
+function stackProjectCards() {
+  // Play feedback sound
+  playCardActionSound();
+  const grid = document.querySelector('.projects-grid');
+  if (!grid) return;
+  const cards = Array.from(grid.querySelectorAll('.project-card'));
+  if (!cards.length) return;
+
+  const gridRect = grid.getBoundingClientRect();
+  const header = document.querySelector('.projects-header');
+  const headerRect = header ? header.getBoundingClientRect() : null;
+
+  const centerX = gridRect.left + gridRect.width / 2;
+  // place stack ~200px below divider line to ensure full stack sits beneath
+  const centerY = headerRect ? (headerRect.bottom + 300) : (gridRect.top + 300);
+
+  cards.forEach((card, idx) => {
+    // Reset any drag offsets gradually
+    // We'll grab current gsap properties for continuity
+    const currentX = gsap.getProperty(card, 'x');
+    const currentY = gsap.getProperty(card, 'y');
+
+    const rect = card.getBoundingClientRect();
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+
+    const deltaX = centerX - cardCenterX;
+    const deltaY = centerY - cardCenterY;
+
+    gsap.to(card, {
+      x: currentX + deltaX,
+      y: currentY + deltaY,
+      rotation: -4 + idx * 2,
+      duration: 0.6,
+      ease: 'power3.out',
+      delay: idx * 0.05
+    });
+
+    card.style.zIndex = 100 + idx;
+  });
+}
+
+function shuffleProjectCards() {
+  // Play feedback sound
+  playCardActionSound();
+  const grid = document.querySelector('.projects-grid');
+  if (!grid) return;
+  const cards = Array.from(grid.querySelectorAll('.project-card'));
+  if (!cards.length) return;
+
+  // Ensure all cards start from grid-aligned position
+  cards.forEach(card => {
+    gsap.set(card, { x: 0, y: 0, rotation: 0 });
+  });
+
+  // Capture initial positions
+  const firstRects = cards.map(c => c.getBoundingClientRect());
+
+  // Shuffle array (Fisher–Yates)
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
+  // Re-append in new order to change layout flow
+  cards.forEach(card => grid.appendChild(card));
+
+  // Capture new positions
+  const lastRects = cards.map(c => c.getBoundingClientRect());
+
+  // FLIP animation
+  cards.forEach((card, idx) => {
+    const dx = firstRects[idx].left - lastRects[idx].left;
+    const dy = firstRects[idx].top - lastRects[idx].top;
+
+    gsap.fromTo(card, { x: dx, y: dy }, {
+      x: 0,
+      y: 0,
+      rotation: (Math.random() * 8) - 4,
+      duration: 0.6,
+      ease: 'power3.out'
+    });
+
+    card.style.zIndex = 1 + idx;
+  });
+}
+/* ----------------- End Card Stack & Shuffle Controls ----------------- */ 

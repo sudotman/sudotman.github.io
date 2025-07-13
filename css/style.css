@@ -2580,29 +2580,51 @@ body.modal-open {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: rgba(19, 19, 19, 0.7);
-  border: 2px solid #A8FF51;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
   color: #A8FF51;
-  font-size: 1.4rem;
+  font-size: 1rem;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   z-index: 100000;
   transition: all 0.3s ease;
+  text-decoration: none;
+  transform: none;
 }
-.color-sampler-btn:hover {
-  background: rgba(168, 255, 81, 0.15);
-  box-shadow: 0 0 15px rgba(168, 255, 81, 0.4);
+.color-sampler-btn::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0px;
+  left: 0px;
+  transform-origin: center right;
+  transition: transform 0.3s ease;
+  background: currentColor;
+  transform: scale(0, 1);
+}
+.color-sampler-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+.color-sampler-btn:hover::after {
+  transform-origin: center left;
+  transform: scale(1, 1);
+}
+.color-sampler-btn:hover svg {
+  transform: translateX(2px);
 }
 .color-sampler-btn.active {
-  background: #A8FF51;
-  color: #131313;
-  box-shadow: 0 0 20px rgba(168, 255, 81, 0.6);
+  color: #A8FF51;
+}
+.color-sampler-btn.active::after {
+  transform: scale(1, 1);
 }
 
 /* ASCII Mode Styles */
@@ -2623,7 +2645,7 @@ body.modal-open {
 /* Secret ASCII Toggle Button */
 .ascii-toggle-btn {
   position: fixed;
-  bottom: 90px; /* Above the colour sampler button */
+  bottom: 80px; /* Above the colour sampler button */
   right: 24px;
   width: 52px;
   height: 52px;

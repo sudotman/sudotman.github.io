@@ -2711,21 +2711,11 @@ body.modal-open {
 }
 
 /* Dots container spacing adjustments for ASCII mode */
-.dots-container.ascii-active {
-  max-width: min(80vw, 1200px);
-  max-height: min(80vh, 800px);
-  margin: 0 auto;
-  overflow: hidden;
-  position: relative;
-}
-
 .dots-container.ascii-active .dot {
   font-size: inherit;
   line-height: 1;
   text-align: center;
   overflow: hidden;
-  position: absolute;
-  transform: none !important; /* Override GSAP transforms in ASCII mode */
   font-weight: bold;
   font-family: 'Courier New', Courier, monospace !important;
 }

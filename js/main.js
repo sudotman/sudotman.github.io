@@ -21,13 +21,25 @@ function initGlowingInteractiveDotsGrid() {
       dotCenters = [];
 
       const style = getComputedStyle(container);
-      const dotPx = parseFloat(style.fontSize);
+      let dotPx = parseFloat(style.fontSize);
       const isAsciiActive = container.classList.contains('ascii-active');
+      
+      // Fallback for font size if it's 0 or invalid
+      if (!dotPx || dotPx <= 0) {
+        dotPx = 16; // Default to 16px
+      }
       
       // Make spacing tighter when ASCII mode is active on this container
       const gapPx = dotPx * (isAsciiActive ? 0.6 : 2);
       let contW = container.clientWidth;
       let contH = container.clientHeight;
+
+      // Safety check: ensure container has valid dimensions
+      if (contW <= 0 || contH <= 0) {
+        // Force minimum dimensions if container is not sized
+        contW = Math.max(contW, window.innerWidth);
+        contH = Math.max(contH, window.innerHeight);
+      }
 
       // In ASCII mode, constrain grid to viewport to prevent off-screen dots
       if (isAsciiActive) {
@@ -44,6 +56,11 @@ function initGlowingInteractiveDotsGrid() {
       if (isAsciiActive) {
         cols = Math.min(cols, 120); // Max 120 columns
         rows = Math.min(rows, 60);  // Max 60 rows
+      }
+      
+      // Safety check: ensure we have valid grid dimensions
+      if (cols <= 0 || rows <= 0) {
+        return;
       }
       
       const total = cols * rows;

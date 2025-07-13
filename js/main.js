@@ -22,7 +22,8 @@ function initGlowingInteractiveDotsGrid() {
 
       const style = getComputedStyle(container);
       const dotPx = parseFloat(style.fontSize);
-      const gapPx = dotPx * 2;
+      // Make spacing tighter when ASCII mode is active on this container
+      const gapPx = dotPx * (container.classList.contains('ascii-active') ? 0.6 : 2);
       const contW = container.clientWidth;
       const contH = container.clientHeight;
 
@@ -1248,9 +1249,27 @@ function initColorSampler() {
   let lastColour = '#245E51';
   let asciiActive = false;
   let asciiBtn;
+  let asciiOverlay;
 
   const asciiChars = ' .,:;i1tfLCG08@'; // richer ramp, dark → light
   let asciiFrame = 0; // frame throttling
+
+  // helper to measure monospace character metrics at given font size
+  function measureChar(px=6) {
+    if (measureChar.cache && measureChar.cache[px]) return measureChar.cache[px];
+    const span = document.createElement('span');
+    span.textContent = 'M';
+    span.style.position = 'absolute';
+    span.style.visibility = 'hidden';
+    span.style.fontFamily = 'Courier, monospace';
+    span.style.fontSize = px + 'px';
+    document.body.appendChild(span);
+    const rect = span.getBoundingClientRect();
+    document.body.removeChild(span);
+    measureChar.cache = measureChar.cache || {};
+    measureChar.cache[px] = { w: rect.width, h: rect.height };
+    return measureChar.cache[px];
+  }
 
   btn.addEventListener('click', async () => {
     if (active) {
@@ -1303,22 +1322,67 @@ function initColorSampler() {
 
         document.querySelectorAll('[data-dots-container-init]').forEach(cont => {
           if (asciiActive) {
+            cont.classList.add('ascii-active');
             const newSize = cont._origFs * 0.3; // denser grid (was 0.4)
             cont.style.fontSize = newSize + 'px';
           } else {
             cont.style.fontSize = cont._origFs + 'px';
+            cont.classList.remove('ascii-active');
           }
           if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
         });
 
         if (asciiActive) {
           document.body.classList.add('ascii-mode');
+          // visually hide dot grids while preserving layout so their dimensions stay intact
+          document.querySelectorAll('[data-dots-container-init]').forEach(c => {
+            c.style.opacity = '0';
+            c.style.pointerEvents = 'none';
+          });
+          if (asciiOverlay) asciiOverlay.style.display = 'block';
           asciiLoop();
         } else {
           document.body.classList.remove('ascii-mode');
           resetDotsAppearance();
+          // restore dots
+          document.querySelectorAll('[data-dots-container-init]').forEach(c => {
+            c.style.opacity = '';
+            c.style.pointerEvents = '';
+            c.classList.remove('ascii-active');
+            c.style.fontSize = c._origFs + 'px';
+            if (typeof c._rebuildGrid === 'function') {
+              // defer rebuild to ensure layout is visible
+              setTimeout(() => c._rebuildGrid(), 40);
+            }
+          });
+          if (asciiOverlay) asciiOverlay.style.display = 'none';
         }
       });
+    }
+    // Create ASCII overlay once
+    if (!asciiOverlay) {
+      asciiOverlay = document.createElement('pre');
+      asciiOverlay.id = 'ascii-overlay';
+      Object.assign(asciiOverlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        margin: '0',
+        padding: '0',
+        whiteSpace: 'pre',
+        fontFamily: 'Courier, monospace',
+        fontSize: '6px',
+        lineHeight: '6px',
+        color: '#A8FF51',
+        background: 'transparent',
+        zIndex: '100000',
+        pointerEvents: 'none',
+        display: 'none',
+        overflow: 'hidden'
+      });
+      document.body.appendChild(asciiOverlay);
     }
   }
 
@@ -1373,6 +1437,7 @@ function initColorSampler() {
         cont.style.fontSize = cont._origFs + 'px';
         if (typeof cont._rebuildGrid === 'function') cont._rebuildGrid();
       });
+      if (asciiOverlay) asciiOverlay.style.display = 'none';
     }
     applyColour('#245E51');
   }
@@ -1385,7 +1450,7 @@ function initColorSampler() {
 
   function asciiLoop() {
     if (!asciiActive) return;
-    // throttle to every 2nd animation frame to improve performance
+    // throttle
     asciiFrame = (asciiFrame + 1) % 2;
     if (asciiFrame !== 0) {
       requestAnimationFrame(asciiLoop);
@@ -1393,31 +1458,31 @@ function initColorSampler() {
     }
 
     if (videoEl.readyState >= 2) {
-      canvasEl.width = videoEl.videoWidth;
-      canvasEl.height = videoEl.videoHeight;
-      ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
-      const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
-      const dots = document.querySelectorAll('.dots-container .dot');
-      dots.forEach(dot => {
-        if (dot._isHole) return;
-        const parent = dot.parentElement;
-        const cols = parent ? parent._cols || 1 : 1;
-        const rows = parent ? parent._rows || 1 : 1;
-        const col = dot._col || 0;
-        const row = dot._row || 0;
-        const x = Math.floor(col / cols * canvasEl.width);
-        const y = Math.floor(row / rows * canvasEl.height);
-        const idx = (y * canvasEl.width + x) * 4;
-        const r = frame[idx];
-        const g = frame[idx + 1];
-        const b = frame[idx + 2];
-        // perceived luminance for better brightness mapping
-        const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const charIndex = Math.min(asciiChars.length - 1, Math.round(brightness * (asciiChars.length - 1)));
-        const char = asciiChars[charIndex];
-        dot.textContent = char;
-        dot.style.color = `rgb(${r},${g},${b})`;
-      });
+      const charPx = 6; // font-size matches overlay style
+      const { w:charW, h:charH } = measureChar(charPx);
+      const targetWidth = Math.floor(window.innerWidth / charW);
+      const aspect = videoEl.videoHeight / videoEl.videoWidth;
+      const targetHeight = Math.floor((window.innerHeight / charH));
+
+      canvasEl.width = targetWidth;
+      canvasEl.height = targetHeight;
+      ctx.drawImage(videoEl, 0, 0, targetWidth, targetHeight);
+      const frame = ctx.getImageData(0, 0, targetWidth, targetHeight).data;
+
+      let asciiStr = '';
+      for (let y = 0; y < targetHeight; y++) {
+        for (let x = 0; x < targetWidth; x++) {
+          const idx = (y * targetWidth + x) * 4;
+          const r = frame[idx];
+          const g = frame[idx + 1];
+          const b = frame[idx + 2];
+          const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+          const charIndex = Math.min(asciiChars.length - 1, Math.round(brightness * (asciiChars.length - 1)));
+          asciiStr += asciiChars[charIndex];
+        }
+        asciiStr += '\n';
+      }
+      if (asciiOverlay) asciiOverlay.textContent = asciiStr;
     }
     requestAnimationFrame(asciiLoop);
   }

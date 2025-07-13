@@ -44,6 +44,10 @@ function initGlowingInteractiveDotsGrid() {
 
         const d = document.createElement("div");
         d.classList.add("dot");
+        d._row = row;
+        d._col = col;
+        container._cols = cols;
+        container._rows = rows;
 
         if (isHole) {
           d.style.visibility = "hidden";
@@ -1238,6 +1242,10 @@ function initColorSampler() {
   let videoStream = null;
   let videoEl, canvasEl, ctx;
   let lastColour = '#245E51';
+  let asciiActive = false;
+  let asciiBtn;
+
+  const asciiChars = ' .:-=+*#%@';
 
   btn.addEventListener('click', async () => {
     if (active) {
@@ -1275,6 +1283,27 @@ function initColorSampler() {
     ctx = canvasEl.getContext('2d');
 
     sampleLoop();
+
+    // Create secret ASCII toggle button if it doesn't exist
+    if (!asciiBtn) {
+      asciiBtn = document.createElement('button');
+      asciiBtn.className = 'ascii-toggle-btn';
+      asciiBtn.textContent = 'ASCII';
+      document.body.appendChild(asciiBtn);
+      setTimeout(() => asciiBtn.classList.add('show'), 100); // Fade in
+
+      asciiBtn.addEventListener('click', () => {
+        asciiActive = !asciiActive;
+        asciiBtn.classList.toggle('active', asciiActive);
+        if (asciiActive) {
+          document.body.classList.add('ascii-mode');
+          asciiLoop();
+        } else {
+          document.body.classList.remove('ascii-mode');
+          resetDotsAppearance();
+        }
+      });
+    }
   }
 
   function sampleLoop() {
@@ -1301,6 +1330,7 @@ function initColorSampler() {
   }
 
   function applyColour(colour) {
+    if (asciiActive) return; // Don't change background during ASCII mode
     if (colour === lastColour) return;
     lastColour = colour;
     if (typeof gsap !== 'undefined') {
@@ -1318,6 +1348,12 @@ function initColorSampler() {
     btn.classList.remove('active');
     if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     if (videoEl) videoEl.remove();
+    if (asciiActive) {
+      asciiActive = false;
+      document.body.classList.remove('ascii-mode');
+      if (asciiBtn) asciiBtn.classList.remove('active');
+      resetDotsAppearance();
+    }
     applyColour('#245E51');
   }
 
@@ -1325,6 +1361,46 @@ function initColorSampler() {
     btn.classList.add('active');
     const computed = getComputedStyle(document.body).backgroundColor || '#245E51';
     applyColour(computed);
+  }
+
+  function asciiLoop() {
+    if (!asciiActive) return;
+    if (videoEl.readyState >= 2) {
+      canvasEl.width = videoEl.videoWidth;
+      canvasEl.height = videoEl.videoHeight;
+      ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+      const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
+      const dots = document.querySelectorAll('.dots-container .dot');
+      dots.forEach(dot => {
+        if (dot._isHole) return;
+        const parent = dot.parentElement;
+        const cols = parent? parent._cols || 1 : 1;
+        const rows = parent? parent._rows || 1 : 1;
+        const col = dot._col || 0;
+        const row = dot._row || 0;
+        const x = Math.floor(col / cols * canvasEl.width);
+        const y = Math.floor(row / rows * canvasEl.height);
+        const idx = (y * canvasEl.width + x) * 4;
+        const r = frame[idx];
+        const g = frame[idx + 1];
+        const b = frame[idx + 2];
+        const brightness = (r + g + b) / 3 / 255;
+        const charIndex = Math.min(asciiChars.length - 1, Math.floor(brightness * (asciiChars.length - 1)));
+        const char = asciiChars[charIndex];
+        dot.textContent = char;
+        dot.style.color = `rgb(${r},${g},${b})`;
+      });
+    }
+    requestAnimationFrame(asciiLoop);
+  }
+
+  function resetDotsAppearance() {
+    const dots = document.querySelectorAll('.dots-container .dot');
+    dots.forEach(dot => {
+      dot.textContent = '';
+      dot.style.color = '';
+      dot.style.backgroundColor = lastColour;
+    });
   }
 }
 /* ----------------- End Real-Time Colour Sampler ----------------- */ 

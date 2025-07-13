@@ -22,13 +22,30 @@ function initGlowingInteractiveDotsGrid() {
 
       const style = getComputedStyle(container);
       const dotPx = parseFloat(style.fontSize);
+      const isAsciiActive = container.classList.contains('ascii-active');
+      
       // Make spacing tighter when ASCII mode is active on this container
-      const gapPx = dotPx * (container.classList.contains('ascii-active') ? 0.6 : 2);
-      const contW = container.clientWidth;
-      const contH = container.clientHeight;
+      const gapPx = dotPx * (isAsciiActive ? 0.6 : 2);
+      let contW = container.clientWidth;
+      let contH = container.clientHeight;
 
-      const cols  = Math.floor((contW + gapPx) / (dotPx + gapPx));
-      const rows  = Math.floor((contH + gapPx) / (dotPx + gapPx));
+      // In ASCII mode, constrain grid to viewport to prevent off-screen dots
+      if (isAsciiActive) {
+        const viewportW = Math.min(window.innerWidth * 0.8, contW);
+        const viewportH = Math.min(window.innerHeight * 0.8, contH);
+        contW = viewportW;
+        contH = viewportH;
+      }
+
+      let cols = Math.floor((contW + gapPx) / (dotPx + gapPx));
+      let rows = Math.floor((contH + gapPx) / (dotPx + gapPx));
+      
+      // Further limit ASCII grid size for better performance and visibility
+      if (isAsciiActive) {
+        cols = Math.min(cols, 120); // Max 120 columns
+        rows = Math.min(rows, 60);  // Max 60 rows
+      }
+      
       const total = cols * rows;
 
       const holeCols = centerHole ? (cols % 2 === 0 ? 4 : 5) : 0;
@@ -86,6 +103,9 @@ function initGlowingInteractiveDotsGrid() {
     let lastTime = 0, lastX = 0, lastY = 0;
 
     window.addEventListener("mousemove", e => {
+      // Skip mouse interactions if ASCII mode is active
+      if (container.classList.contains('ascii-active')) return;
+      
       const now   = performance.now();
       const dt    = now - lastTime || 16;
       let   dx    = e.pageX - lastX;
@@ -133,6 +153,9 @@ function initGlowingInteractiveDotsGrid() {
     });
 
     window.addEventListener("click", e => {
+      // Skip click interactions if ASCII mode is active
+      if (container.classList.contains('ascii-active')) return;
+      
       dotCenters.forEach(({ el, x, y }) => {
         const dist = Math.hypot(x - e.pageX, y - e.pageY);
         if (dist < shockRadius && !el._inertiaApplied) {
@@ -1033,6 +1056,10 @@ function initScrollBasedDotAnimation() {
       dots.forEach((dot, index) => {
         if (dot._isHole) return; // Skip center hole dots
         
+        // Skip scroll animations if ASCII mode is active
+        const container = dot.closest('[data-dots-container-init]');
+        if (container && container.classList.contains('ascii-active')) return;
+        
         // Create wave-like movement based on scroll position
         const waveOffset = (index * 0.1) + (scrollProgress * Math.PI * 2);
         const waveX = Math.sin(waveOffset) * 15;
@@ -1064,6 +1091,10 @@ function initScrollBasedDotAnimation() {
         isScrolling = false;
         dots.forEach((dot) => {
           if (dot._isHole) return;
+          
+          // Skip scroll reset animations if ASCII mode is active
+          const container = dot.closest('[data-dots-container-init]');
+          if (container && container.classList.contains('ascii-active')) return;
           
           if (typeof gsap !== 'undefined') {
             gsap.to(dot, {
@@ -1302,6 +1333,16 @@ function initColorSampler() {
     
     const container = document.querySelector('[data-dots-container-init]');
     if (container) {
+      if (asciiActive) {
+        // Kill all GSAP animations on dots when entering ASCII mode
+        const dots = container.querySelectorAll('.dot');
+        if (typeof gsap !== 'undefined') {
+          gsap.killTweensOf(dots);
+          // Reset transforms
+          gsap.set(dots, { x: 0, y: 0, clearProps: "transform" });
+        }
+      }
+      
       container.classList.toggle('ascii-active', asciiActive);
       // Rebuild grid with new spacing
       if (container._rebuildGrid) {
@@ -1368,7 +1409,7 @@ function initColorSampler() {
 
   function applyAsciiToDots() {
     const container = document.querySelector('[data-dots-container-init]');
-    if (!container) return;
+    if (!container || !container.classList.contains('ascii-active')) return;
     
     const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
     if (!dots.length) return;
@@ -1393,7 +1434,7 @@ function initColorSampler() {
       const col = index % cols;
       const pixelIndex = (row * cols + col) * 4;
       
-      if (pixelIndex < data.length) {
+      if (pixelIndex < data.length && row < rows && col < cols) {
         const r = data[pixelIndex];
         const g = data[pixelIndex + 1];
         const b = data[pixelIndex + 2];
@@ -1407,12 +1448,13 @@ function initColorSampler() {
         dot.textContent = char;
         dot.style.backgroundColor = 'transparent';
         dot.style.color = lastColour;
-        dot.style.fontFamily = 'Courier, monospace';
+        dot.style.fontFamily = 'Courier New, Courier, monospace';
         dot.style.fontSize = 'inherit';
         dot.style.display = 'flex';
         dot.style.alignItems = 'center';
         dot.style.justifyContent = 'center';
         dot.style.lineHeight = '1';
+        dot.style.transform = 'none'; // Ensure no transforms interfere
       }
     });
   }

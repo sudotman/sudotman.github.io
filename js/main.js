@@ -144,6 +144,12 @@ function initGlowingInteractiveDotsGrid() {
         dotCenters.forEach(({ el, x, y }) => {
           const dist = Math.hypot(x - e.pageX, y - e.pageY);
           const t    = Math.max(0, 1 - dist / threshold);
+          
+          // Preserve heatmap colors - only apply hover if no heatmap data
+          if (el._heatmapCount && el._heatmapCount > 0) {
+            return; // Skip hover effect for heatmap dots
+          }
+          
           const col  = gsap.utils.interpolate(colors.base, colors.active, t);
           gsap.set(el, { backgroundColor: col });
 
@@ -1696,3 +1702,485 @@ function shuffleProjectCards() {
   });
 }
 /* ----------------- End Card Stack & Shuffle Controls ----------------- */ 
+
+/* ================= Visitor Heatmap ================= */
+// Replace CountAPI with KVDB.io key-value bucket (create one at https://kvdb.io)
+const KVDB_BUCKET = 'GpuEbRgGPvKxLPDh5ktKRc'; // <-- replace with your bucket id
+const HEATMAP_ENDPOINT = `https://kvdb.io/${KVDB_BUCKET}`;
+
+async function fetchCount(key) {
+  try {
+    const r = await fetch(`${HEATMAP_ENDPOINT}/${key}`);
+    if (r.ok) {
+      const txt = await r.text();
+      return parseInt(txt, 10) || 0;
+    }
+  } catch {}
+  return null;
+}
+
+async function hitCount(key) {
+  let current = await fetchCount(key);
+  if (current === null) current = 0;
+  const next = current + 1;
+  try {
+    await fetch(`${HEATMAP_ENDPOINT}/${key}`, { method: 'PUT', body: String(next) });
+  } catch {}
+  return next;
+}
+
+// Local cache for click counts to minimise network calls
+const dotClickCounts = {};
+let oracleShownThisSession = false;
+let heatmapDataLoaded = false; // Track if we've loaded data this session
+let globalClickSequence = 0; // Global counter for click ordering
+
+// Batch operations to reduce API calls
+const pendingWrites = new Map();
+let writeTimeout = null;
+const MAX_STORED_CLICKS = 60; // Only store last 60 clicks
+
+// Load all heatmap data once per session from localStorage + selective KVDB sync
+async function loadHeatmapData(container) {
+  if (heatmapDataLoaded) return;
+  heatmapDataLoaded = true;
+
+  const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+  
+  // First, load everything from localStorage (instant)
+  dots.forEach(dot => {
+    const key = getDotKey(dot);
+    const lsKey = `heat_${key}`;
+    const data = localStorage.getItem(lsKey);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.count > 0) {
+          dotClickCounts[key] = parsed.count;
+          globalClickSequence = Math.max(globalClickSequence, parsed.sequence || 0);
+          applyHeatToDot(dot, parsed.count, false);
+        }
+      } catch {
+        // Handle old format
+        const count = parseInt(data, 10) || 0;
+        if (count > 0) {
+          dotClickCounts[key] = count;
+          applyHeatToDot(dot, count, false);
+        }
+      }
+    }
+  });
+
+  // Then sync with KVDB only for dots that have local data (much fewer calls)
+  const keysToSync = Object.keys(dotClickCounts);
+  if (keysToSync.length === 0) return;
+
+  // Batch sync in chunks of 10 to avoid overwhelming the API
+  for (let i = 0; i < keysToSync.length; i += 10) {
+    const chunk = keysToSync.slice(i, i + 10);
+    await Promise.all(chunk.map(async key => {
+      try {
+        const remoteData = await fetch(`${HEATMAP_ENDPOINT}/${key}`);
+        if (remoteData.ok) {
+          const remoteText = await remoteData.text();
+          let remoteCount = 0;
+          try {
+            const parsed = JSON.parse(remoteText);
+            remoteCount = parsed.count || 0;
+          } catch {
+            remoteCount = parseInt(remoteText, 10) || 0;
+          }
+          
+          if (remoteCount > dotClickCounts[key]) {
+            // Remote has more clicks, update local
+            dotClickCounts[key] = remoteCount;
+            const newEntry = { count: remoteCount, sequence: globalClickSequence++, timestamp: Date.now() };
+            localStorage.setItem(`heat_${key}`, JSON.stringify(newEntry));
+            const dot = container.querySelector(`[data-key="${key}"]`) || 
+                       Array.from(container.querySelectorAll('.dot')).find(d => getDotKey(d) === key);
+            if (dot) applyHeatToDot(dot, remoteCount, false);
+          }
+        }
+      } catch {}
+    }));
+    // Small delay between chunks
+    if (i + 10 < keysToSync.length) await new Promise(r => setTimeout(r, 100));
+  }
+}
+
+// Batch write pending changes every 2 seconds
+function flushPendingWrites() {
+  if (pendingWrites.size === 0) return;
+  
+  const writes = Array.from(pendingWrites.entries());
+  pendingWrites.clear();
+  
+  // Write to KVDB in background (don't await)
+  writes.forEach(async ([key, entry]) => {
+    try {
+      await fetch(`${HEATMAP_ENDPOINT}/${key}`, { method: 'PUT', body: JSON.stringify(entry) });
+    } catch {}
+  });
+}
+
+async function incrementHeat(dot) {
+  const key = getDotKey(dot);
+  globalClickSequence++;
+  
+  // Always increment locally first (instant feedback)
+  const currentCount = dotClickCounts[key] || 0;
+  const newCount = currentCount + 1;
+  dotClickCounts[key] = newCount;
+  
+  // Store with sequence number for ordering
+  const clickEntry = {
+    count: newCount,
+    sequence: globalClickSequence,
+    timestamp: Date.now()
+  };
+  
+  // Update localStorage immediately
+  localStorage.setItem(`heat_${key}`, JSON.stringify(clickEntry));
+  
+  // Apply visual change immediately
+  applyHeatToDot(dot, newCount, true);
+  
+  // Queue for batch write to KVDB
+  pendingWrites.set(key, clickEntry);
+  
+  // Clean up old entries if we exceed MAX_STORED_CLICKS
+  cleanupOldEntries();
+  
+  // Debounce batch writes
+  clearTimeout(writeTimeout);
+  writeTimeout = setTimeout(flushPendingWrites, 2000);
+}
+
+function cleanupOldEntries() {
+  // Get all stored entries
+  const entries = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('heat_')) {
+      const data = localStorage.getItem(key);
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.sequence) {
+          entries.push({ key, ...parsed });
+        }
+      } catch {
+        // Handle old format - convert to new format
+        const count = parseInt(data, 10) || 0;
+        if (count > 0) {
+          const newEntry = { count, sequence: globalClickSequence++, timestamp: Date.now() };
+          localStorage.setItem(key, JSON.stringify(newEntry));
+          entries.push({ key, ...newEntry });
+        }
+      }
+    }
+  }
+  
+  // If we have more than MAX_STORED_CLICKS, remove oldest ones
+  if (entries.length > MAX_STORED_CLICKS) {
+    entries.sort((a, b) => a.sequence - b.sequence);
+    const toRemove = entries.slice(0, entries.length - MAX_STORED_CLICKS);
+    
+    toRemove.forEach(entry => {
+      localStorage.removeItem(entry.key);
+      const dotKey = entry.key.replace('heat_', '');
+      delete dotClickCounts[dotKey];
+      
+      // Also remove from KVDB
+      fetch(`${HEATMAP_ENDPOINT}/${dotKey}`, { method: 'DELETE' }).catch(() => {});
+    });
+  }
+}
+
+function applyHeatToDot(dot, count, animate=true) {
+  const col = colourFromCount(count);
+  dot._heatmapColor = col; // Store heatmap color
+  dot._heatmapCount = count; // Store count for reference
+  
+  // For the reveal animation, we just store the color and count
+  // The actual animation will be handled by animateHeatmapReveal
+  if (!animate) {
+    return; // Don't apply visual changes during data loading
+  }
+  
+  if (typeof gsap !== 'undefined') {
+    gsap.to(dot, { backgroundColor: col, duration: 0.6 });
+  } else {
+    dot.style.backgroundColor = col;
+  }
+}
+
+function colourFromCount(count) {
+  // Color progression from green to red
+  if (count === 0) return '#245E51'; // Default dark green
+  if (count === 1) return '#A8FF51'; // Solid green for first click
+  if (count === 2) return '#FFFF51'; // Yellow for second click
+  if (count === 3) return '#FF9F51'; // Orange for third click
+  if (count <= 5) return '#FF6B47'; // Red-orange for 4-5 clicks
+  return '#FF4C24'; // Deep red for 6+ clicks
+}
+
+// Beautiful avant-garde heatmap reveal animation
+async function animateHeatmapReveal(container) {
+  // Only play the reveal animation once per session
+  if (window.heatmapRevealPlayed) {
+    // Just show the dots without animation
+    const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+    const heatmapDots = dots.filter(d => d._heatmapCount && d._heatmapCount > 0);
+    heatmapDots.forEach(dot => {
+      gsap.set(dot, { backgroundColor: dot._heatmapColor, scale: 1, opacity: 1 });
+    });
+    return;
+  }
+  
+  window.heatmapRevealPlayed = true;
+  
+  const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+  const heatmapDots = dots.filter(d => d._heatmapCount && d._heatmapCount > 0);
+  
+  if (heatmapDots.length === 0) return;
+  
+  // Create ripple effect from center
+  const centerX = container.clientWidth / 2;
+  const centerY = container.clientHeight / 2;
+  
+  // Sort dots by distance from center for wave effect
+  const sortedDots = heatmapDots.map(dot => {
+    const rect = dot.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const x = rect.left - containerRect.left + rect.width / 2;
+    const y = rect.top - containerRect.top + rect.height / 2;
+    const distance = Math.hypot(x - centerX, y - centerY);
+    return { dot, distance, x, y };
+  }).sort((a, b) => a.distance - b.distance);
+  
+  // Create multiple ripple waves for better effect
+  const maxDimension = Math.max(container.clientWidth, container.clientHeight);
+  const rippleCount = 3;
+  
+  for (let i = 0; i < rippleCount; i++) {
+    const ripple = document.createElement('div');
+    ripple.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px solid rgba(168,255,81,${0.8 - i * 0.2});
+      pointer-events: none;
+      z-index: 1000;
+      transform: translate(-50%, -50%);
+    `;
+    container.appendChild(ripple);
+    
+    // Animate ripple expansion with staggered timing
+    gsap.to(ripple, {
+      width: maxDimension * 2.5,
+      height: maxDimension * 2.5,
+      duration: 1.8,
+      delay: i * 0.15,
+      ease: "power2.out"
+    });
+    
+    // Animate ripple fade out
+    gsap.to(ripple, {
+      opacity: 0,
+      duration: 0.8,
+      delay: i * 0.15 + 1.0,
+      ease: "power2.out",
+      onComplete: () => {
+        ripple.remove();
+      }
+    });
+  }
+  
+  // Reset all heatmap dots to transparent initially
+  heatmapDots.forEach(dot => {
+    gsap.set(dot, { 
+      backgroundColor: 'rgba(36, 94, 81, 0)',
+      scale: 0.3,
+      opacity: 0
+    });
+  });
+  
+  // Animate dots in waves with staggered timing
+  for (let i = 0; i < sortedDots.length; i++) {
+    const { dot, distance } = sortedDots[i];
+    const delay = (distance / 200) * 0.1; // Stagger based on distance
+    
+    // Create individual particle effect for each dot
+    const particle = document.createElement('div');
+    particle.style.cssText = `
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: ${dot._heatmapColor};
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px ${dot._heatmapColor};
+    `;
+    container.appendChild(particle);
+    
+    // Animate particle from center to dot position
+    const rect = dot.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const targetX = rect.left - containerRect.left + rect.width / 2;
+    const targetY = rect.top - containerRect.top + rect.height / 2;
+    
+    gsap.to(particle, {
+      x: targetX - centerX,
+      y: targetY - centerY,
+      duration: 0.8,
+      delay: delay,
+      ease: "power2.out",
+      onComplete: () => {
+        particle.remove();
+      }
+    });
+    
+    // Animate the actual dot
+    gsap.to(dot, {
+      backgroundColor: dot._heatmapColor,
+      scale: 1,
+      opacity: 1,
+      duration: 0.6,
+      delay: delay + 0.4,
+      ease: "elastic.out(1, 0.5)",
+      onStart: () => {
+        // Add glow effect
+        gsap.to(dot, {
+          boxShadow: `0 0 20px ${dot._heatmapColor}`,
+          duration: 0.3,
+          yoyo: true,
+          repeat: 1
+        });
+      }
+    });
+  }
+  
+  // Create floating energy particles
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      const floater = document.createElement('div');
+      floater.style.cssText = `
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        background: rgba(168,255,81,0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 998;
+        top: ${Math.random() * 100}%;
+        left: ${Math.random() * 100}%;
+      `;
+      container.appendChild(floater);
+      
+      gsap.to(floater, {
+        y: -100,
+        x: Math.random() * 100 - 50,
+        opacity: 0,
+        duration: 2 + Math.random() * 2,
+        ease: "power1.out",
+        onComplete: () => {
+          floater.remove();
+        }
+      });
+    }, Math.random() * 1000);
+  }
+}
+
+async function revealHeatmap(container) {
+  // Just load data once - no need to re-fetch every time
+  await loadHeatmapData(container);
+  
+  // Create beautiful reveal animation
+  await animateHeatmapReveal(container);
+}
+
+// Attach click handler once DOM is ready
+function initHeatmapClickHandler() {
+  const container = document.querySelector('[data-dots-container-init]');
+  if (!container) return;
+  
+  // Ensure container accepts clicks
+  container.style.pointerEvents = 'auto';
+  
+  container.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!target.classList || !target.classList.contains('dot') || target._isHole) return;
+    showOracleOverlay(() => revealHeatmap(container));
+    incrementHeat(target);
+  });
+  
+  // Flush any pending writes before page unload
+  window.addEventListener('beforeunload', flushPendingWrites);
+}
+
+document.addEventListener('DOMContentLoaded', initHeatmapClickHandler);
+/* =============== End Visitor Heatmap =============== */ 
+
+// ---------- Oracle Overlay (mysterious message) ----------
+function ensureOracleOverlay() {
+  if (document.getElementById('oracle-overlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'oracle-overlay';
+  Object.assign(ov.style, {
+    position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10000, opacity: 0, background: 'transparent'
+  });
+  ov.innerHTML = `<div style="font-family: 'Cinzel', serif; color:#A8FF51; font-size:clamp(1.5rem,4vw,3rem); text-align:center; text-shadow:0 0 15px rgba(168,255,81,0.6); transform: translateY(-25vh);">
+      the oracle will remember you...<br/>as it has everyone prior
+    </div>`;
+  document.body.appendChild(ov);
+}
+
+function showOracleOverlay(onFinish) {
+  // Only show once per session
+  if (oracleShownThisSession) {
+    if (onFinish) onFinish();
+    return;
+  }
+  oracleShownThisSession = true;
+  
+  ensureOracleOverlay();
+  const ov = document.getElementById('oracle-overlay');
+  if (!ov) { if (onFinish) onFinish(); return; }
+
+  if (typeof gsap !== 'undefined') {
+    gsap.killTweensOf(ov);
+    gsap.set(ov, { opacity: 0, pointerEvents: 'auto' });
+    gsap.to(ov, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
+      // Start the wave animation much earlier for smoother transition
+      setTimeout(() => {
+        if (onFinish) onFinish();
+      }, 800); // Start wave after 0.8s instead of 3.8s
+      
+      // Continue fading out the oracle text
+      gsap.to(ov, { opacity: 0, duration: 1.0, delay: 1.2, ease: 'power2.in', onComplete: () => {
+        ov.style.pointerEvents = 'none';
+      }});
+    }});
+  } else {
+    ov.style.opacity = 1;
+    setTimeout(() => {
+      if (onFinish) onFinish();
+    }, 1200); // Start wave after 1.2s instead of 3s
+    setTimeout(() => {
+      ov.style.opacity = 0;
+    }, 2500);
+  }
+}
+// ---------- End Oracle Overlay ----------
+
+// Helper to derive unique key from dot position
+function getDotKey(dot) {
+  return `${dot._row}_${dot._col}`;
+}

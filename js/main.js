@@ -1537,10 +1537,22 @@ function initColorSampler() {
 /* ----------------- End Real-Time Colour Sampler ----------------- */ 
 
 // --------------- Card Action Sound Helper -----------------
-function playCardActionSound() {
+function playStackSound() {
+  try { 
+    // Re-use a single <audio> instance for stack sound
+    const audio = playStackSound._audio || (playStackSound._audio = new Audio('sounds/card-stack.wav'));
+    audio.currentTime = 0; // rewind so rapid replays work
+    // Attempt playback (will be allowed because the click counts as user interaction)
+    audio.play().catch(() => {/* ignore autoplay issues silently */});
+  } catch (err) {
+    console.warn('Stack audio playback failed:', err);
+  }
+} 
+
+function playShuffleSound() {
   try {
     // Re-use a single AudioContext if possible (some browsers limit concurrent contexts)
-    const ctx = playCardActionSound._ctx || (playCardActionSound._ctx = new (window.AudioContext || window.webkitAudioContext)());
+    const ctx = playShuffleSound._ctx || (playShuffleSound._ctx = new (window.AudioContext || window.webkitAudioContext)());
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
@@ -1558,15 +1570,33 @@ function playCardActionSound() {
     osc.stop(ctx.currentTime + 0.3);
   } catch (err) {
     // If AudioContext fails (e.g., due to browser policies), silently ignore.
-    console.warn('Audio playback failed:', err);
+    console.warn('Shuffle audio playback failed:', err);
   }
 }
 // ------------- End Card Action Sound Helper -------------
 
+/* ----------- Card Action Control Flag & Helpers ------------ */
+let cardActionInProgress = false;
+
+function setCardActionButtonsDisabled(disabled) {
+  document.querySelectorAll('.cards-action-btn').forEach(btn => {
+    btn.disabled = disabled;
+    btn.classList.toggle('disabled', disabled);
+    // light visual feedback
+    btn.style.pointerEvents = disabled ? 'none' : '';
+    btn.style.opacity = disabled ? '0.5' : '';
+  });
+}
+/* ----------- End Helpers ------------ */
+
 /* ------------------- Card Stack & Shuffle Controls ------------------- */
 function stackProjectCards() {
-  // Play feedback sound
-  playCardActionSound();
+  if (cardActionInProgress) return; // prevent overlapping actions
+  cardActionInProgress = true;
+  setCardActionButtonsDisabled(true);
+
+  // Play stack sound
+  playStackSound();
   const grid = document.querySelector('.projects-grid');
   if (!grid) return;
   const cards = Array.from(grid.querySelectorAll('.project-card'));
@@ -1604,11 +1634,21 @@ function stackProjectCards() {
 
     card.style.zIndex = 100 + idx;
   });
+  // when animation ends, re-enable controls
+  const totalDuration = 0.6 + ((cards.length - 1) * 0.05);
+  gsap.delayedCall(totalDuration, () => {
+    cardActionInProgress = false;
+    setCardActionButtonsDisabled(false);
+  });
 }
 
 function shuffleProjectCards() {
-  // Play feedback sound
-  playCardActionSound();
+  if (cardActionInProgress) return; // prevent overlapping actions
+  cardActionInProgress = true;
+  setCardActionButtonsDisabled(true);
+
+  // Play shuffle sound
+  playShuffleSound();
   const grid = document.querySelector('.projects-grid');
   if (!grid) return;
   const cards = Array.from(grid.querySelectorAll('.project-card'));
@@ -1648,6 +1688,11 @@ function shuffleProjectCards() {
     });
 
     card.style.zIndex = 1 + idx;
+  });
+  // fixed length shuffle animation (~0.6s)
+  gsap.delayedCall(0.6, () => {
+    cardActionInProgress = false;
+    setCardActionButtonsDisabled(false);
   });
 }
 /* ----------------- End Card Stack & Shuffle Controls ----------------- */ 

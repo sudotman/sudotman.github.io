@@ -1335,17 +1335,20 @@ function initColorSampler() {
       return;
     }
 
-    if (supportsMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        startSampling(stream);
-      } catch (err) {
-        console.warn('Webcam permission denied or unavailable, using fallback colour', err);
+    // Show oracle overlay before starting mood sampling
+    showMoodOracleOverlay(async () => {
+      if (supportsMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          startSampling(stream);
+        } catch (err) {
+          console.warn('Webcam permission denied or unavailable, using fallback colour', err);
+          fallbackSample();
+        }
+      } else {
         fallbackSample();
       }
-    } else {
-      fallbackSample();
-    }
+    });
   });
 
   asciiBtn.addEventListener('click', () => {
@@ -2142,6 +2145,19 @@ function ensureOracleOverlay() {
   document.body.appendChild(ov);
 }
 
+function ensureMoodOracleOverlay() {
+  if (document.getElementById('mood-oracle-overlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'mood-oracle-overlay';
+  Object.assign(ov.style, {
+    position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10000, opacity: 0, background: 'transparent'
+  });
+  ov.innerHTML = `<div style="font-family: 'Cinzel', serif; color:#A8FF51; font-size:clamp(1.5rem,4vw,3rem); text-align:center; text-shadow:0 0 15px rgba(168,255,81,0.6); transform: translateY(-25vh);">
+      the oracle perceives you...<br/>colors singing through the dots
+    </div>`;
+  document.body.appendChild(ov);
+}
+
 function showOracleOverlay(onFinish) {
   // Only show once per session
   if (oracleShownThisSession) {
@@ -2173,6 +2189,45 @@ function showOracleOverlay(onFinish) {
     setTimeout(() => {
       if (onFinish) onFinish();
     }, 1200); // Start wave after 1.2s instead of 3s
+    setTimeout(() => {
+      ov.style.opacity = 0;
+    }, 2500);
+  }
+}
+
+let moodOracleShownThisSession = false;
+
+function showMoodOracleOverlay(onFinish) {
+  // Only show once per session
+  if (moodOracleShownThisSession) {
+    if (onFinish) onFinish();
+    return;
+  }
+  moodOracleShownThisSession = true;
+  
+  ensureMoodOracleOverlay();
+  const ov = document.getElementById('mood-oracle-overlay');
+  if (!ov) { if (onFinish) onFinish(); return; }
+
+  if (typeof gsap !== 'undefined') {
+    gsap.killTweensOf(ov);
+    gsap.set(ov, { opacity: 0, pointerEvents: 'auto' });
+    gsap.to(ov, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
+      // Execute the mood functionality after a brief moment
+      setTimeout(() => {
+        if (onFinish) onFinish();
+      }, 800);
+      
+      // Continue fading out the oracle text
+      gsap.to(ov, { opacity: 0, duration: 1.0, delay: 1.2, ease: 'power2.in', onComplete: () => {
+        ov.style.pointerEvents = 'none';
+      }});
+    }});
+  } else {
+    ov.style.opacity = 1;
+    setTimeout(() => {
+      if (onFinish) onFinish();
+    }, 1200);
     setTimeout(() => {
       ov.style.opacity = 0;
     }, 2500);

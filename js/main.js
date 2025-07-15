@@ -1711,25 +1711,105 @@ function shuffleProjectCards() {
 const KVDB_BUCKET = 'GpuEbRgGPvKxLPDh5ktKRc'; // <-- replace with your bucket id
 const HEATMAP_ENDPOINT = `https://kvdb.io/${KVDB_BUCKET}`;
 
-async function fetchCount(key) {
+// KVDB service state tracking
+let kvdbAvailable = true;
+let kvdbRetryCount = 0;
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_BASE_DELAY = 1000; // 1 second base delay
+
+// Enhanced error handling with retry logic and exponential backoff
+async function kvdbRequest(url, options = {}, retryAttempt = 0) {
   try {
-    const r = await fetch(`${HEATMAP_ENDPOINT}/${key}`);
-    if (r.ok) {
-      const txt = await r.text();
-      return parseInt(txt, 10) || 0;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`KVDB request failed: ${response.status} ${response.statusText}`);
     }
-  } catch {}
-  return null;
+    
+    // Reset retry count on successful request
+    kvdbRetryCount = 0;
+    kvdbAvailable = true;
+    
+    return response;
+  } catch (error) {
+    console.warn(`KVDB request failed (attempt ${retryAttempt + 1}):`, error.message);
+    
+    // Check if we should retry
+    if (retryAttempt < MAX_RETRY_ATTEMPTS && !error.name === 'AbortError') {
+      const delay = RETRY_BASE_DELAY * Math.pow(2, retryAttempt); // Exponential backoff
+      console.log(`Retrying KVDB request in ${delay}ms...`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return kvdbRequest(url, options, retryAttempt + 1);
+    }
+    
+    // Mark KVDB as potentially unavailable after max retries
+    if (retryAttempt >= MAX_RETRY_ATTEMPTS) {
+      kvdbRetryCount++;
+      if (kvdbRetryCount >= 3) {
+        kvdbAvailable = false;
+        console.warn('KVDB service marked as unavailable after multiple failures');
+      }
+    }
+    
+    throw error;
+  }
+}
+
+async function fetchCount(key) {
+  if (!kvdbAvailable) {
+    console.log('KVDB unavailable, skipping fetch for key:', key);
+    return null;
+  }
+  
+  try {
+    const response = await kvdbRequest(`${HEATMAP_ENDPOINT}/${key}`);
+    const text = await response.text();
+    
+    // Handle both old format (plain number) and new format (JSON)
+    try {
+      const parsed = JSON.parse(text);
+      return parsed.count || 0;
+    } catch {
+      return parseInt(text, 10) || 0;
+    }
+  } catch (error) {
+    console.warn(`Failed to fetch count for key ${key}:`, error.message);
+    return null;
+  }
 }
 
 async function hitCount(key) {
   let current = await fetchCount(key);
   if (current === null) current = 0;
   const next = current + 1;
+  
+  if (!kvdbAvailable) {
+    console.log('KVDB unavailable, returning local count only');
+    return next;
+  }
+  
   try {
-    await fetch(`${HEATMAP_ENDPOINT}/${key}`, { method: 'PUT', body: String(next) });
-  } catch {}
-  return next;
+    await kvdbRequest(`${HEATMAP_ENDPOINT}/${key}`, { 
+      method: 'PUT', 
+      body: String(next),
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    });
+    return next;
+  } catch (error) {
+    console.warn(`Failed to update count for key ${key}:`, error.message);
+    return next; // Return the incremented count even if remote update failed
+  }
 }
 
 // Local cache for click counts to minimise network calls
@@ -1754,39 +1834,57 @@ async function loadHeatmapData(container) {
   dots.forEach(dot => {
     const key = getDotKey(dot);
     const lsKey = `heat_${key}`;
-    const data = localStorage.getItem(lsKey);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.count > 0) {
-          dotClickCounts[key] = parsed.count;
-          globalClickSequence = Math.max(globalClickSequence, parsed.sequence || 0);
-          applyHeatToDot(dot, parsed.count, false);
-        }
-      } catch {
-        // Handle old format
-        const count = parseInt(data, 10) || 0;
-        if (count > 0) {
-          dotClickCounts[key] = count;
-          applyHeatToDot(dot, count, false);
+    
+    try {
+      const data = localStorage.getItem(lsKey);
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.count > 0) {
+            dotClickCounts[key] = parsed.count;
+            globalClickSequence = Math.max(globalClickSequence, parsed.sequence || 0);
+            applyHeatToDot(dot, parsed.count, false);
+          }
+        } catch (parseError) {
+          console.warn(`Failed to parse localStorage data for key ${lsKey}:`, parseError);
+          // Handle old format
+          const count = parseInt(data, 10) || 0;
+          if (count > 0) {
+            dotClickCounts[key] = count;
+            applyHeatToDot(dot, count, false);
+            // Convert to new format
+            const newEntry = { count, sequence: globalClickSequence++, timestamp: Date.now() };
+            localStorage.setItem(lsKey, JSON.stringify(newEntry));
+          }
         }
       }
+    } catch (storageError) {
+      console.warn(`Failed to access localStorage for key ${lsKey}:`, storageError);
     }
   });
 
   // Then sync with KVDB only for dots that have local data (much fewer calls)
   const keysToSync = Object.keys(dotClickCounts);
-  if (keysToSync.length === 0) return;
+  if (keysToSync.length === 0 || !kvdbAvailable) {
+    if (!kvdbAvailable) {
+      console.log('KVDB unavailable, skipping remote sync');
+    }
+    return;
+  }
 
-  // Batch sync in chunks of 10 to avoid overwhelming the API
-  for (let i = 0; i < keysToSync.length; i += 10) {
-    const chunk = keysToSync.slice(i, i + 10);
-    await Promise.all(chunk.map(async key => {
-      try {
-        const remoteData = await fetch(`${HEATMAP_ENDPOINT}/${key}`);
-        if (remoteData.ok) {
-          const remoteText = await remoteData.text();
+  console.log(`Syncing ${keysToSync.length} keys with KVDB...`);
+
+  // Batch sync in chunks of 5 to avoid overwhelming the API (reduced from 10)
+  for (let i = 0; i < keysToSync.length; i += 5) {
+    const chunk = keysToSync.slice(i, i + 5);
+    
+    try {
+      await Promise.allSettled(chunk.map(async key => {
+        try {
+          const response = await kvdbRequest(`${HEATMAP_ENDPOINT}/${key}`);
+          const remoteText = await response.text();
           let remoteCount = 0;
+          
           try {
             const parsed = JSON.parse(remoteText);
             remoteCount = parsed.count || 0;
@@ -1798,104 +1896,248 @@ async function loadHeatmapData(container) {
             // Remote has more clicks, update local
             dotClickCounts[key] = remoteCount;
             const newEntry = { count: remoteCount, sequence: globalClickSequence++, timestamp: Date.now() };
-            localStorage.setItem(`heat_${key}`, JSON.stringify(newEntry));
+            
+            try {
+              localStorage.setItem(`heat_${key}`, JSON.stringify(newEntry));
+            } catch (storageError) {
+              console.warn(`Failed to update localStorage for key ${key}:`, storageError);
+            }
+            
             const dot = container.querySelector(`[data-key="${key}"]`) || 
                        Array.from(container.querySelectorAll('.dot')).find(d => getDotKey(d) === key);
             if (dot) applyHeatToDot(dot, remoteCount, false);
           }
+        } catch (error) {
+          console.warn(`Failed to sync key ${key} with KVDB:`, error.message);
         }
-      } catch {}
-    }));
-    // Small delay between chunks
-    if (i + 10 < keysToSync.length) await new Promise(r => setTimeout(r, 100));
+      }));
+    } catch (error) {
+      console.warn(`Batch sync failed for chunk starting at index ${i}:`, error.message);
+    }
+    
+    // Small delay between chunks to prevent rate limiting
+    if (i + 5 < keysToSync.length) {
+      await new Promise(resolve => setTimeout(resolve, 200)); // Increased delay
+    }
   }
+  
+  console.log('KVDB sync completed');
 }
 
 // Batch write pending changes every 2 seconds
-function flushPendingWrites() {
+async function flushPendingWrites() {
   if (pendingWrites.size === 0) return;
   
   const writes = Array.from(pendingWrites.entries());
   pendingWrites.clear();
   
-  // Write to KVDB in background (don't await)
-  writes.forEach(async ([key, entry]) => {
+  if (!kvdbAvailable) {
+    console.log('KVDB unavailable, skipping batch write');
+    return;
+  }
+  
+  console.log(`Flushing ${writes.length} pending writes to KVDB...`);
+  
+  // Process writes with proper error handling and retry logic
+  const writePromises = writes.map(async ([key, entry]) => {
     try {
-      await fetch(`${HEATMAP_ENDPOINT}/${key}`, { method: 'PUT', body: JSON.stringify(entry) });
-    } catch {}
+      await kvdbRequest(`${HEATMAP_ENDPOINT}/${key}`, { 
+        method: 'PUT', 
+        body: JSON.stringify(entry),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log(`Successfully wrote key: ${key}`);
+    } catch (error) {
+      console.warn(`Failed to write key ${key} to KVDB:`, error.message);
+      // Re-queue failed writes for next batch
+      pendingWrites.set(key, entry);
+    }
   });
+  
+  // Use Promise.allSettled to handle all writes regardless of individual failures
+  const results = await Promise.allSettled(writePromises);
+  const successful = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  
+  if (failed > 0) {
+    console.warn(`Batch write completed: ${successful} successful, ${failed} failed`);
+  } else {
+    console.log(`Batch write completed successfully: ${successful} writes`);
+  }
 }
 
 async function incrementHeat(dot) {
-  const key = getDotKey(dot);
-  globalClickSequence++;
-  
-  // Always increment locally first (instant feedback)
-  const currentCount = dotClickCounts[key] || 0;
-  const newCount = currentCount + 1;
-  dotClickCounts[key] = newCount;
-  
-  // Store with sequence number for ordering
-  const clickEntry = {
-    count: newCount,
-    sequence: globalClickSequence,
-    timestamp: Date.now()
-  };
-  
-  // Update localStorage immediately
-  localStorage.setItem(`heat_${key}`, JSON.stringify(clickEntry));
-  
-  // Apply visual change immediately
-  applyHeatToDot(dot, newCount, true);
-  
-  // Queue for batch write to KVDB
-  pendingWrites.set(key, clickEntry);
-  
-  // Clean up old entries if we exceed MAX_STORED_CLICKS
-  cleanupOldEntries();
-  
-  // Debounce batch writes
-  clearTimeout(writeTimeout);
-  writeTimeout = setTimeout(flushPendingWrites, 2000);
+  try {
+    const key = getDotKey(dot);
+    
+    // Validate dot coordinates before processing
+    if (!key || key.includes('undefined') || key.includes('null')) {
+      console.warn('Invalid dot key generated:', key);
+      return;
+    }
+    
+    globalClickSequence++;
+    
+    // Always increment locally first (instant feedback)
+    const currentCount = dotClickCounts[key] || 0;
+    const newCount = currentCount + 1;
+    dotClickCounts[key] = newCount;
+    
+    // Store with sequence number for ordering
+    const clickEntry = {
+      count: newCount,
+      sequence: globalClickSequence,
+      timestamp: Date.now()
+    };
+    
+    // Validate click entry data
+    if (newCount <= 0 || globalClickSequence <= 0) {
+      console.warn('Invalid click entry data:', clickEntry);
+      return;
+    }
+    
+    // Update localStorage immediately with error handling
+    try {
+      localStorage.setItem(`heat_${key}`, JSON.stringify(clickEntry));
+    } catch (storageError) {
+      console.warn(`Failed to update localStorage for key ${key}:`, storageError);
+      // Continue execution even if localStorage fails
+    }
+    
+    // Apply visual change immediately
+    try {
+      applyHeatToDot(dot, newCount, true);
+    } catch (visualError) {
+      console.warn(`Failed to apply visual feedback for dot:`, visualError);
+    }
+    
+    // Queue for batch write to KVDB (only if KVDB is available)
+    if (kvdbAvailable) {
+      pendingWrites.set(key, clickEntry);
+    } else {
+      console.log('KVDB unavailable, click stored locally only');
+    }
+    
+    // Clean up old entries if we exceed MAX_STORED_CLICKS
+    try {
+      cleanupOldEntries();
+    } catch (cleanupError) {
+      console.warn('Failed to cleanup old entries:', cleanupError);
+    }
+    
+    // Debounce batch writes
+    clearTimeout(writeTimeout);
+    writeTimeout = setTimeout(() => {
+      flushPendingWrites().catch(error => {
+        console.warn('Batch write failed:', error);
+      });
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Critical error in incrementHeat:', error);
+    // Ensure the system continues to function even if this fails
+  }
 }
 
 function cleanupOldEntries() {
-  // Get all stored entries
-  const entries = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('heat_')) {
-      const data = localStorage.getItem(key);
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.sequence) {
-          entries.push({ key, ...parsed });
-        }
-      } catch {
-        // Handle old format - convert to new format
-        const count = parseInt(data, 10) || 0;
-        if (count > 0) {
-          const newEntry = { count, sequence: globalClickSequence++, timestamp: Date.now() };
-          localStorage.setItem(key, JSON.stringify(newEntry));
-          entries.push({ key, ...newEntry });
+  try {
+    // Get all stored entries with error handling
+    const entries = [];
+    
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('heat_')) {
+          try {
+            const data = localStorage.getItem(key);
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.sequence && parsed.count > 0) {
+                  entries.push({ key, ...parsed });
+                }
+              } catch (parseError) {
+                console.warn(`Failed to parse entry for key ${key}:`, parseError);
+                // Handle old format - convert to new format
+                const count = parseInt(data, 10) || 0;
+                if (count > 0) {
+                  const newEntry = { count, sequence: globalClickSequence++, timestamp: Date.now() };
+                  try {
+                    localStorage.setItem(key, JSON.stringify(newEntry));
+                    entries.push({ key, ...newEntry });
+                  } catch (storageError) {
+                    console.warn(`Failed to convert old format for key ${key}:`, storageError);
+                  }
+                }
+              }
+            }
+          } catch (itemError) {
+            console.warn(`Failed to access localStorage item ${key}:`, itemError);
+          }
         }
       }
+    } catch (storageError) {
+      console.warn('Failed to iterate localStorage:', storageError);
+      return; // Exit early if we can't access localStorage
     }
-  }
-  
-  // If we have more than MAX_STORED_CLICKS, remove oldest ones
-  if (entries.length > MAX_STORED_CLICKS) {
-    entries.sort((a, b) => a.sequence - b.sequence);
+    
+    // Validate entries count
+    if (entries.length <= MAX_STORED_CLICKS) {
+      return; // No cleanup needed
+    }
+    
+    console.log(`Cleaning up ${entries.length - MAX_STORED_CLICKS} old entries...`);
+    
+    // Sort entries by sequence (oldest first) with error handling
+    try {
+      entries.sort((a, b) => {
+        const seqA = a.sequence || 0;
+        const seqB = b.sequence || 0;
+        return seqA - seqB;
+      });
+    } catch (sortError) {
+      console.warn('Failed to sort entries for cleanup:', sortError);
+      return;
+    }
+    
     const toRemove = entries.slice(0, entries.length - MAX_STORED_CLICKS);
+    let removedCount = 0;
+    let failedCount = 0;
     
     toRemove.forEach(entry => {
-      localStorage.removeItem(entry.key);
-      const dotKey = entry.key.replace('heat_', '');
-      delete dotClickCounts[dotKey];
-      
-      // Also remove from KVDB
-      fetch(`${HEATMAP_ENDPOINT}/${dotKey}`, { method: 'DELETE' }).catch(() => {});
+      try {
+        // Remove from localStorage
+        localStorage.removeItem(entry.key);
+        
+        // Remove from memory cache
+        const dotKey = entry.key.replace('heat_', '');
+        if (dotKey && dotClickCounts[dotKey]) {
+          delete dotClickCounts[dotKey];
+        }
+        
+        // Remove from KVDB (only if available)
+        if (kvdbAvailable && dotKey) {
+          kvdbRequest(`${HEATMAP_ENDPOINT}/${dotKey}`, { method: 'DELETE' })
+            .catch(error => {
+              console.warn(`Failed to delete key ${dotKey} from KVDB:`, error.message);
+            });
+        }
+        
+        removedCount++;
+      } catch (removeError) {
+        console.warn(`Failed to remove entry ${entry.key}:`, removeError);
+        failedCount++;
+      }
     });
+    
+    if (removedCount > 0) {
+      console.log(`Cleanup completed: ${removedCount} entries removed${failedCount > 0 ? `, ${failedCount} failed` : ''}`);
+    }
+    
+  } catch (error) {
+    console.error('Critical error in cleanupOldEntries:', error);
   }
 }
 
@@ -2102,11 +2344,259 @@ async function animateHeatmapReveal(container) {
 }
 
 async function revealHeatmap(container) {
-  // Just load data once - no need to re-fetch every time
-  await loadHeatmapData(container);
+  console.log('Starting heatmap reveal with progressive loading...');
   
-  // Create beautiful reveal animation
+  // Start with immediate fallback dots for instant feedback
+  showFallbackHeatmap(container);
+  
+  // Load data with timeout and progressive updates
+  const loadingPromise = loadHeatmapDataProgressive(container);
+  
+  // Set a maximum wait time for KVDB data
+  const timeoutPromise = new Promise(resolve => {
+    setTimeout(() => {
+      console.log('KVDB loading timeout reached, proceeding with available data');
+      resolve('timeout');
+    }, 3000); // 3 second timeout
+  });
+  
+  // Race between data loading and timeout
+  const result = await Promise.race([loadingPromise, timeoutPromise]);
+  
+  // Clean up loading animation
+  cleanupLoadingAnimation();
+  
+  // Create beautiful reveal animation with whatever data we have
   await animateHeatmapReveal(container);
+  
+  console.log('Heatmap reveal completed:', result === 'timeout' ? 'with timeout' : 'successfully');
+}
+
+// Show immediate fallback heatmap for instant feedback
+function showFallbackHeatmap(container) {
+  const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+  
+  // Create some random "warm" spots based on localStorage or generate random ones
+  const fallbackSpots = generateFallbackHeatSpots(dots);
+  
+  fallbackSpots.forEach(({ dot, intensity }) => {
+    const color = colourFromCount(intensity);
+    dot._heatmapColor = color;
+    dot._heatmapCount = intensity;
+    dot._isFallback = true; // Mark as fallback data
+    
+    // Apply subtle initial styling
+    gsap.set(dot, { 
+      backgroundColor: color,
+      opacity: 0.3,
+      scale: 0.8
+    });
+  });
+  
+  console.log(`Applied ${fallbackSpots.length} fallback heat spots`);
+}
+
+// Generate fallback heat spots based on localStorage or random patterns
+function generateFallbackHeatSpots(dots) {
+  const spots = [];
+  const maxSpots = Math.min(15, Math.floor(dots.length * 0.05)); // 5% of dots, max 15
+  
+  // First, try to use any existing localStorage data
+  const existingKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('heat_')) {
+      try {
+        const data = localStorage.getItem(key);
+        const parsed = JSON.parse(data);
+        if (parsed.count > 0) {
+          existingKeys.push({ key: key.replace('heat_', ''), count: parsed.count });
+        }
+      } catch (e) {
+        // Handle old format
+        const count = parseInt(data, 10) || 0;
+        if (count > 0) {
+          existingKeys.push({ key: key.replace('heat_', ''), count });
+        }
+      }
+    }
+  }
+  
+  // Use existing data if available
+  existingKeys.slice(0, maxSpots).forEach(({ key, count }) => {
+    const dot = dots.find(d => getDotKey(d) === key);
+    if (dot) {
+      spots.push({ dot, intensity: Math.min(count, 10) });
+    }
+  });
+  
+  // Fill remaining spots with attractive random patterns
+  const remainingSpots = maxSpots - spots.length;
+  if (remainingSpots > 0) {
+    // Create clusters around interesting areas (corners, center, golden ratio points)
+    const interestingPoints = [
+      { x: 0.2, y: 0.2 }, // Top-left
+      { x: 0.8, y: 0.2 }, // Top-right
+      { x: 0.2, y: 0.8 }, // Bottom-left
+      { x: 0.8, y: 0.8 }, // Bottom-right
+      { x: 0.618, y: 0.382 }, // Golden ratio point
+      { x: 0.382, y: 0.618 }, // Golden ratio point
+    ];
+    
+    const container = dots[0].parentElement;
+    const containerRect = container.getBoundingClientRect();
+    
+    for (let i = 0; i < remainingSpots; i++) {
+      const point = interestingPoints[i % interestingPoints.length];
+      const targetX = containerRect.width * point.x;
+      const targetY = containerRect.height * point.y;
+      
+      // Find closest dot to this interesting point
+      let closestDot = null;
+      let minDistance = Infinity;
+      
+      dots.forEach(dot => {
+        if (spots.some(s => s.dot === dot)) return; // Skip already used dots
+        
+        const rect = dot.getBoundingClientRect();
+        const dotX = rect.left - containerRect.left + rect.width / 2;
+        const dotY = rect.top - containerRect.top + rect.height / 2;
+        const distance = Math.hypot(dotX - targetX, dotY - targetY);
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestDot = dot;
+        }
+      });
+      
+      if (closestDot) {
+        const intensity = Math.floor(Math.random() * 5) + 1; // 1-5 intensity
+        spots.push({ dot: closestDot, intensity });
+      }
+    }
+  }
+  
+  return spots;
+}
+
+// Progressive loading with immediate updates
+async function loadHeatmapDataProgressive(container) {
+  if (heatmapDataLoaded) return 'already-loaded';
+  heatmapDataLoaded = true;
+
+  const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
+  
+  // First, load everything from localStorage (instant)
+  dots.forEach(dot => {
+    const key = getDotKey(dot);
+    const lsKey = `heat_${key}`;
+    
+    try {
+      const data = localStorage.getItem(lsKey);
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.count > 0) {
+            dotClickCounts[key] = parsed.count;
+            globalClickSequence = Math.max(globalClickSequence, parsed.sequence || 0);
+            
+            // Update fallback data immediately if this is better
+            if (dot._isFallback && parsed.count > dot._heatmapCount) {
+              const color = colourFromCount(parsed.count);
+              dot._heatmapColor = color;
+              dot._heatmapCount = parsed.count;
+              dot._isFallback = false;
+              
+              // Smooth transition to new color
+              gsap.to(dot, {
+                backgroundColor: color,
+                opacity: 0.6,
+                scale: 0.9,
+                duration: 0.3
+              });
+            }
+          }
+        } catch (parseError) {
+          console.warn(`Failed to parse localStorage data for key ${lsKey}:`, parseError);
+        }
+      }
+    } catch (storageError) {
+      console.warn(`Failed to access localStorage for key ${lsKey}:`, storageError);
+    }
+  });
+
+  // Then sync with KVDB only if available and we have keys to sync
+  const keysToSync = Object.keys(dotClickCounts);
+  if (keysToSync.length === 0 || !kvdbAvailable) {
+    console.log('No KVDB sync needed or KVDB unavailable');
+    return 'local-only';
+  }
+
+  console.log(`Progressive sync of ${keysToSync.length} keys with KVDB...`);
+
+  // Batch sync in smaller chunks with immediate updates
+  for (let i = 0; i < keysToSync.length; i += 3) { // Smaller chunks for faster updates
+    const chunk = keysToSync.slice(i, i + 3);
+    
+    try {
+      await Promise.allSettled(chunk.map(async key => {
+        try {
+          const response = await kvdbRequest(`${HEATMAP_ENDPOINT}/${key}`);
+          const remoteText = await response.text();
+          let remoteCount = 0;
+          
+          try {
+            const parsed = JSON.parse(remoteText);
+            remoteCount = parsed.count || 0;
+          } catch {
+            remoteCount = parseInt(remoteText, 10) || 0;
+          }
+          
+          if (remoteCount > dotClickCounts[key]) {
+            // Remote has more clicks, update immediately
+            dotClickCounts[key] = remoteCount;
+            const newEntry = { count: remoteCount, sequence: globalClickSequence++, timestamp: Date.now() };
+            
+            try {
+              localStorage.setItem(`heat_${key}`, JSON.stringify(newEntry));
+            } catch (storageError) {
+              console.warn(`Failed to update localStorage for key ${key}:`, storageError);
+            }
+            
+            // Find and update the dot immediately
+            const dot = container.querySelector(`[data-key="${key}"]`) || 
+                       Array.from(container.querySelectorAll('.dot')).find(d => getDotKey(d) === key);
+            if (dot) {
+              const color = colourFromCount(remoteCount);
+              dot._heatmapColor = color;
+              dot._heatmapCount = remoteCount;
+              dot._isFallback = false;
+              
+              // Smooth progressive update
+              gsap.to(dot, {
+                backgroundColor: color,
+                opacity: 0.8,
+                scale: 1,
+                duration: 0.4,
+                ease: "power2.out"
+              });
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to sync key ${key} with KVDB:`, error.message);
+        }
+      }));
+    } catch (error) {
+      console.warn(`Batch sync failed for chunk starting at index ${i}:`, error.message);
+    }
+    
+    // Small delay between chunks but don't block the UI
+    if (i + 3 < keysToSync.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  
+  return 'completed';
 }
 
 // Attach click handler once DOM is ready
@@ -2124,8 +2614,123 @@ function initHeatmapClickHandler() {
     incrementHeat(target);
   });
   
-  // Flush any pending writes before page unload
-  window.addEventListener('beforeunload', flushPendingWrites);
+  // Enhanced page unload handler to ensure data persistence
+  const handlePageUnload = async (e) => {
+    if (pendingWrites.size > 0) {
+      console.log(`Flushing ${pendingWrites.size} pending writes before page unload...`);
+      
+      // For beforeunload, we need to use sendBeacon or synchronous requests
+      // as async operations may not complete
+      const writes = Array.from(pendingWrites.entries());
+      
+      // Try to use sendBeacon for better reliability
+      if (navigator.sendBeacon && kvdbAvailable) {
+        writes.forEach(([key, entry]) => {
+          const url = `${HEATMAP_ENDPOINT}/${key}`;
+          const data = JSON.stringify(entry);
+          
+          try {
+            const success = navigator.sendBeacon(url, data);
+            if (!success) {
+              console.warn(`Failed to send beacon for key: ${key}`);
+            }
+          } catch (error) {
+            console.warn(`Beacon failed for key ${key}:`, error);
+          }
+        });
+      } else {
+        // Fallback to synchronous flush
+        try {
+          await flushPendingWrites();
+        } catch (error) {
+          console.warn('Failed to flush pending writes on unload:', error);
+        }
+      }
+    }
+  };
+  
+  // Add both beforeunload and unload handlers for better coverage
+  window.addEventListener('beforeunload', handlePageUnload);
+  window.addEventListener('unload', handlePageUnload);
+  
+  // Add visibility change handler to flush writes when tab becomes hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && pendingWrites.size > 0) {
+      console.log('Tab hidden, flushing pending writes...');
+      flushPendingWrites().catch(error => {
+        console.warn('Failed to flush writes on visibility change:', error);
+      });
+    }
+  });
+  
+  // Add debugging capabilities (can be toggled via console)
+  window.heatmapDebug = {
+    // Toggle debug logging
+    enableDebug: () => {
+      window.heatmapDebugEnabled = true;
+      console.log('Heatmap debug logging enabled');
+    },
+    disableDebug: () => {
+      window.heatmapDebugEnabled = false;
+      console.log('Heatmap debug logging disabled');
+    },
+    
+    // Get current state
+    getState: () => ({
+      kvdbAvailable,
+      kvdbRetryCount,
+      pendingWrites: pendingWrites.size,
+      dotClickCounts: Object.keys(dotClickCounts).length,
+      globalClickSequence,
+      heatmapDataLoaded
+    }),
+    
+    // Force flush pending writes
+    flushNow: () => {
+      console.log('Manually flushing pending writes...');
+      return flushPendingWrites();
+    },
+    
+    // Test KVDB connectivity
+    testKvdb: async () => {
+      console.log('Testing KVDB connectivity...');
+      try {
+        const response = await kvdbRequest(`${HEATMAP_ENDPOINT}/test`, {
+          method: 'PUT',
+          body: 'test'
+        });
+        console.log('KVDB test successful');
+        return true;
+      } catch (error) {
+        console.error('KVDB test failed:', error);
+        return false;
+      }
+    },
+    
+    // Get diagnostic info
+    getDiagnostics: () => {
+      const localStorageKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('heat_')) {
+          localStorageKeys.push(key);
+        }
+      }
+      
+      return {
+        state: window.heatmapDebug.getState(),
+        localStorageEntries: localStorageKeys.length,
+        endpoint: HEATMAP_ENDPOINT,
+        maxStoredClicks: MAX_STORED_CLICKS,
+        retrySettings: {
+          maxRetries: MAX_RETRY_ATTEMPTS,
+          baseDelay: RETRY_BASE_DELAY
+        }
+      };
+    }
+  };
+  
+  console.log('Heatmap click handler initialized. Use window.heatmapDebug for debugging.');
 }
 
 document.addEventListener('DOMContentLoaded', initHeatmapClickHandler);
@@ -2170,28 +2775,204 @@ function showOracleOverlay(onFinish) {
   const ov = document.getElementById('oracle-overlay');
   if (!ov) { if (onFinish) onFinish(); return; }
 
+  // Play mystical sound effect if available
+  playOracleSound();
+
   if (typeof gsap !== 'undefined') {
     gsap.killTweensOf(ov);
     gsap.set(ov, { opacity: 0, pointerEvents: 'auto' });
     gsap.to(ov, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
-      // Start the wave animation much earlier for smoother transition
+      // Start loading animation immediately after oracle text appears
       setTimeout(() => {
+        startLoadingAnimation();
         if (onFinish) onFinish();
-      }, 800); // Start wave after 0.8s instead of 3.8s
+      }, 600); // Reduced from 800ms
       
       // Continue fading out the oracle text
-      gsap.to(ov, { opacity: 0, duration: 1.0, delay: 1.2, ease: 'power2.in', onComplete: () => {
+      gsap.to(ov, { opacity: 0, duration: 0.8, delay: 0.8, ease: 'power2.in', onComplete: () => {
         ov.style.pointerEvents = 'none';
       }});
     }});
   } else {
     ov.style.opacity = 1;
     setTimeout(() => {
+      startLoadingAnimation();
       if (onFinish) onFinish();
-    }, 1200); // Start wave after 1.2s instead of 3s
+    }, 1000); // Reduced from 1200ms
     setTimeout(() => {
       ov.style.opacity = 0;
-    }, 2500);
+    }, 2000);
+  }
+}
+
+// Play mystical sound effect during oracle overlay
+function playOracleSound() {
+  try {
+    // Create a subtle mystical sound using Web Audio API
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+      const audioContext = new (AudioContext || webkitAudioContext)();
+      
+      // Create a gentle mystical tone
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Set up mystical frequency sweep
+      oscillator.frequency.setValueAtTime(150, audioContext.currentTime); // A3
+
+      
+      oscillator.type = 'sine';
+      
+      // Gentle fade in and out
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.3);
+      gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 2.0);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 2.5);
+    }
+  } catch (error) {
+    console.log('Audio not available:', error);
+  }
+}
+
+// Start beautiful loading animation while data loads
+function startLoadingAnimation() {
+  const container = document.querySelector('[data-dots-container-init]');
+  if (!container) return;
+  
+  // Create loading overlay with mystical particles
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.id = 'heatmap-loading-overlay';
+  loadingOverlay.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 100%;
+    pointer-events: none;
+    z-index: 1000;
+    background: radial-gradient(circle at center, rgba(168,255,81,0.05) 50%, transparent 99%);
+  `;
+  container.appendChild(loadingOverlay);
+  
+  // Create mystical loading particles
+  createLoadingParticles(loadingOverlay);
+  
+  // Create pulsing energy waves
+  createEnergyWaves(loadingOverlay);
+  
+  // Store reference for cleanup
+  window.heatmapLoadingOverlay = loadingOverlay;
+}
+
+// Create mystical floating particles during loading
+function createLoadingParticles(container) {
+  const particleCount = 20;
+  
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'loading-particle';
+    particle.style.cssText = `
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: rgba(168,255,81,0.8);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(168,255,81,0.6);
+    `;
+    
+    // Random starting position
+    const startX = Math.random() * container.clientWidth;
+    const startY = Math.random() * container.clientHeight;
+    
+    gsap.set(particle, { x: startX, y: startY, opacity: 0 });
+    container.appendChild(particle);
+    
+    // Animate particle with floating motion
+    const tl = gsap.timeline({ repeat: -1 });
+    tl.to(particle, {
+      opacity: 1,
+      duration: 0.5,
+      ease: "power2.out"
+    })
+    .to(particle, {
+      x: startX + (Math.random() - 0.5) * 200,
+      y: startY + (Math.random() - 0.5) * 200,
+      duration: 3 + Math.random() * 2,
+      ease: "sine.inOut"
+    }, 0)
+    .to(particle, {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.in"
+    }, "-=0.5");
+    
+    // Stagger particle animations
+    tl.delay(Math.random() * 2);
+  }
+}
+
+// Create pulsing energy waves during loading
+function createEnergyWaves(container) {
+  const centerX = container.clientWidth / 2;
+  const centerY = container.clientHeight / 2;
+  const maxDimension = Math.max(container.clientWidth, container.clientHeight);
+  
+  // Create multiple energy waves
+  for (let i = 0; i < 3; i++) {
+    const wave = document.createElement('div');
+    wave.className = 'energy-wave';
+    wave.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 1px solid rgba(168,255,81,0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    `;
+    container.appendChild(wave);
+    
+    // Animate wave expansion
+    const tl = gsap.timeline({ repeat: -1 });
+    tl.fromTo(wave, {
+      width: 20,
+      height: 20,
+      opacity: 0.6
+    }, {
+      width: maxDimension * 1.5,
+      height: maxDimension * 1.5,
+      opacity: 0,
+      duration: 8,
+      ease: "power2.out"
+    });
+    
+    // Stagger wave animations
+    tl.delay(i * 5);
+  }
+}
+
+// Clean up loading animation
+function cleanupLoadingAnimation() {
+  const loadingOverlay = window.heatmapLoadingOverlay;
+  if (loadingOverlay) {
+    gsap.to(loadingOverlay, {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.out",
+      onComplete: () => {
+        loadingOverlay.remove();
+        window.heatmapLoadingOverlay = null;
+      }
+    });
   }
 }
 

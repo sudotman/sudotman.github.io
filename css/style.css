@@ -2297,7 +2297,7 @@ body.modal-open {
   transform: translate(-50%, -50%);
   z-index: 3;
   transition: all 0.3s ease;
-  border-radius: 50%;
+  border-radius: 0%;
   padding: 1rem;
 }
 
@@ -2309,6 +2309,13 @@ body.modal-open {
 
 .osmo-icon__link:hover .osmo-icon-svg {
   filter: drop-shadow(0 0 10px rgba(168, 255, 81, 0.6));
+}
+
+.osmo-icon-svg {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .osmo-icon__link.hidden {

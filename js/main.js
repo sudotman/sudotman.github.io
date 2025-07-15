@@ -2853,12 +2853,27 @@ function startLoadingAnimation() {
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 100%;
+    opacity: 0;
     pointer-events: none;
     z-index: 1000;
-    background: radial-gradient(circle at center, rgba(168,255,81,0.05) 50%, transparent 99%);
+    background: radial-gradient(circle at center, rgba(168,255,81,0.03) 40%, transparent 80%);
   `;
   container.appendChild(loadingOverlay);
+  
+  // Smoothly fade in the loading overlay
+  if (typeof gsap !== 'undefined') {
+    gsap.to(loadingOverlay, {
+      opacity: 1,
+      duration: 0.8,
+      ease: "power2.out"
+    });
+  } else {
+    // Fallback for browsers without GSAP
+    loadingOverlay.style.transition = 'opacity 0.8s ease-out';
+    setTimeout(() => {
+      loadingOverlay.style.opacity = '1';
+    }, 50);
+  }
   
   // Create mystical loading particles
   createLoadingParticles(loadingOverlay);

@@ -57,7 +57,7 @@
           "label": "play game"
         },
         {
-          "href": "https://www.youtube.com/watch?v=a-95skTdkrw",
+          "href": "https://www.youtube.com/embed/a-95skTdkrw",
           "label": "trailer"
         }
       ]
@@ -134,11 +134,11 @@
       "gallery": ["images/g_saaya.jpg"],
       "links": [
         {
-          "href": "https://www.youtube.com/watch?v=UtHD8Z4hcjA",
+          "href": "https://www.youtube.com/embed/UtHD8Z4hcjA",
           "label": "full prototype walkthrough"
         },
         {
-          "href": "https://www.youtube.com/watch?v=cgmB701HbGQ",
+          "href": "https://www.youtube.com/embed/cgmB701HbGQ",
           "label": "trailer"
         }
       ]
@@ -157,7 +157,7 @@
           "label": "news article"
         },
         {
-          "href": "https://www.youtube.com/watch?v=6AaSlMxhXWM",
+          "href": "https://www.youtube.com/embed/6AaSlMxhXWM",
           "label": "demo video"
         }
       ]
@@ -183,7 +183,7 @@
       "gallery": ["images/zer.png", "images/hmg_marksman.png", "images/hmg_bullet.png", "images/hmg_bulletConfig2.png", "images/hmg_gunSettings.png", "images/hmg_world.png", "images/hmg1.png", "images/hmg2.png", "images/hmg3.png", "images/hmg4.png", "images/hmg5.png", "images/hmg_envi1.png", "images/hmg_envi2.png"],
       "links": [
         {
-          "href": "https://www.youtube.com/watch?v=maTayxf1UQo",
+          "href": "https://www.youtube.com/embed/maTayxf1UQo",
           "label": "demo video"
         }
       ]
@@ -296,7 +296,7 @@
       "gallery": ["images/shiva_main.png"],
       "links": [
         {
-          "href": "https://www.youtube.com/watch?v=n1a0VhDK-ck",
+          "href": "https://www.youtube.com/embed/n1a0VhDK-ck",
           "label": "trailer"
         }
       ]

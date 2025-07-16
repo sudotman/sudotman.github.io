@@ -235,6 +235,9 @@ function initTabSwitching() {
       node.classList.add('active');
       document.getElementById(`${targetTab}-tab`).classList.add('active');
       
+      // Handle card action buttons visibility/functionality
+      updateCardActionsForTab(targetTab);
+      
       // Enhanced constellation morphing effect
       morphConstellation(targetTab);
       
@@ -248,6 +251,36 @@ function initTabSwitching() {
       }, 100);
     });
   });
+}
+
+// Update card actions based on active tab
+function updateCardActionsForTab(activeTab) {
+  const cardActions = document.querySelector('.cards-actions');
+  const filterDropdown = document.getElementById('filter-dropdown');
+  
+  if (activeTab === 'projects') {
+    // Enable card actions for projects tab
+    if (cardActions) {
+      cardActions.style.opacity = '1';
+      cardActions.style.pointerEvents = 'auto';
+    }
+    // Close filter dropdown if open
+    if (filterDropdown) {
+      filterDropdown.classList.remove('show');
+      document.querySelector('.filter-cards-btn')?.classList.remove('active');
+    }
+  } else {
+    // Disable card actions for other tabs
+    if (cardActions) {
+      cardActions.style.opacity = '0.3';
+      cardActions.style.pointerEvents = 'none';
+    }
+    // Close filter dropdown if open
+    if (filterDropdown) {
+      filterDropdown.classList.remove('show');
+      document.querySelector('.filter-cards-btn')?.classList.remove('active');
+    }
+  }
 }
 
 // Constellation morphing animation
@@ -1355,8 +1388,8 @@ async function loadProjects() {
       programming: '#A8FF51',
       art: '#F05CEB',
       design: '#5CB3FF',
-      research: '#FF5C5C',
-      open_source: '#F05CEB',
+      rnd: '#F05CEB',
+      open_source: '#FF5C5C',
     };
 
     window.projectMap = {};
@@ -1804,9 +1837,16 @@ function stackProjectCards() {
   // place stack ~200px below divider line to ensure full stack sits beneath
   const centerY = headerRect ? (headerRect.bottom + 300) : (gridRect.top + 300);
 
+  // Create satisfying stacking animation with momentum
+  const tl = gsap.timeline({
+    onComplete: () => {
+      cardActionInProgress = false;
+      setCardActionButtonsDisabled(false);
+    }
+  });
+
   cards.forEach((card, idx) => {
     // Reset any drag offsets gradually
-    // We'll grab current gsap properties for continuity
     const currentX = gsap.getProperty(card, 'x');
     const currentY = gsap.getProperty(card, 'y');
 
@@ -1817,22 +1857,40 @@ function stackProjectCards() {
     const deltaX = centerX - cardCenterX;
     const deltaY = centerY - cardCenterY;
 
-    gsap.to(card, {
+    // Calculate distance for speed variation
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const baseDuration = 0.4;
+    const duration = baseDuration + (distance / 1000) * 0.15; // Longer duration for farther cards
+
+    // Add anticipation micro-animation before main movement
+    tl.to(card, {
+      scale: 1.05,
+      rotation: (Math.random() - 0.5) * 10,
+      duration: 0.08,
+      ease: 'power2.out'
+    }, idx * 0.04)
+    .to(card, {
       x: currentX + deltaX,
       y: currentY + deltaY,
-      rotation: -4 + idx * 2,
-      duration: 0.6,
+      scale: 1,
+      rotation: -8 + idx * 1.5 + (Math.random() - 0.5) * 3, // More organic rotation
+      duration: duration,
       ease: 'power3.out',
-      delay: idx * 0.05
-    });
-
-    card.style.zIndex = 100 + idx;
-  });
-  // when animation ends, re-enable controls
-  const totalDuration = 0.6 + ((cards.length - 1) * 0.05);
-  gsap.delayedCall(totalDuration, () => {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
+      onStart: () => {
+        card.style.zIndex = 100 + idx;
+      }
+    }, idx * 0.04 + 0.08)
+    // Small settling animation for weight feeling
+    .to(card, {
+      y: currentY + deltaY + 2, // Small drop
+      duration: 0.06,
+      ease: 'bounce.out'
+    }, idx * 0.04 + 0.08 + duration - 0.03)
+    .to(card, {
+      y: currentY + deltaY, // Settle back
+      duration: 0.06,
+      ease: 'power2.out'
+    }, idx * 0.04 + 0.08 + duration + 0.03);
   });
 }
 
@@ -1848,6 +1906,14 @@ function shuffleProjectCards() {
   const cards = Array.from(grid.querySelectorAll('.project-card'));
   if (!cards.length) return;
 
+  // Create satisfying shuffle animation with chaos and order
+  const tl = gsap.timeline({
+    onComplete: () => {
+      cardActionInProgress = false;
+      setCardActionButtonsDisabled(false);
+    }
+  });
+
   // Ensure all cards start from grid-aligned position
   cards.forEach(card => {
     gsap.set(card, { x: 0, y: 0, rotation: 0 });
@@ -1856,37 +1922,58 @@ function shuffleProjectCards() {
   // Capture initial positions
   const firstRects = cards.map(c => c.getBoundingClientRect());
 
-  // Shuffle array (Fisher–Yates)
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-
-  // Re-append in new order to change layout flow
-  cards.forEach(card => grid.appendChild(card));
-
-  // Capture new positions
-  const lastRects = cards.map(c => c.getBoundingClientRect());
-
-  // FLIP animation
-  cards.forEach((card, idx) => {
-    const dx = firstRects[idx].left - lastRects[idx].left;
-    const dy = firstRects[idx].top - lastRects[idx].top;
-
-    gsap.fromTo(card, { x: dx, y: dy }, {
-      x: 0,
-      y: 0,
-      rotation: (Math.random() * 8) - 4,
-      duration: 0.6,
-      ease: 'power3.out'
-    });
-
-    card.style.zIndex = 1 + idx;
+  // Phase 1: Chaotic dispersion - cards fly apart
+  tl.to(cards, {
+    x: () => (Math.random() - 0.5) * 400,
+    y: () => (Math.random() - 0.5) * 300,
+    rotation: () => (Math.random() - 0.5) * 180,
+    scale: () => 0.8 + Math.random() * 0.4,
+    duration: 0.35,
+    ease: 'power2.out',
+    stagger: {
+      amount: 0.15,
+      from: 'center'
+    }
   });
-  // fixed length shuffle animation (~0.6s)
-  gsap.delayedCall(0.6, () => {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
+
+  // Phase 2: Reorganization - shuffle array and reposition
+  tl.call(() => {
+    // Shuffle array (Fisher–Yates)
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+
+    // Re-append in new order to change layout flow
+    cards.forEach(card => grid.appendChild(card));
+  });
+
+  // Phase 3: Graceful return to new positions
+  tl.call(() => {
+    // Capture new positions after shuffle
+    const lastRects = cards.map(c => c.getBoundingClientRect());
+
+    cards.forEach((card, idx) => {
+      const dx = firstRects[idx].left - lastRects[idx].left;
+      const dy = firstRects[idx].top - lastRects[idx].top;
+
+      // Set the card to its original position temporarily
+      gsap.set(card, { x: dx, y: dy });
+
+      // Animate to new position with satisfying physics
+      gsap.to(card, {
+        x: 0,
+        y: 0,
+        rotation: (Math.random() * 8) - 4,
+        scale: 1,
+        duration: 0.5,
+        ease: 'back.out(1.2)',
+        delay: Math.random() * 0.15, // Random delays for organic feel
+        onStart: () => {
+          card.style.zIndex = 1 + idx;
+        }
+      });
+    });
   });
 }
 
@@ -1911,6 +1998,9 @@ function toggleFilterDropdown() {
 function filterProjects(category) {
   if (cardActionInProgress) return; // prevent filtering during other animations
   
+  cardActionInProgress = true;
+  setCardActionButtonsDisabled(true);
+  
   currentFilter = category;
   const grid = document.querySelector('.projects-grid');
   if (!grid) return;
@@ -1933,37 +2023,73 @@ function filterProjects(category) {
   dropdown.classList.remove('show');
   button.classList.remove('active');
   
-  // Filter cards with smooth animation
-  cards.forEach((card, index) => {
+  // Separate cards into visible and hidden groups
+  const visibleCards = [];
+  const hiddenCards = [];
+  
+  cards.forEach(card => {
     const projectId = card.dataset.project;
     const project = window.projectMap ? window.projectMap[projectId] : null;
     
     if (category === 'all' || (project && project.category === category)) {
-      // Show card
-      gsap.to(card, {
+      visibleCards.push(card);
+    } else {
+      hiddenCards.push(card);
+    }
+  });
+  
+  // Create timeline for smooth orchestrated animation
+  const tl = gsap.timeline({
+    onComplete: () => {
+      cardActionInProgress = false;
+      setCardActionButtonsDisabled(false);
+    }
+  });
+  
+  // First, hide cards that should be hidden with satisfying exit animation
+  if (hiddenCards.length > 0) {
+    tl.to(hiddenCards, {
+      opacity: 0,
+      scale: 0.7,
+      rotation: (i) => (Math.random() - 0.5) * 20, // Random rotation for organic feel
+      y: -30,
+      duration: 0.5,
+      ease: 'power3.in',
+      stagger: {
+        amount: 0.2,
+        from: 'center'
+      },
+      onComplete: () => {
+        hiddenCards.forEach(card => {
+          card.style.display = 'none';
+        });
+      }
+    });
+  }
+  
+  // Then, show/rearrange visible cards with satisfying entrance
+  tl.set(visibleCards, { display: 'block' })
+    .fromTo(visibleCards, 
+      { 
+        opacity: 0, 
+        scale: 0.8, 
+        y: 50,
+        rotation: (i) => (Math.random() - 0.5) * 15
+      },
+      {
         opacity: 1,
         scale: 1,
         y: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-        delay: index * 0.05
-      });
-      card.style.display = 'block';
-    } else {
-      // Hide card
-      gsap.to(card, {
-        opacity: 0,
-        scale: 0.8,
-        y: -20,
-        duration: 0.3,
-        ease: 'power2.in',
-        delay: index * 0.02,
-        onComplete: () => {
-          card.style.display = 'none';
+        rotation: (i) => (Math.random() - 0.5) * 4, // Subtle final rotation
+        duration: 0.7,
+        ease: 'back.out(1.7)',
+        stagger: {
+          amount: 0.4,
+          from: 'start'
         }
-      });
-    }
-  });
+      }, 
+      hiddenCards.length > 0 ? 0.3 : 0
+    );
 }
 
 // Close dropdown when clicking outside

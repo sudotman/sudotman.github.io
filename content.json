@@ -6,78 +6,8 @@
   },
   "projects": [
     {
-      "id": "g_unwind",
-      "category": "game",
-      "title": "Unlearn",
-      "short": "A 2D puzzle-platformer that pits you against your own keyboard.",
-      "long": "Keys change behaviour forcing you to un-learn muscle memory while unfolding a metafictional narrative. Built with Unity, this game explores the concept of adaptive controls and player conditioning, creating a unique gameplay experience that challenges traditional input expectations.",
-      "image": "images/unlearn1.png",
-      "gallery": ["images/unlearn1.png", "images/unlearn2.png"],
-      "links": [
-        {
-          "href": "https://www.satyamkashyap.com/g_unwind.html",
-          "label": "Play Game"
-        },
-        {
-          "href": "https://github.com/sudotman/unlearn",
-          "label": "Source Code"
-        }
-      ]
-    },
-    {
-      "id": "g_shiva",
-      "category": "art",
-      "title": "Shiva",
-      "short": "3D Hack-n-Slash/RPG inspired by Hindu mythology.",
-      "long": "Multi-chapter action RPG built with Unity URP, exploring timelines through stylised combat.",
-      "image": "images/shiva_main.png",
-      "gallery": ["images/shiva_main.png"]
-    },
-    {
-      "id": "g_coffee",
-      "category": "game",
-      "title": "zzz…",
-      "short": "Jam game: clear caffeine from Bob’s brain so he can sleep.",
-      "long": "Prototype made in 48h where you roam neural pathways eliminating caffeine molecules.",
-      "image": "images/g_zzz.png",
-      "gallery": ["images/g_zzz.png"]
-    },
-    {
-      "id": "g_saaya",
-      "category": "game",
-      "title": "Saaya",
-      "short": "Psychological horror game set in Himachal Pradesh.",
-      "long": "Ambient narrative horror inspired by PT; uncover the tragic truth behind your missing son.",
-      "image": "images/g_saaya.jpg"
-    },
-    {
-      "id": "g_space",
-      "category": "game",
-      "title": "All Mans Space",
-      "short": "CRT-styled arcade shooter built in 93 minutes.",
-      "long": "Dodge and shoot missiles to rack up a high score in this retro homage.",
-      "image": "images/g_space.png"
-    },
-    {
-      "id": "g_snake",
-      "category": "game",
-      "title": "Snakes and Ladders",
-      "short": "Classic board game re-imagined on screen — built in 46 minutes.",
-      "long": "Simple dice mechanics with quick colourful visuals.",
-      "image": "images/g_snake.png"
-    },
-    {
-      "id": "g_tower",
-      "category": "game",
-      "title": "Tower Power",
-      "short": "One-week tower-defence project inspired by Brackeys.",
-      "long": "Balance economy and turret synergy to survive incoming waves.",
-      "image": "images/g_tower.png"
-    },
-
-    {
       "id": "p_betterUnity",
-      "category": "programming",
+      "category": "open_source",
       "title": "better unity",
       "short": "minimal unity extension suite that aims to be modular and non-intrusive.",
       "long": "a collection of modifications and additions (scripts/prefabs) which enhance the overall flow of using the unity engine. features include inspector enhancements, transform tools, hierarchy improvements, debug utilities, vr scripts, navigation systems, and flow controllers. designed to be robust but minimal with modular architecture and minimal cross-dependencies.",
@@ -93,102 +23,6 @@
           "label": "project docs"
         }
       ]
-    },
-    {
-      "id": "p_hmg",
-      "category": "programming",
-      "title": "MR HMG Simulator",
-      "short": "Mixed-reality heavy-machine-gun simulator for Varjo-XR 3.",
-      "long": "Full-scale replica gun with real-time XR feedback and ballistics.",
-      "image": "images/zer.png"
-    },
-    {
-      "id": "p_floorPlanGenerator",
-      "category": "programming",
-      "title": "2D-3D Floor-Plan Generator",
-      "short": "Turns CAD floor-plans into textured 3D VR-ready models.",
-      "long": "Detects walls, doors, windows; extrudes geometry and assigns PBR materials for VR walkthroughs.",
-      "image": "images/floor.png"
-    },
-    {
-      "id": "p_fireSafety",
-      "category": "programming",
-      "title": "VR Fire Safety Training",
-      "short": "Interactive VR module teaching extinguisher usage.",
-      "long": "Simulates multiple fire classes, tracks user performance and provides real-time feedback.",
-      "image": "images/fire.png"
-    },
-    {
-      "id": "p_opengl",
-      "category": "programming",
-      "title": "OpenGL Experiments",
-      "short": "Graphics algorithms and demos in C/OpenGL.",
-      "long": "Custom rasteriser, shader playground and real-time lighting maths.",
-      "image": "images/opengl.jpg"
-    },
-    {
-      "id": "a_confidential",
-      "category": "programming",
-      "title": "Confidential App Storage",
-      "short": "Android vault app using AES-256 and 2FA.",
-      "long": "Stores sensitive data like debit-card and PAN numbers securely.",
-      "image": "images/encrypt.jpeg"
-    },
-    {
-      "id": "a_wusic",
-      "category": "programming",
-      "title": "wusic — Minimal Music Player",
-      "short": "Distraction-free, Lo-fi streaming player.",
-      "long": "Strips UI to essentials and streams curated low-fidelity playlists.",
-      "image": "images/wusic.jpg"
-    },
-    {
-      "id": "p_caesar",
-      "category": "programming",
-      "title": "Encryption Algorithms",
-      "short": "Implementations of classic ciphers (e.g., Caesar).",
-      "long": "Educational CLI demos of multiple encryption/decryption algorithms.",
-      "image": "images/caesar.png"
-    },
-    {
-      "id": "c_sentience",
-      "category": "programming",
-      "title": "CoinSentience",
-      "short": "Cryptocurrency data suite for analysis and trading.",
-      "long": "Historical price scraping, custom indicators and exchange order execution.",
-      "image": "images/Backtester1.png"
-    },
-    {
-      "id": "c_indicators",
-      "category": "programming",
-      "title": "Custom Indicators",
-      "short": "TradingView scripts supporting various strategies.",
-      "long": "Includes volume-weighted EMA combiner and range premium visualiser.",
-      "image": "images/Premium1.png"
-    },
-    {
-      "id": "p_keras",
-      "category": "programming",
-      "title": "Facial Expression Recognition",
-      "short": "Keras/CNN model recognising seven basic emotions.",
-      "long": "OpenCV face detection with lightweight CNN trained on FER-2013 dataset.",
-      "image": "images/facialRec.png"
-    },
-    {
-      "id": "p_discordbot",
-      "category": "programming",
-      "title": "Discord Bot",
-      "short": "Node.js bot providing role management and music playback.",
-      "long": "Watches chat and responds with helpful tools and custom commands.",
-      "image": "images/discord.jpg"
-    },
-    {
-      "id": "p_selfdriving",
-      "category": "programming",
-      "title": "Self-Driving Car (Genetic Algorithms)",
-      "short": "Unity simulation that evolves cars to drive autonomously.",
-      "long": "Genetic algorithm mutates sensor weights, improving navigation each generation.",
-      "image": "images/selfdriving.png"
     },
     {
       "id": "r_cbfc",
@@ -210,23 +44,27 @@
       ]
     },
     {
-      "id": "c_mortar",
-      "category": "research", 
-      "title": "81mm mortar simulator",
-      "short": "a fully-fledged 81mm mortar simulator - with accurate physics and realistic ballistics - multi-user MFC/MPC training",
-      "long": "deployed at several infantry schools. featuers are immense and encapsulate every facet of a mortar platoon. there are several other QoL features and a robust error-free mathematical foundation for all calculations.",
-      "image": "images/c_mortar.png",
-      "gallery": ["images/c_mortar.png","images/c_mortar_2.png","images/c_mortar_3.png"],
+      "id": "g_unwind",
+      "category": "game",
+      "title": "Unlearn",
+      "short": "A 2D puzzle-platformer that pits you against your own keyboard.",
+      "long": "Keys change behaviour forcing you to un-learn muscle memory while unfolding a metafictional narrative. Built with Unity, this game explores the concept of adaptive controls and player conditioning, creating a unique gameplay experience that challenges traditional input expectations.",
+      "image": "images/unlearn1.png",
+      "gallery": ["images/unlearn1.png", "images/unlearn2.png"],
       "links": [
         {
-          "href": "https://github.com/sudotman/mortar-simulator",
-          "label": "website link"
+          "href": "https://sudotman.itch.io/unlearn",
+          "label": "play game"
+        },
+        {
+          "href": "https://www.youtube.com/watch?v=a-95skTdkrw",
+          "label": "trailer"
         }
       ]
     },
     {
       "id": "p_renderbuddy",
-      "category": "programming",
+      "category": "open_source",
       "title": "render buddy",
       "short": "unreal engine toolkit for remote render monitoring and batch processing.",
       "long": "a handy toolkit designed to bridge the gap between individual/small teams and enterprise-level unreal engine capabilities. features include remote render control via firebase, batch rendering from csv files, new process rendering, and real-time status monitoring through a web dashboard. aimed at indie and mid-level teams to leverage advanced rendering workflows without technical complexity.",
@@ -244,8 +82,132 @@
       ]
     },
     {
-      "id": "p_blenderqueue",
+      "id": "p_floorPlanGenerator",
+      "category": "rnd",
+      "title": "2D-3D Floor-Plan Generator",
+      "short": "Turns CAD floor-plans into textured 3D VR-ready models.",
+      "long": "A tool that attempts to save time for architects in having to visualize house/floor plans for clients in 3D.<br><br>Elaborating on the problem statement a little more, architects usually design house plans in 2D using some CAD software. These CAD files (.dwg,.cad,.dxf) are great and serve most realistic purposes but home owners like to visualize their homes in a proper 3D manner before settling down on one. This in turn, entails the architects having to make 3D models themselves or having to ask people to make 3D models for them.<br><br>The manual 3D modelling usually takes up about 1-2 hours of the architects time. The solution cuts down on the time required from prep from 1-2 hours down to 5-10 minutes and automates most of the 3D generation.<br><br>The user imports the 2D floor plan from a simple .exe and then in turn receive a complete 3D model that is viewable in VR right out the gate with proper materials/textures assigned to it. Uses Python as the backend to parse the CAD files and then uses Unreal to swap in models/textures/material from a huge library of presets.",
+      "image": "images/floor.png",
+      "gallery": ["images/floor_original.png", "images/floor.png", "images/floor_working.png", "images/floor_working2.png", "images/floor_intermediary.png"]
+    },
+    {
+      "id": "p_isro",
+      "category": "rnd",
+      "title": "isro's gaganyaan vr simulator",
+      "short": "an end-to-end vr simulator for isro's gaganyaan mission",
+      "long": "a fully-fledged vr simulator for isro's gaganyaan mission. the simulator is a multi-user training system that allows for training of astronauts in a safe and controlled environment. developer in collaboration with ISRO during my time at parallax labs - simulates mission phases with an ability to ingest actual simulation data - malleable physics, time and space-based physics.",
+      "image": "images/isro1.jpg",
+      "gallery": ["images/isro1.jpg","images/isroNews.jfif","images/isro2.jpg","images/isro3.png","images/isro4.jpg","images/isro5.jpg"],
+      "links": [
+        {
+          "href": "https://www.linkedin.com/posts/parallax-labs_parallaxlabs-isro-gaganyaan-activity-7168507087709224961-hMNi?utm_source=share&utm_medium=member_ios&rcm=ACoAACm-Mk8BAUl80yxhDsINOF-UgQbQJWMovTQ",
+          "label": "linkedin post"
+        }
+      ]
+    },
+    {
+      "id": "p_everythingbagel",
+      "category": "design",
+      "title": "the everything bagel",
+      "short": "a website consisting of various functionalities/datasets mostly for fun but could be utilized for productivity.",
+      "long": "A website consisting of various sections pertaining to multiple functionalities. Inspired by the movie Everything Everywhere All at Once by Daniel Kwan and Daniel Scheinert. The whole idea is a combination of various online datasets (all mostly through open source APIs) into a meaningful format - making a fun and mostly silly yet slightly productive experience.<br><br><strong>Main Components:</strong><br><br><strong>1. Art:</strong> Query and fetch art pieces from major museums (Metropolitan Museum of Modern Art and Chicago Art Museum) - over 700k art pieces available for browsing.<br><br><strong>2. World Information:</strong> Real-time world data including IP/email/DNS geolocation, world registered domains search, forex rates, and Indian postal codes lookup.<br><br><strong>3. Every Day is Special:</strong> Historical events, notable births and deaths for any given day to make dull days more interesting.<br><br><strong>4. Analytics and Data:</strong> Name-based estimations (age/gender/nationality guessing) and unified metadata fetching for any website URL.<br><br><strong>5. Religious Stuff:</strong> Random verses from three holy books: Bhagavad Gita, Bible, and Quran.<br><br><strong>6. Silly Things:</strong> Random cat/dog facts and images, plus fox and duck sections for entertainment.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/bagel.jpeg",
+      "gallery": ["https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/bagel.jpeg","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/art_corner_1.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/art_corner_2.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/world_information_1.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/silly_things.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/estimations.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/the-everything-bagel",
+          "label": "github repo"
+        },
+        {
+          "href": "https://the-everything-bagel.streamlit.app/",
+          "label": "live website"
+        }
+      ]
+    },
+    {
+      "id": "g_saaya",
+      "category": "game",
+      "title": "Saaya",
+      "short": "Psychological horror game set in Himachal Pradesh.",
+      "long": "A psychological horror game with a focus on ambiance. You explore a private ranch in Himachal, and eventually piece together the story. Ambient narrative horror inspired by PT; uncover the tragic truth behind your missing son. <strong>TW: Tantric cults, human sacrifices.</strong> <h2>Trailer:</h2><span class='image main'><iframe width='633' height='346' src='https://www.youtube.com/embed/cgmB701HbGQ' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span><h2>Full Walkthrough:</h2><span class='image main'><iframe width='633' height='346' src='https://www.youtube.com/embed/UtHD8Z4hcjA' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span>",
+      "image": "images/g_saaya.jpg",
+      "gallery": ["images/g_saaya.jpg"],
+      "links": [
+        {
+          "href": "https://www.youtube.com/watch?v=UtHD8Z4hcjA",
+          "label": "full prototype walkthrough"
+        }
+      ]
+    },
+    {
+      "id": "p_colorsVisualizer",
+      "category": "rnd",
+      "title": "realistic colors visualizer",
+      "short": "unreal-engine powered colors visualizer made for birla opus.",
+      "long": "a unreal engine front end that interfaces with hardware knobs and a controller simulateneously and allows for real-time color visualization of about ~2300 colors on varied houses and very seamless customer onboarding and analytics. deployed across 10+ locations in india [mumbai, delhi, kolkata, etc].<br><iframe width='1394' height='784' src='https://www.youtube.com/embed/6AaSlMxhXWM' title='BirlaOpusDemo 080724' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe>",
+      "image": "images/zer.png",
+      "gallery": ["images/birlaOpus0.png", "images/birlaOpus1.jpg", "images/birlaOpus2.jpg", "images/birlaOpus3.jpg", "images/birlaOpus4.jpg"],
+      "links": [
+        {
+          "href": "https://www.passionateinmarketing.com/birla-opus-paints-launches-first-of-its-kind-paint-studio-in-mumbai-and-navi-mumbai-a-destination-for-all-your-painting-needs/",
+          "label": "news article"
+        }
+      ]
+    },
+    {
+      "id": "g_gamejams_tidbits",
+      "category": "game",
+      "title": "gamejams tidbits",
+      "short": "a collection of gamejams projects/tiny projects.",
+      "long": "A collection of small game projects and jam entries showcasing rapid prototyping and creative experimentation:<br><br><strong>1. zzz…:</strong> 48-hour jam game where you clear caffeine from Bob's brain so he can sleep. You roam neural pathways eliminating caffeine molecules in this unique biological adventure.<br><br><strong>2. All Mans Space:</strong> CRT-styled arcade shooter built in just 93 minutes. Dodge and shoot missiles to rack up a high score in this retro homage with authentic vintage aesthetics.<br><br><strong>3. Snakes and Ladders:</strong> Classic board game re-imagined on screen, built in 46 minutes. Features simple dice mechanics with quick colourful visuals for a modern take on the timeless game.<br><br><strong>4. Tower Power:</strong> One-week tower-defence project inspired by Brackeys tutorials. Balance economy and turret synergy to survive incoming waves in this strategic defense game.",
+      "image": "images/g_zzz.png",
+      "gallery": ["images/g_zzz.png", "images/g_space.png", "images/g_snake.png", "images/g_tower.png"]
+    },
+
+
+    {
+      "id": "p_hmg",
+      "category": "rnd",
+      "title": "MR HMG Simulator",
+      "short": "Mixed-reality heavy-machine-gun simulator for Varjo-XR 3.",
+      "long": "A MR based Machine Gun simulator made for the Varjo XR-3. The experience is setup with a green screen on which the MR content is displayed. Features a real gun from which trigger, position data is received and reflected inside of the simulator [serial ports].<br><br>The specifications have to be as generic as possible because of a signed NDA: The ballistics have been coded to simulate real gun's ballistics as much as possible. From the gun's specifications to the bullet's specifications are all accurately done.<br><br>The bullet has a specified ballistic coefficient: takes in form factor, mass, diameter etc. The gun also can have additional spread, different fire modes, switching of the ammo/bullet-types depending on the configuration.<br><br>Has multiple modes of training too, from zeroing to tactical marksmanship all in accordance to the [redacted] Army specifications. The full interface also has CRC-16 checksums at both the receiver and the sender to ensure full data integrity.<br><br>The simulator features multiple realistic environments and weather conditions including snowy mountain terrain, temperate grasslands, rocky desert landscapes, and arctic conditions with dynamic weather effects like snowfall. These diverse environmental settings provide comprehensive training scenarios for different operational conditions and tactical situations.<br><br><br>Plus a lot of 'more' specific and intricate trainings which I unfortunately can't reveal but have been coded in C++/Blueprints using Unreal Engine.",
+      "image": "images/zer.png",
+      "gallery": ["images/zer.png", "images/hmg_marksman.png", "images/hmg_bullet.png", "images/hmg_bulletConfig2.png", "images/hmg_gunSettings.png", "images/hmg_world.png", "images/hmg1.png", "images/hmg2.png", "images/hmg3.png", "images/hmg4.png", "images/hmg5.png", "images/hmg_envi1.png", "images/hmg_envi2.png"],
+      "links": [
+        {
+          "href": "https://www.youtube.com/watch?v=maTayxf1UQo",
+          "label": "demo video"
+        }
+      ]
+    },
+
+    {
+      "id": "p_fireSafety",
+      "category": "rnd",
+      "title": "VR Fire Safety Training",
+      "short": "Interactive VR module teaching extinguisher usage.",
+      "long": "A VR-based fire safety training simulator which trains people on various phases of extinguishing a fire.<br><br>Has multiple modules that teach things ranging from evacuation to extinguishing different types of fires and which extinguishers to use.",
+      "image": "images/fire.png",
+      "gallery": ["images/fire.png", "images/fire_selection.png", "images/fire_extinguish.png"]
+    },
+    {
+      "id": "p_opengl",
       "category": "programming",
+      "title": "OpenGL Experiments",
+      "short": "Graphics algorithms and demos in C/OpenGL - graphics experiments.",
+      "long": "Custom rasteriser, shader playground and real-time lighting maths.",
+      "image": "images/opengl.jpg",
+      "gallery": ["images/opengl.jpg"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/opengl-experiments",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_blenderqueue",
+      "category": "open_source",
       "title": "blender open render queue",
       "short": "simple, lightweight render queuing tool/batch renderer for blender.",
       "long": "an open-source render queue for blender that acts as a wrapper around the blender cli. designed to be a simple solution for queuing up renders and executing them in the background. features include automatic blender executable detection, blend file queue management, and background rendering capabilities. created as an alternative to paid and convoluted solutions.",
@@ -259,6 +221,75 @@
         {
           "href": "https://satyamkashyap.com/BlenderOpenRenderQueue/",
           "label": "project docs"
+        }
+      ]
+    },
+    {
+      "id": "a_wusic", 
+      "category": "design",
+      "title": "wusic — Minimal Music Player",
+      "short": "Distraction-free music player born from personal frustrations with typical music apps.",
+      "long": "A music player designed from personal experience with choice paralysis (always ending up with Kanye!) and distracting music interfaces. Built for focused work/study sessions with thoughtful UX choices:<br><br>- Swipe-based album view instead of overwhelming lists, forcing more deliberate music choices<br>- Intentional long-press to play mechanism that discourages frequent switching<br>- Single-click dark mode and fullscreen toggles (no more digging through menus!)<br>- Clean, consistent aesthetic with minimal UI elements<br><br>Features offline music library management with custom sorting and integrated lofi-music streams. The entire design philosophy stems from real frustrations with existing players, creating something that's both visually pleasing and mindfully engineered to reduce distractions.",
+      "image": "images/wusic.jpg",
+      "gallery": ["images/wusic.jpg","images/wusic1.jpg","images/wusic2.jpg","images/wusic3.jpg"],
+      "links": [
+        {
+          "href": "https://play.google.com/store/apps/details?id=com.developertman.kanyealbums",
+          "label": "playstore link"
+        }
+      ]
+    },
+    {
+      "id": "p_tidbits",
+      "category": "programming",
+      "title": "tidbits",
+      "short": "a collection of small projects and experiments.",
+      "long": "A diverse collection of programming experiments and utility projects:<br><br><strong>1. Facial Expression Recognition:</strong> Keras/CNN model recognising seven basic emotions using OpenCV face detection with lightweight CNN trained on FER-2013 dataset.<br><br><strong>2. Discord Bot:</strong> Node.js bot providing role management and music playback that watches chat and responds with helpful tools and custom commands.<br><br><strong>3. Self-Driving Car (Genetic Algorithms):</strong> Unity simulation that evolves cars to drive autonomously using genetic algorithm that mutates sensor weights, improving navigation each generation.<br><br><strong>4. Custom TradingView Indicators:</strong> Scripts supporting various trading strategies including volume-weighted EMA combiner and range premium visualiser.<br><br><strong>5. CoinSentience:</strong> Cryptocurrency data suite for analysis and trading with historical price scraping, custom indicators and exchange order execution.",
+      "image": "images/facialRec.png",
+      "gallery": ["images/facialRec.png", "images/discord.jpg", "images/selfdriving.png", "images/Premium1.png", "images/Backtester1.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/facial-expression-recognition",
+          "label": "Facial Recognition Source"
+        },
+        {
+          "href": "https://github.com/sudotman/discord-bot",
+          "label": "Discord Bot Source"
+        },
+        {
+          "href": "https://github.com/sudotman/self-driving-car",
+          "label": "Self-Driving Car Source"
+        }
+      ]
+    },
+
+    {
+      "id": "c_mortar",
+      "category": "rnd", 
+      "title": "81mm mortar simulator",
+      "short": "a fully-fledged simulator - with accurate physics and realistic ballistics - multi-user training",
+      "long": "deployed at several infantry schools. featuers are immense and encapsulate every facet of a mortar platoon. there are several other QoL features and a robust error-free mathematical foundation for all calculations.",
+      "image": "images/c_mortar.png",
+      "gallery": ["images/c_mortar.png","images/c_mortar_2.png","images/c_mortar_3.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/mortar-simulator",
+          "label": "website link"
+        }
+      ]
+    },
+    {
+      "id": "g_shiva",
+      "category": "game",
+      "title": "Shiva",
+      "short": "3D Hack-n-Slash/RPG inspired by Hindu mythology - derives ancient mythology to form a fun combat system and level design.",
+      "long": "Multi-chapter action RPG built with Unity URP, exploring timelines through stylised combat. <h2>Trailer:</h2><span class='image main'><iframe width='760' height='415' src='https://www.youtube.com/embed/n1a0VhDK-ck' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span>",
+      "image": "images/shiva_main.png",
+      "gallery": ["images/shiva_main.png"],
+      "links": [
+        {
+          "href": "https://www.youtube.com/watch?v=n1a0VhDK-ck",
+          "label": "trailer"
         }
       ]
     }

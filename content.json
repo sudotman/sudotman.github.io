@@ -129,13 +129,17 @@
       "category": "game",
       "title": "Saaya",
       "short": "Psychological horror game set in Himachal Pradesh.",
-      "long": "A psychological horror game with a focus on ambiance. You explore a private ranch in Himachal, and eventually piece together the story. Ambient narrative horror inspired by PT; uncover the tragic truth behind your missing son. <strong>TW: Tantric cults, human sacrifices.</strong> <h2>Trailer:</h2><span class='image main'><iframe width='633' height='346' src='https://www.youtube.com/embed/cgmB701HbGQ' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span><h2>Full Walkthrough:</h2><span class='image main'><iframe width='633' height='346' src='https://www.youtube.com/embed/UtHD8Z4hcjA' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span>",
+      "long": "A psychological horror game with a focus on ambiance. You explore a private ranch in Himachal, and eventually piece together the story. Ambient narrative horror inspired by PT; uncover the tragic truth behind your missing son. <strong>TW: Tantric cults, human sacrifices.</strong>",
       "image": "images/g_saaya.jpg",
       "gallery": ["images/g_saaya.jpg"],
       "links": [
         {
           "href": "https://www.youtube.com/watch?v=UtHD8Z4hcjA",
           "label": "full prototype walkthrough"
+        },
+        {
+          "href": "https://www.youtube.com/watch?v=cgmB701HbGQ",
+          "label": "trailer"
         }
       ]
     },
@@ -144,13 +148,17 @@
       "category": "rnd",
       "title": "realistic colors visualizer",
       "short": "unreal-engine powered colors visualizer made for birla opus.",
-      "long": "a unreal engine front end that interfaces with hardware knobs and a controller simulateneously and allows for real-time color visualization of about ~2300 colors on varied houses and very seamless customer onboarding and analytics. deployed across 10+ locations in india [mumbai, delhi, kolkata, etc].<br><iframe width='1394' height='784' src='https://www.youtube.com/embed/6AaSlMxhXWM' title='BirlaOpusDemo 080724' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe>",
+      "long": "a unreal engine front end that interfaces with hardware knobs and a controller simulateneously and allows for real-time color visualization of about ~2300 colors on varied houses and very seamless customer onboarding and analytics. deployed across 10+ locations in india [mumbai, delhi, kolkata, etc].",
       "image": "images/zer.png",
       "gallery": ["images/birlaOpus0.png", "images/birlaOpus1.jpg", "images/birlaOpus2.jpg", "images/birlaOpus3.jpg", "images/birlaOpus4.jpg"],
       "links": [
         {
           "href": "https://www.passionateinmarketing.com/birla-opus-paints-launches-first-of-its-kind-paint-studio-in-mumbai-and-navi-mumbai-a-destination-for-all-your-painting-needs/",
           "label": "news article"
+        },
+        {
+          "href": "https://www.youtube.com/watch?v=6AaSlMxhXWM",
+          "label": "demo video"
         }
       ]
     },
@@ -283,7 +291,7 @@
       "category": "game",
       "title": "Shiva",
       "short": "3D Hack-n-Slash/RPG inspired by Hindu mythology - derives ancient mythology to form a fun combat system and level design.",
-      "long": "Multi-chapter action RPG built with Unity URP, exploring timelines through stylised combat. <h2>Trailer:</h2><span class='image main'><iframe width='760' height='415' src='https://www.youtube.com/embed/n1a0VhDK-ck' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></span>",
+      "long": "Multi-chapter action RPG built with Unity URP, exploring timelines through stylised combat.",
       "image": "images/shiva_main.png",
       "gallery": ["images/shiva_main.png"],
       "links": [

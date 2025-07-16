@@ -913,20 +913,73 @@ function openProjectModal(button) {
 
   // Build gallery
   const images = (project.gallery && project.gallery.length) ? project.gallery : (project.image ? [project.image] : []);
-
+  
+  // Enhanced modal content with better layout and interactive elements
   body.innerHTML = `
-    <h2 class="project-modal-title">${project.title || ''}</h2>
-    <p class="project-modal-description">${project.long || ''}</p>
-    <div class="project-modal-gallery">
-      ${images.map(src => `<img src="${src}" alt="${project.title}" class="project-modal-img"/>`).join('')}
+    <div class="project-modal-layout">
+      <div class="project-modal-header-section">
+        <div class="project-modal-category">${project.category || 'project'}</div>
+        <h2 class="project-modal-title">${project.title || ''}</h2>
+        <div class="project-modal-divider"></div>
+      </div>
+      
+      <div class="project-modal-content-grid">
+        <div class="project-modal-main-content">
+          <div class="project-modal-description-section">
+            <h3 class="project-modal-section-title">overview</h3>
+            <p class="project-modal-description">${project.long || project.short || ''}</p>
+          </div>
+          
+          ${project.links && project.links.length ? `
+          <div class="project-modal-links-section">
+            <h3 class="project-modal-section-title">explore</h3>
+            <div class="project-modal-links">
+              ${project.links.map(l => `
+                <a href="${l.href}" target="_blank" class="project-modal-link">
+                  <div class="project-modal-link-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 0L10.5 5.5L16 8L10.5 10.5L8 16L5.5 10.5L0 8L5.5 5.5L8 0Z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <span class="project-modal-link-text">${l.label || 'View Project'}</span>
+                  <div class="project-modal-link-arrow">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 11L11 1M11 1H1M11 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="project-modal-gallery-section">
+          <h3 class="project-modal-section-title">visuals</h3>
+          <div class="project-modal-gallery">
+            ${images.map((src, index) => `
+              <div class="project-modal-img-container" onclick="openImageLightbox('${src}', ${index}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+                <img src="${src}" alt="${project.title}" class="project-modal-img"/>
+                <div class="project-modal-img-overlay">
+                  <div class="project-modal-img-expand">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 3H21V9M14 10L21 3M9 21H3V15M10 14L3 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      
+      <div class="project-modal-footer">
+        <div class="project-modal-tech-indicator">
+          <div class="tech-pulse"></div>
+          <span>interactive experience</span>
+        </div>
+      </div>
     </div>
-    ${project.links && project.links.length ? `<div class="project-modal-links">${project.links.map(l => `
-      <a href="${l.href}" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0L10.5 5.5L16 8L10.5 10.5L8 16L5.5 10.5L0 8L5.5 5.5L8 0Z" fill="currentColor"/>
-        </svg>
-        ${l.label || 'View Project'}
-      </a>`).join('')}</div>` : ''}
   `;
 
   if (typeof gsap !== 'undefined') {
@@ -934,9 +987,97 @@ function openProjectModal(button) {
   }
 }
 
+// Image Lightbox functionality
+function openImageLightbox(src, currentIndex, imagesJson) {
+  const images = JSON.parse(imagesJson.replace(/&quot;/g, '"'));
+  
+  // Create lightbox if it doesn't exist
+  let lightbox = document.getElementById('image-lightbox');
+  if (!lightbox) {
+    lightbox = document.createElement('div');
+    lightbox.id = 'image-lightbox';
+    lightbox.className = 'image-lightbox';
+    document.body.appendChild(lightbox);
+  }
+  
+  lightbox.innerHTML = `
+    <div class="lightbox-backdrop" onclick="closeImageLightbox()"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close" onclick="closeImageLightbox()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      
+      ${images.length > 1 ? `
+        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(${currentIndex - 1}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(${currentIndex + 1}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      ` : ''}
+      
+      <div class="lightbox-image-container">
+        <img src="${src}" alt="Project Image" class="lightbox-image"/>
+      </div>
+      
+      ${images.length > 1 ? `
+        <div class="lightbox-counter">
+          <span>${currentIndex + 1} / ${images.length}</span>
+        </div>
+        <div class="lightbox-thumbnails">
+          ${images.map((imgSrc, index) => `
+            <div class="lightbox-thumbnail ${index === currentIndex ? 'active' : ''}" onclick="navigateLightbox(${index}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+              <img src="${imgSrc}" alt="Thumbnail ${index + 1}"/>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  lightbox.classList.add('show');
+  document.body.classList.add('lightbox-open');
+  
+  // Add keyboard navigation
+  document.addEventListener('keydown', lightboxKeyHandler);
+}
+
+function navigateLightbox(newIndex, imagesJson) {
+  const images = JSON.parse(imagesJson.replace(/&quot;/g, '"'));
+  const clampedIndex = Math.max(0, Math.min(newIndex, images.length - 1));
+  
+  if (clampedIndex !== newIndex) return; // Out of bounds
+  
+  openImageLightbox(images[clampedIndex], clampedIndex, imagesJson);
+}
+
+function closeImageLightbox() {
+  const lightbox = document.getElementById('image-lightbox');
+  if (lightbox) {
+    lightbox.classList.remove('show');
+    document.body.classList.remove('lightbox-open');
+    document.removeEventListener('keydown', lightboxKeyHandler);
+  }
+}
+
+function lightboxKeyHandler(e) {
+  if (e.key === 'Escape') {
+    closeImageLightbox();
+  }
+}
+
 function closeProjectModal() {
   const modal = document.getElementById('project-modal');
   if (!modal || !modal.classList.contains('show')) return;
+
+  // Close any open lightbox first
+  closeImageLightbox();
 
   if (typeof gsap !== 'undefined') {
     gsap.killTweensOf(modal.querySelector('.project-modal-content'));

@@ -10,9 +10,19 @@
       "category": "game",
       "title": "Unlearn",
       "short": "A 2D puzzle-platformer that pits you against your own keyboard.",
-      "long": "Keys change behaviour forcing you to un-learn muscle memory while unfolding a metafictional narrative.",
+      "long": "Keys change behaviour forcing you to un-learn muscle memory while unfolding a metafictional narrative. Built with Unity, this game explores the concept of adaptive controls and player conditioning, creating a unique gameplay experience that challenges traditional input expectations.",
       "image": "images/unlearn1.png",
-      "gallery": ["images/unlearn1.png", "images/unlearn2.png"]
+      "gallery": ["images/unlearn1.png", "images/unlearn2.png"],
+      "links": [
+        {
+          "href": "https://www.satyamkashyap.com/g_unwind.html",
+          "label": "Play Game"
+        },
+        {
+          "href": "https://github.com/sudotman/unlearn",
+          "label": "Source Code"
+        }
+      ]
     },
     {
       "id": "g_shiva",
@@ -70,8 +80,19 @@
       "category": "programming",
       "title": "BetterUnity",
       "short": "Extensions and helpers that supercharge the Unity editor.",
-      "long": "Quality-of-life tools, template scenes and performance helpers.",
-      "image": "images/betterunity.png"
+      "long": "A comprehensive toolkit designed to enhance the Unity development experience. Features include custom editor windows, automated asset management, performance profiling tools, and workflow optimizations. This extension significantly reduces development time and improves code quality through intelligent automation and helpful utilities.",
+      "image": "images/betterunity.png",
+      "gallery": ["images/betterunity.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/BetterUnity",
+          "label": "GitHub Repository"
+        },
+        {
+          "href": "https://www.satyamkashyap.com/p_betterUnity.html",
+          "label": "Documentation"
+        }
+      ]
     },
     {
       "id": "p_hmg",

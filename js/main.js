@@ -958,7 +958,7 @@ function openProjectModal(button) {
           <h3 class="project-modal-section-title">visuals</h3>
           <div class="project-modal-gallery">
             ${images.map((src, index) => `
-              <div class="project-modal-img-container" onclick="openImageLightbox('${src}', ${index}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+              <div class="project-modal-img-container" data-src="${src}" data-index="${index}">
                 <img src="${src}" alt="${project.title}" class="project-modal-img"/>
                 <div class="project-modal-img-overlay">
                   <div class="project-modal-img-expand">
@@ -974,13 +974,37 @@ function openProjectModal(button) {
       </div>
       
       <div class="project-modal-footer">
-        <div class="project-modal-tech-indicator">
-          <div class="tech-pulse"></div>
-          <span>interactive experience</span>
+        <div class="project-modal-metadata">
+          <div class="metadata-item">
+            <span class="metadata-label">category</span>
+            <span class="metadata-value">${project.category || 'project'}</span>
+          </div>
+          ${images.length > 1 ? `
+          <div class="metadata-item">
+            <span class="metadata-label">gallery</span>
+            <span class="metadata-value">${images.length} images</span>
+          </div>
+          ` : ''}
+          ${project.links && project.links.length ? `
+          <div class="metadata-item">
+            <span class="metadata-label">links</span>
+            <span class="metadata-value">${project.links.length} available</span>
+          </div>
+          ` : ''}
         </div>
       </div>
     </div>
   `;
+
+  // Add click handlers for image containers
+  const imageContainers = modal.querySelectorAll('.project-modal-img-container');
+  imageContainers.forEach(container => {
+    container.addEventListener('click', function() {
+      const src = this.dataset.src;
+      const index = parseInt(this.dataset.index);
+      openImageLightbox(src, index, JSON.stringify(images));
+    });
+  });
 
   if (typeof gsap !== 'undefined') {
     gsap.fromTo(modal.querySelector('.project-modal-content'), { y: -40, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
@@ -1010,12 +1034,12 @@ function openImageLightbox(src, currentIndex, imagesJson) {
       </button>
       
       ${images.length > 1 ? `
-        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(${currentIndex - 1}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(${currentIndex - 1})">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(${currentIndex + 1}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(${currentIndex + 1})">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -1032,7 +1056,7 @@ function openImageLightbox(src, currentIndex, imagesJson) {
         </div>
         <div class="lightbox-thumbnails">
           ${images.map((imgSrc, index) => `
-            <div class="lightbox-thumbnail ${index === currentIndex ? 'active' : ''}" onclick="navigateLightbox(${index}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">
+            <div class="lightbox-thumbnail ${index === currentIndex ? 'active' : ''}" onclick="navigateLightbox(${index})">
               <img src="${imgSrc}" alt="Thumbnail ${index + 1}"/>
             </div>
           `).join('')}
@@ -1041,6 +1065,9 @@ function openImageLightbox(src, currentIndex, imagesJson) {
     </div>
   `;
   
+  // Store current images globally for navigation
+  window.currentLightboxImages = images;
+  
   lightbox.classList.add('show');
   document.body.classList.add('lightbox-open');
   
@@ -1048,13 +1075,15 @@ function openImageLightbox(src, currentIndex, imagesJson) {
   document.addEventListener('keydown', lightboxKeyHandler);
 }
 
-function navigateLightbox(newIndex, imagesJson) {
-  const images = JSON.parse(imagesJson.replace(/&quot;/g, '"'));
+function navigateLightbox(newIndex) {
+  const images = window.currentLightboxImages;
+  if (!images || !images.length) return;
+  
   const clampedIndex = Math.max(0, Math.min(newIndex, images.length - 1));
   
   if (clampedIndex !== newIndex) return; // Out of bounds
   
-  openImageLightbox(images[clampedIndex], clampedIndex, imagesJson);
+  openImageLightbox(images[clampedIndex], clampedIndex, JSON.stringify(images));
 }
 
 function closeImageLightbox() {
@@ -1063,12 +1092,25 @@ function closeImageLightbox() {
     lightbox.classList.remove('show');
     document.body.classList.remove('lightbox-open');
     document.removeEventListener('keydown', lightboxKeyHandler);
+    window.currentLightboxImages = null;
   }
 }
 
 function lightboxKeyHandler(e) {
   if (e.key === 'Escape') {
     closeImageLightbox();
+  } else if (e.key === 'ArrowLeft') {
+    const images = window.currentLightboxImages;
+    if (images && images.length > 1) {
+      const currentIndex = parseInt(document.querySelector('.lightbox-counter span')?.textContent?.split(' / ')[0] || '1') - 1;
+      navigateLightbox(currentIndex - 1);
+    }
+  } else if (e.key === 'ArrowRight') {
+    const images = window.currentLightboxImages;
+    if (images && images.length > 1) {
+      const currentIndex = parseInt(document.querySelector('.lightbox-counter span')?.textContent?.split(' / ')[0] || '1') - 1;
+      navigateLightbox(currentIndex + 1);
+    }
   }
 }
 

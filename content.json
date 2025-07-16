@@ -78,19 +78,19 @@
     {
       "id": "p_betterUnity",
       "category": "programming",
-      "title": "BetterUnity",
-      "short": "Extensions and helpers that supercharge the Unity editor.",
-      "long": "A comprehensive toolkit designed to enhance the Unity development experience. Features include custom editor windows, automated asset management, performance profiling tools, and workflow optimizations. This extension significantly reduces development time and improves code quality through intelligent automation and helpful utilities.",
+      "title": "better unity",
+      "short": "minimal unity extension suite that aims to be modular and non-intrusive.",
+      "long": "a collection of modifications and additions (scripts/prefabs) which enhance the overall flow of using the unity engine. features include inspector enhancements, transform tools, hierarchy improvements, debug utilities, vr scripts, navigation systems, and flow controllers. designed to be robust but minimal with modular architecture and minimal cross-dependencies.",
       "image": "images/betterunity.png",
-      "gallery": ["images/betterunity.png"],
+      "gallery": ["images/betterunity.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnity/1_4_Unit.gif","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnity/FoldersHierarchy.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnity/InstallationGit.gif","images/betterunitystars.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnity/8_2_Navigation.gif"],
       "links": [
         {
           "href": "https://github.com/sudotman/BetterUnity",
-          "label": "GitHub Repository"
+          "label": "github repo"
         },
         {
-          "href": "https://www.satyamkashyap.com/p_betterUnity.html",
-          "label": "Documentation"
+          "href": "https://www.satyamkashyap.com/BetterUnity/",
+          "label": "project docs"
         }
       ]
     },
@@ -196,7 +196,71 @@
       "title": "cbfc cut lists explorer",
       "short": "modular way to explore/analyze cbfc's censorship and usual practices",
       "long": "<a href='https://github.com/sudotman/cbfc-cutlists-2018-2022'>github repository.</a><br> a fully searchable database of all the cut lists of the cbfc. search by the cuts, film names, film language and more. a fast database is initialized with the data from the cbfc website - allowing for fast searching and filtering.",
-      "image": "images/cbfc.png"
+      "image": "images/cbfc.png",
+      "gallery": ["images/cbfc.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/cbfc-cutlists-2018-2022",
+          "label": "github repo"
+        },
+        {
+          "href": "https://cbfc.satyamkashyap.com/",
+          "label": "online hosted instance"
+        }
+      ]
+    },
+    {
+      "id": "c_mortar",
+      "category": "research", 
+      "title": "81mm mortar simulator",
+      "short": "a fully-fledged 81mm mortar simulator - with accurate physics and realistic ballistics - multi-user MFC/MPC training",
+      "long": "deployed at several infantry schools. featuers are immense and encapsulate every facet of a mortar platoon. there are several other QoL features and a robust error-free mathematical foundation for all calculations.",
+      "image": "images/c_mortar.png",
+      "gallery": ["images/c_mortar.png","images/c_mortar_2.png","images/c_mortar_3.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/mortar-simulator",
+          "label": "website link"
+        }
+      ]
+    },
+    {
+      "id": "p_renderbuddy",
+      "category": "programming",
+      "title": "render buddy",
+      "short": "unreal engine toolkit for remote render monitoring and batch processing.",
+      "long": "a handy toolkit designed to bridge the gap between individual/small teams and enterprise-level unreal engine capabilities. features include remote render control via firebase, batch rendering from csv files, new process rendering, and real-time status monitoring through a web dashboard. aimed at indie and mid-level teams to leverage advanced rendering workflows without technical complexity.",
+      "image": "images/renderbuddy.png",
+      "gallery": ["images/renderbuddy.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/renderbuddy",
+          "label": "github repo"
+        },
+        {
+          "href": "https://www.satyamkashyap.com/renderbuddy/",
+          "label": "project docs"
+        }
+      ]
+    },
+    {
+      "id": "p_blenderqueue",
+      "category": "programming",
+      "title": "blender open render queue",
+      "short": "simple, lightweight render queuing tool/batch renderer for blender.",
+      "long": "an open-source render queue for blender that acts as a wrapper around the blender cli. designed to be a simple solution for queuing up renders and executing them in the background. features include automatic blender executable detection, blend file queue management, and background rendering capabilities. created as an alternative to paid and convoluted solutions.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/refs/heads/main/demos/smallerprojects/demo.png",
+      "gallery": ["https://raw.githubusercontent.com/sudotman/sudotman/refs/heads/main/demos/smallerprojects/demo.png"],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/BlenderOpenRenderQueue",
+          "label": "github repo"
+        },
+        {
+          "href": "https://satyamkashyap.com/BlenderOpenRenderQueue/",
+          "label": "project docs"
+        }
+      ]
     }
   ]
 } 

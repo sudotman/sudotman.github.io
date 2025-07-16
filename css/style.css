@@ -1557,18 +1557,10 @@ body.lightbox-open {
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
   z-index: 999998;
-  /* Add subtle dot pattern to backdrop */
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(168, 255, 81, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 75% 75%, rgba(255, 76, 36, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px, 70px 70px;
-  animation: backdropDots 20s linear infinite;
+  /* Clean backdrop */
 }
 
-@keyframes backdropDots {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 50px 50px, -70px -70px; }
-}
+
 
 @supports not (backdrop-filter: blur(8px)) {
   .project-modal-backdrop {
@@ -1601,7 +1593,7 @@ body.lightbox-open {
   position: relative;
 }
 
-/* Add animated geometric overlay to modal */
+/* Subtle gradient overlay */
 .project-modal-content::before {
   content: '';
   position: absolute;
@@ -1610,17 +1602,10 @@ body.lightbox-open {
   right: 0;
   bottom: 0;
   background: 
-    linear-gradient(45deg, transparent 48%, rgba(168, 255, 81, 0.02) 49%, rgba(168, 255, 81, 0.02) 51%, transparent 52%),
-    linear-gradient(-45deg, transparent 48%, rgba(255, 76, 36, 0.02) 49%, rgba(255, 76, 36, 0.02) 51%, transparent 52%);
-  background-size: 80px 80px, 60px 60px;
-  animation: modalGeometry 25s linear infinite;
+    radial-gradient(circle at 20% 20%, rgba(168, 255, 81, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 76, 36, 0.02) 0%, transparent 50%);
   pointer-events: none;
   z-index: 1;
-}
-
-@keyframes modalGeometry {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 80px 80px, -60px -60px; }
 }
 
 .project-modal-close {
@@ -1933,7 +1918,9 @@ body.lightbox-open {
 .project-modal-img-expand {
   color: #A8FF51;
   background: rgba(168, 255, 81, 0.1);
-  padding: 0.8rem;
+  padding: 1rem;
+  padding-top: 0.5rem;
+
   border-radius: 50%;
   border: 2px solid rgba(168, 255, 81, 0.3);
   transition: all 0.3s ease;
@@ -1949,39 +1936,41 @@ body.lightbox-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(168, 255, 81, 0.1);
 }
 
-.project-modal-tech-indicator {
+.project-modal-metadata {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 2rem;
   color: rgba(168, 255, 81, 0.7);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: lowercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
-.tech-pulse {
-  width: 8px;
-  height: 8px;
-  background: #A8FF51;
-  border-radius: 50%;
-  animation: techPulse 2s infinite;
+.metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-@keyframes techPulse {
-  0%, 100% { 
-    opacity: 1; 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(168, 255, 81, 0.7);
-  }
-  50% { 
-    opacity: 0.7; 
-    transform: scale(1.2);
-    box-shadow: 0 0 0 10px rgba(168, 255, 81, 0);
-  }
+.metadata-label {
+  color: rgba(168, 255, 81, 0.5);
+  font-weight: 400;
+}
+
+.metadata-value {
+  color: rgba(168, 255, 81, 0.9);
+  font-weight: 500;
+  position: relative;
+}
+
+.metadata-value::before {
+  content: '•';
+  margin-right: 0.5rem;
+  color: rgba(168, 255, 81, 0.3);
 }
 
 /* Image Lightbox Styles */

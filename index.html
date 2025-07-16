@@ -157,10 +157,44 @@
     <div class="projects-content" id="projects-content">
       <div class="projects-header">
         <h1 class="projects-title">my digital deck</h1>
-        <!-- card controls for stack/shuffle -->
+        <!-- card controls for stack/shuffle/filter -->
         <div class="cards-actions">
           <button class="cards-action-btn stack-cards-btn" onclick="stackProjectCards()">stack cards</button>
           <button class="cards-action-btn shuffle-cards-btn" onclick="shuffleProjectCards()">shuffle cards</button>
+          <div class="filter-dropdown-container">
+            <button class="cards-action-btn filter-cards-btn" onclick="toggleFilterDropdown()">
+              filter cards
+              <svg class="filter-dropdown-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 5L6 8L9 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="filter-dropdown" id="filter-dropdown">
+              <div class="filter-option active" data-filter="all" onclick="filterProjects('all')">
+                <span class="filter-dot"></span>
+                show all
+              </div>
+              <div class="filter-option" data-filter="game" onclick="filterProjects('game')">
+                <span class="filter-dot" style="background-color: #FFB74C;"></span>
+                games
+              </div>
+              <div class="filter-option" data-filter="programming" onclick="filterProjects('programming')">
+                <span class="filter-dot" style="background-color: #A8FF51;"></span>
+                programming
+              </div>
+              <div class="filter-option" data-filter="art" onclick="filterProjects('art')">
+                <span class="filter-dot" style="background-color: #F05CEB;"></span>
+                art
+              </div>
+              <div class="filter-option" data-filter="research" onclick="filterProjects('research')">
+                <span class="filter-dot" style="background-color: #FF5C5C;"></span>
+                research
+              </div>
+              <div class="filter-option" data-filter="open_source" onclick="filterProjects('open_source')">
+                <span class="filter-dot" style="background-color: #F05CEB;"></span>
+                open source
+              </div>
+            </div>
+          </div>
         </div>
         <div class="projects-tabs">
           <div class="constellation-nav">

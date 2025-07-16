@@ -1889,6 +1889,93 @@ function shuffleProjectCards() {
     setCardActionButtonsDisabled(false);
   });
 }
+
+/* ------------------- Filter Functionality ------------------- */
+let currentFilter = 'all';
+
+function toggleFilterDropdown() {
+  const dropdown = document.getElementById('filter-dropdown');
+  const button = document.querySelector('.filter-cards-btn');
+  
+  if (!dropdown || !button) return;
+  
+  if (dropdown.classList.contains('show')) {
+    dropdown.classList.remove('show');
+    button.classList.remove('active');
+  } else {
+    dropdown.classList.add('show');
+    button.classList.add('active');
+  }
+}
+
+function filterProjects(category) {
+  if (cardActionInProgress) return; // prevent filtering during other animations
+  
+  currentFilter = category;
+  const grid = document.querySelector('.projects-grid');
+  if (!grid) return;
+  
+  const cards = Array.from(grid.querySelectorAll('.project-card'));
+  const dropdown = document.getElementById('filter-dropdown');
+  const button = document.querySelector('.filter-cards-btn');
+  
+  // Update active state in dropdown
+  const options = dropdown.querySelectorAll('.filter-option');
+  options.forEach(option => {
+    if (option.dataset.filter === category) {
+      option.classList.add('active');
+    } else {
+      option.classList.remove('active');
+    }
+  });
+  
+  // Close dropdown
+  dropdown.classList.remove('show');
+  button.classList.remove('active');
+  
+  // Filter cards with smooth animation
+  cards.forEach((card, index) => {
+    const projectId = card.dataset.project;
+    const project = window.projectMap ? window.projectMap[projectId] : null;
+    
+    if (category === 'all' || (project && project.category === category)) {
+      // Show card
+      gsap.to(card, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 0.4,
+        ease: 'power2.out',
+        delay: index * 0.05
+      });
+      card.style.display = 'block';
+    } else {
+      // Hide card
+      gsap.to(card, {
+        opacity: 0,
+        scale: 0.8,
+        y: -20,
+        duration: 0.3,
+        ease: 'power2.in',
+        delay: index * 0.02,
+        onComplete: () => {
+          card.style.display = 'none';
+        }
+      });
+    }
+  });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById('filter-dropdown');
+  const container = document.querySelector('.filter-dropdown-container');
+  
+  if (dropdown && container && !container.contains(event.target)) {
+    dropdown.classList.remove('show');
+    document.querySelector('.filter-cards-btn')?.classList.remove('active');
+  }
+});
 /* ----------------- End Card Stack & Shuffle Controls ----------------- */ 
 
 /* ================= Visitor Heatmap ================= */

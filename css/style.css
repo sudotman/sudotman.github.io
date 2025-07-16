@@ -3175,6 +3175,107 @@ body.lightbox-open {
   width: 100%;
 }
 
+/* Filter dropdown styling */
+.filter-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-cards-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-dropdown-arrow {
+  transition: transform 0.3s ease;
+}
+
+.filter-cards-btn.active .filter-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: rgba(21, 37, 37, 0.95);
+  border: 2px solid rgba(168, 255, 81, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  min-width: 180px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  color: #cbc8c5;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.filter-option:hover {
+  background: rgba(168, 255, 81, 0.1);
+  color: #A8FF51;
+}
+
+.filter-option.active {
+  background: rgba(168, 255, 81, 0.15);
+  color: #A8FF51;
+}
+
+.filter-option.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #A8FF51;
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #A8FF51;
+  display: inline-block;
+  opacity: 0.8;
+}
+
+.filter-option:hover .filter-dot {
+  opacity: 1;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.cards-action-btn.disabled {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  color: #666 !important;
+}
+
+.cards-action-btn.disabled::after {
+  background: #666 !important;
+}
+
 /* ================= Central Card Icon Enhancements ================ */
 /* Make the central icon larger and give it a subtle luminous glow so it matches the intended PNG design */
 .osmo-icon__link {

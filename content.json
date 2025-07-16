@@ -168,6 +168,14 @@
       "short": "Unity simulation that evolves cars to drive autonomously.",
       "long": "Genetic algorithm mutates sensor weights, improving navigation each generation.",
       "image": "images/selfdriving.png"
+    },
+    {
+      "id": "r_cbfc",
+      "category": "open_source", 
+      "title": "cbfc cut lists explorer",
+      "short": "modular way to explore/analyze cbfc's censorship and usual practices",
+      "long": "<a href='https://github.com/sudotman/cbfc-cutlists-2018-2022'>github repository.</a><br> a fully searchable database of all the cut lists of the cbfc. search by the cuts, film names, film language and more. a fast database is initialized with the data from the cbfc website - allowing for fast searching and filtering.",
+      "image": "images/cbfc.png"
     }
   ]
 } 

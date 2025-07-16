@@ -1171,7 +1171,9 @@ async function loadProjects() {
       game: '#FFB74C',
       programming: '#A8FF51',
       art: '#F05CEB',
-      design: '#5CB3FF'
+      design: '#5CB3FF',
+      research: '#FF5C5C',
+      open_source: '#F05CEB',
     };
 
     window.projectMap = {};

@@ -2360,14 +2360,11 @@ a {
 }
 
 .dot {
-  will-change: transform, background-color;
-  transform-origin: center;
-  background-color: #245e51;
-  border-radius: 50%;
+  background-color: var(--color-neutral-800);
+  border-radius: 100vw;
   width: 1em;
   height: 1em;
-  position: relative;
-  transform: translate(0);
+  will-change: transform, opacity;
 }
 
 .osmo-icon__link {

@@ -114,12 +114,32 @@ function initGlowingInteractiveDotsGrid() {
     container._rebuildGrid = buildGrid;
     container._origFs = parseFloat(getComputedStyle(container).fontSize);
 
-    window.addEventListener("resize", buildGrid);
+    // Debounce resize handler for performance
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(buildGrid, 150);
+    });
     buildGrid();
 
     let lastTime = 0, lastX = 0, lastY = 0;
+    let lastEvent = null;
+    let ticking = false;
 
-    window.addEventListener("mousemove", e => {
+    function onMouseMove(e) {
+      lastEvent = e; // Store the latest event
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }
+
+    function update() {
+      ticking = false;
+      if (!lastEvent) return;
+
+      const e = lastEvent;
+
       // Skip mouse interactions if ASCII mode is active
       if (container.classList.contains('ascii-active')) return;
       
@@ -140,40 +160,39 @@ function initGlowingInteractiveDotsGrid() {
       lastX    = e.pageX;
       lastY    = e.pageY;
 
-      requestAnimationFrame(() => {
-        dotCenters.forEach(({ el, x, y }) => {
-          const dist = Math.hypot(x - e.pageX, y - e.pageY);
-          const t    = Math.max(0, 1 - dist / threshold);
-          
-          // Preserve heatmap colors - only apply hover if no heatmap data
-          if (el._heatmapCount && el._heatmapCount > 0) {
-            return; // Skip hover effect for heatmap dots
-          }
-          
-          const col  = gsap.utils.interpolate(colors.base, colors.active, t);
-          gsap.set(el, { backgroundColor: col });
+      dotCenters.forEach(({ el, x, y }) => {
+        const dist = Math.hypot(x - e.pageX, y - e.pageY);
+        const t    = Math.max(0, 1 - dist / threshold);
+        
+        if (el._heatmapCount && el._heatmapCount > 0) {
+          return;
+        }
+        
+        const col  = gsap.utils.interpolate(colors.base, colors.active, t);
+        gsap.set(el, { backgroundColor: col });
 
-          if (speed > speedThreshold && dist < threshold && !el._inertiaApplied) {
-            el._inertiaApplied = true;
-            const pushX = (x - e.pageX) + vx * 0.005;
-            const pushY = (y - e.pageY) + vy * 0.005;
+        if (speed > speedThreshold && dist < threshold && !el._inertiaApplied) {
+          el._inertiaApplied = true;
+          const pushX = (x - e.pageX) + vx * 0.005;
+          const pushY = (y - e.pageY) + vy * 0.005;
 
-            gsap.to(el, {
-              inertia: { x: pushX, y: pushY, resistance: 750 },
-              onComplete() {
-                gsap.to(el, {
-                  x: 0,
-                  y: 0,
-                  duration: 1.5,
-                  ease: "elastic.out(1,0.75)"
-                });
-                el._inertiaApplied = false;
-              }
-            });
-          }
-        });
+          gsap.to(el, {
+            inertia: { x: pushX, y: pushY, resistance: 750 },
+            onComplete() {
+              gsap.to(el, {
+                x: 0,
+                y: 0,
+                duration: 1.5,
+                ease: "elastic.out(1,0.75)"
+              });
+              el._inertiaApplied = false;
+            }
+          });
+        }
       });
-    });
+    }
+
+    window.addEventListener("mousemove", onMouseMove);
 
     window.addEventListener("click", e => {
       // Skip click interactions if ASCII mode is active
@@ -1275,63 +1294,61 @@ document.addEventListener('DOMContentLoaded', function() {
 // Scroll-based Dot Animation
 function initScrollBasedDotAnimation() {
   let scrollTimeout;
-  let isScrolling = false;
+  let lastScrollTop = 0;
+  let ticking = false;
 
   function animateDotsOnScroll() {
     const projectsContent = document.getElementById('projects-content');
     const dots = document.querySelectorAll('.dots-container .dot');
     
     if (!projectsContent || !dots.length) return;
+
+    function updateScrollAnimation() {
+        ticking = false;
+        const scrollTop = lastScrollTop;
+        const scrollHeight = projectsContent.scrollHeight - projectsContent.clientHeight;
+        const scrollProgress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+        
+        dots.forEach((dot, index) => {
+            if (dot._isHole) return;
+            const container = dot.closest('[data-dots-container-init]');
+            if (container && container.classList.contains('ascii-active')) return;
+            
+            const waveOffset = (index * 0.1) + (scrollProgress * Math.PI * 2);
+            const waveX = Math.sin(waveOffset) * 15;
+            const waveY = Math.cos(waveOffset * 0.7) * 10;
+            
+            const driftX = (Math.sin(scrollProgress * Math.PI * 3 + index * 0.5) * 8);
+            const driftY = (Math.cos(scrollProgress * Math.PI * 2 + index * 0.3) * 12);
+            
+            const finalX = waveX + driftX;
+            const finalY = waveY + driftY;
+            
+            if (typeof gsap !== 'undefined') {
+                gsap.to(dot, {
+                    x: finalX,
+                    y: finalY,
+                    duration: 0.3,
+                    ease: "power2.out",
+                    overwrite: "auto"
+                });
+            } else {
+                dot.style.transform = `translate(${finalX}px, ${finalY}px)`;
+            }
+        });
+    }
     
     projectsContent.addEventListener('scroll', (e) => {
+      lastScrollTop = e.target.scrollTop;
+      if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(updateScrollAnimation);
+      }
+
       clearTimeout(scrollTimeout);
-      isScrolling = true;
-      
-      const scrollTop = e.target.scrollTop;
-      const scrollHeight = e.target.scrollHeight - e.target.clientHeight;
-      const scrollProgress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
-      
-      // Animate dots based on scroll progress
-      dots.forEach((dot, index) => {
-        if (dot._isHole) return; // Skip center hole dots
-        
-        // Skip scroll animations if ASCII mode is active
-        const container = dot.closest('[data-dots-container-init]');
-        if (container && container.classList.contains('ascii-active')) return;
-        
-        // Create wave-like movement based on scroll position
-        const waveOffset = (index * 0.1) + (scrollProgress * Math.PI * 2);
-        const waveX = Math.sin(waveOffset) * 15;
-        const waveY = Math.cos(waveOffset * 0.7) * 10;
-        
-        // Add some random drift
-        const driftX = (Math.sin(scrollProgress * Math.PI * 3 + index * 0.5) * 8);
-        const driftY = (Math.cos(scrollProgress * Math.PI * 2 + index * 0.3) * 12);
-        
-        const finalX = waveX + driftX;
-        const finalY = waveY + driftY;
-        
-        // Apply smooth animation
-        if (typeof gsap !== 'undefined') {
-          gsap.to(dot, {
-            x: finalX,
-            y: finalY,
-            duration: 0.3,
-            ease: "power2.out",
-            overwrite: "auto"
-          });
-        } else {
-          dot.style.transform = `translate(${finalX}px, ${finalY}px)`;
-        }
-      });
-      
-      // Reset dots to original position after scrolling stops
       scrollTimeout = setTimeout(() => {
-        isScrolling = false;
         dots.forEach((dot) => {
           if (dot._isHole) return;
-          
-          // Skip scroll reset animations if ASCII mode is active
           const container = dot.closest('[data-dots-container-init]');
           if (container && container.classList.contains('ascii-active')) return;
           

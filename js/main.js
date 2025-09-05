@@ -1903,7 +1903,7 @@ function stackProjectCards() {
     }
   });
 
-  const eased = gsap.parseEase('power3.out');
+  const eased = gsap.parseEase('steps(6)');
   cards.forEach((card, idx) => {
     // Reset any drag offsets gradually
     const currentX = gsap.getProperty(card, 'x');
@@ -1918,7 +1918,7 @@ function stackProjectCards() {
 
     // Calculate distance for speed variation
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const baseDuration = PERF.isLowEnd ? 0.28 : 0.4;
+    const baseDuration = PERF.isLowEnd ? 0.26 : 0.38;
     const duration = baseDuration + (distance / 1000) * (PERF.isLowEnd ? 0.08 : 0.15);
 
     // Add anticipation micro-animation before main movement
@@ -1988,7 +1988,7 @@ function shuffleProjectCards() {
     rotation: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 120 : 180),
     scale: () => 0.88 + Math.random() * 0.3,
     duration: PERF.isLowEnd ? 0.28 : 0.35,
-    ease: 'power2.out',
+    ease: 'steps(8)',
     stagger: {
       amount: PERF.isLowEnd ? 0.1 : 0.15,
       from: 'center'
@@ -2026,7 +2026,7 @@ function shuffleProjectCards() {
         rotation: (Math.random() * 6) - 3,
         scale: 1,
         duration: PERF.isLowEnd ? 0.38 : 0.5,
-        ease: 'back.out(1.2)',
+        ease: 'steps(10)',
         delay: Math.random() * (PERF.isLowEnd ? 0.1 : 0.15), // Random delays for organic feel
         onStart: () => {
           card.style.zIndex = 1 + idx;

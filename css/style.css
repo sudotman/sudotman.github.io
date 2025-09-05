@@ -1939,6 +1939,11 @@ body.lightbox-open {
   height: 200px;
   object-fit: cover;
   transition: all 0.3s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: pixelated !important;
 }
 
 .project-modal-img-overlay {
@@ -2140,6 +2145,11 @@ body.lightbox-open {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: pixelated !important;
 }
 
 .lightbox-counter {
@@ -2198,6 +2208,11 @@ body.lightbox-open {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: pixelated !important;
 }
 
 /* Mobile responsiveness */
@@ -2320,22 +2335,26 @@ body.lightbox-open {
   position: relative; /* allow drag transforms but no manual offsets */
   width: 320px;
   height: 420px;
-  /* translucent background with accent border */
-  background: rgba(21, 37, 37, 0.6);
+  /* pixel-art background + subtle dithering */
+  background:
+    linear-gradient(135deg, rgba(21,37,37,0.95) 0%, rgba(21,37,37,0.78) 100%),
+    repeating-linear-gradient(45deg, rgba(168,255,81,0.06) 0 1px, transparent 1px 3px);
   border: 2px solid;
-  border-image: linear-gradient(135deg, 
-    color-mix(in srgb, var(--accent) 60%, transparent), 
-    color-mix(in srgb, var(--accent) 20%, transparent), 
+  border-image: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 60%, transparent),
+    color-mix(in srgb, var(--accent) 20%, transparent),
     color-mix(in srgb, var(--accent) 60%, transparent)
   ) 1;
   border-radius: 0;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
   cursor: grab;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-  opacity: 0;
-  animation: cardDeal 0.8s ease forwards;
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,0.25) inset,
+    0 4px 0 0 rgba(0,0,0,0.25);
+  opacity: 1; /* keep visible at rest to avoid any unexpected hiding */
+  animation: none;
   user-select: none;
   position: relative;
   will-change: transform;
@@ -2352,17 +2371,9 @@ body.lightbox-open {
 }
 
 .project-card:hover {
-  transform: translateY(-15px) scale(1.03);
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.5),
-    0 10px 25px color-mix(in srgb, var(--accent) 40%, transparent),
-    inset 0 0 30px color-mix(in srgb, var(--accent) 25%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  border-image: linear-gradient(135deg, 
-    var(--accent), 
-    color-mix(in srgb, var(--accent) 30%, transparent), 
-    var(--accent)
-  ) 1;
+  transform: translateY(-10px) scale(1.02);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 35%, transparent)) drop-shadow(0 0 22px color-mix(in srgb, var(--accent) 20%, transparent));
+  border-image: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent), var(--accent)) 1;
   z-index: 100;
 }
 
@@ -2570,9 +2581,9 @@ body.lightbox-open {
 }
 
 .project-expand-btn {
-  background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%),
-    linear-gradient(45deg, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 50%);
+  background:
+    linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 100%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 12%, transparent) 0 1px, transparent 1px 3px);
   border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
   color: var(--accent);
   padding: 0.8rem 1.5rem;
@@ -2614,17 +2625,15 @@ body.lightbox-open {
 }
 
 .project-expand-btn:hover {
-  background: 
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, #000) 0%, color-mix(in srgb, var(--accent) 25%, #000) 100%),
-    linear-gradient(45deg, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 50%);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, #000) 0%, color-mix(in srgb, var(--accent) 30%, #000) 100%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 25%, transparent) 0 1px, transparent 1px 3px);
   border-color: var(--accent);
   color: #fff;
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.01);
   box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.4),
-    0 4px 15px color-mix(in srgb, var(--accent) 30%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
   text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
@@ -2893,6 +2902,68 @@ body.lightbox-open {
 .osmo-icon__link.hidden {
   opacity: 0;
   transform: translate(-50%, -50%) scale(0);
+}
+
+/* === CRT / Pixel HUD Overlay === */
+/* Global non-interactive overlay; subtle and performant */
+/* Global CRT overlay: applied to the entire page */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900; /* beneath modals (which are > 999k) but above site content */
+  background:
+    /* brighter alternating light/dark lines */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.07) 0px,
+      rgba(255,255,255,0.07) 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+  mix-blend-mode: soft-light;
+  opacity: 0.45;
+  background-size: 100% 4px;
+  background-position: 0 0;
+  animation: crtScan 2s linear infinite;
+}
+
+/* vignette and chromatic noise */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 901;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="1" height="1" fill="rgba(255,0,0,0.03)"/><rect x="1" width="1" height="1" fill="rgba(0,255,0,0.03)"/><rect y="1" width="1" height="1" fill="rgba(0,0,255,0.03)"/><rect x="1" y="1" width="1" height="1" fill="rgba(255,255,255,0.03)"/></svg>');
+  background-size: cover, 2px 2px;
+  animation: crtNoise 8s steps(8) infinite;
+}
+
+@keyframes crtNoise {
+  0%, 100% { opacity: 0.18; filter: blur(0px); }
+  50% { opacity: 0.24; filter: blur(0.1px); }
+}
+
+@keyframes crtScan {
+  from { background-position-y: 0; }
+  to   { background-position-y: 4px; }
+}
+
+/* Slight flicker on big neon elements (cards header, center icon) */
+.projects-title, .osmo-icon__link {
+  animation: crtFlicker 3.5s steps(12) infinite;
+}
+
+@keyframes crtFlicker {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  10% { filter: brightness(1.03) saturate(1.06); }
+  20% { filter: brightness(0.97) saturate(0.95); }
+  35% { filter: brightness(1.04) saturate(1.08); }
+  60% { filter: brightness(0.99) saturate(0.98); }
 }
 
 /* Constellation Navigation System */

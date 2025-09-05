@@ -1064,12 +1064,10 @@ body.lightbox-open {
 .interest-links:hover {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1.02);
+  transform: none !important;
 }
 
-.interest-links:hover {
-  bottom: -55px; /* maintain position */
-}
+.interest-links:hover { bottom: auto; }
 
 .interest-links {
   position: static;
@@ -1081,6 +1079,7 @@ body.lightbox-open {
   z-index: 3;
   position: relative;
   pointer-events: auto;
+  min-height: 0; /* lock height to prevent jitter */
 }
 
 .interest-node:hover .interest-links { opacity: 1; }
@@ -1096,7 +1095,7 @@ body.lightbox-open {
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 500;
-  transition: all 0.4s ease;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   backdrop-filter: blur(10px);
   white-space: nowrap;
   position: relative;
@@ -1130,9 +1129,14 @@ body.lightbox-open {
     repeating-linear-gradient(90deg, rgba(168,255,81,0.26) 0 1px, transparent 1px 3px);
   border-color: #A8FF51;
   color: #ffffff;
-  transform: translateY(-1px);
   box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset, 0 6px 18px rgba(168, 255, 81, 0.28);
 }
+
+/* prevent any vertical nudge on hover/focus/active */
+.interest-link,
+.interest-link:hover,
+.interest-link:focus,
+.interest-link:active { transform: none !important; }
 
 .constellation-web {
   position: absolute;
@@ -2819,13 +2823,13 @@ body.theme-pink .dots-container .dot.shape-diamond::before {
 
 /* Subtle global hue shift for dots only (keeps images/text crisp) */
 body.theme-pink .dots-container {
-  filter: hue-rotate(285deg) saturate(1.15);
+  filter: none;
 }
 
 /* Title accents in pink */
 body.theme-pink .projects-title {
-  color: #F05CEB;
-  text-shadow: 0 0 20px rgba(240, 92, 235, 0.35);
+  color: inherit;
+  text-shadow: inherit;
 }
 
 /* Make the footer title clickable */
@@ -2959,7 +2963,7 @@ body::after {
   z-index: 901;
   background:
     radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%),
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="1" height="1" fill="rgba(255,0,0,0.03)"/><rect x="1" width="1" height="1" fill="rgba(0,255,0,0.03)"/><rect y="1" width="1" height="1" fill="rgba(0,0,255,0.03)"/><rect x="1" y="1" width="1" height="1" fill="rgba(255,255,255,0.03)"/></svg>');
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="1" height="1" fill="rgba(255,0,180,0.03)"/><rect x="1" width="1" height="1" fill="rgba(255,120,220,0.03)"/><rect y="1" width="1" height="1" fill="rgba(220,0,255,0.03)"/><rect x="1" y="1" width="1" height="1" fill="rgba(255,255,255,0.02)"/></svg>');
   background-size: cover, 2px 2px;
   animation: crtNoise 8s steps(8) infinite;
 }
@@ -2984,6 +2988,19 @@ body::after {
     radial-gradient(150% 130% at 50% 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.40) 100%);
   mix-blend-mode: soft-light;
   /* Blend dark edge layers with multiply and side highlights with screen */
+  background-blend-mode: multiply, multiply, multiply, multiply, screen, screen, multiply;
+}
+
+/* Pink theme: global tint behind content, subtle and GPU-friendly */
+body.theme-pink .osmo-ui::before {
+  background:
+    radial-gradient(220% 180% at 0% 0%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.18) 30%, transparent 60%),
+    radial-gradient(220% 180% at 100% 0%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.18) 30%, transparent 60%),
+    radial-gradient(220% 180% at 0% 100%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.18) 30%, transparent 60%),
+    radial-gradient(220% 180% at 100% 100%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.18) 30%, transparent 60%),
+    radial-gradient(70% 140% at 0% 50%, rgba(255,160,240,0.08) 0%, transparent 60%),
+    radial-gradient(70% 140% at 100% 50%, rgba(255,160,240,0.08) 0%, transparent 60%),
+    radial-gradient(150% 130% at 50% 50%, rgba(255,120,230,0.05) 40%, rgba(0,0,0,0.35) 100%);
   background-blend-mode: multiply, multiply, multiply, multiply, screen, screen, multiply;
 }
 

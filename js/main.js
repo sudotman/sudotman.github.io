@@ -287,9 +287,6 @@ function initThemeToggle() {
         const count = dot._heatmapCount || 0;
         dot.style.color = colourFromCount(count);
       });
-      document.querySelectorAll('.project-card').forEach(card => {
-        card.style.setProperty('--accent', '#F05CEB');
-      });
     } else {
       titleLine1.textContent = "dante's digital inferno";
       titleLine2.textContent = "everything is what it truly is";
@@ -298,17 +295,6 @@ function initThemeToggle() {
       dots.forEach(dot => {
         const count = dot._heatmapCount || 0;
         dot.style.color = colourFromCount(count);
-      });
-      const projectMap = window.projectMap || {};
-      document.querySelectorAll('.project-card').forEach(card => {
-        const pid = card.dataset.project;
-        const proj = projectMap[pid];
-        if (proj) {
-          const accentMap = { game: '#FFB74C', programming: '#A8FF51', art: '#F05CEB', rnd: '#FF5C5C', open_source: '#F05CEB' };
-          card.style.setProperty('--accent', accentMap[proj.category] || '#A8FF51');
-        } else {
-          card.style.setProperty('--accent', '#A8FF51');
-        }
       });
     }
   }
@@ -608,7 +594,7 @@ function loadInterestsData(interests) {
           <path class="game-connect" d="M45 40 L55 40 M50 40 L50 50" stroke="#ff4c24" stroke-width="1" opacity="0.6"/>
         </svg>
       `,
-      links: [{ label: 'games page', url: interests.games.gamesPage }]
+      links: []
     }
   ];
   
@@ -1500,11 +1486,11 @@ async function loadProjects() {
 
     const accentMap = {
       game: '#FFB74C',
-      programming: document.body.classList.contains('theme-pink') ? '#F05CEB' : '#A8FF51',
+      programming: '#A8FF51',
       art: '#F05CEB',
       design: '#5CB3FF',
-      rnd: document.body.classList.contains('theme-pink') ? '#FF5C5C' : '#F05CEB',
-      open_source: document.body.classList.contains('theme-pink') ? '#F05CEB' : '#FF5C5C',
+      rnd: '#F05CEB',
+      open_source: '#FF5C5C',
     };
 
     window.projectMap = {};
@@ -1645,6 +1631,8 @@ function initColorSampler() {
   let asciiActive = false;
   let videoStream = null;
   let videoEl, canvasEl, ctx;
+  let asciiCanvas, asciiCtx; // dedicated low-res canvas for ASCII sampling
+  let isFrontCamera = true;  // track camera for mirroring
   let lastColour = '#245E51';
 
 
@@ -1675,11 +1663,32 @@ function initColorSampler() {
     showMoodOracleOverlay(async () => {
       if (supportsMedia) {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          // Prefer front camera for a natural mirrored ASCII selfie, with a reasonable resolution
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'user' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          });
+          isFrontCamera = true;
           startSampling(stream);
-        } catch (err) {
-          console.warn('Webcam permission denied or unavailable, using fallback colour', err);
-          fallbackSample();
+        } catch (errFront) {
+          try {
+            // Fallback to environment camera
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              }
+            });
+            isFrontCamera = false;
+            startSampling(stream);
+          } catch (errEnv) {
+            console.warn('Webcam permission denied or unavailable, using fallback colour', errEnv);
+            fallbackSample();
+          }
         }
       } else {
         fallbackSample();
@@ -1733,19 +1742,26 @@ function initColorSampler() {
 
     canvasEl = document.createElement('canvas');
     ctx = canvasEl.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    // Prepare ASCII sampling canvas once (resized on demand)
+    asciiCanvas = document.createElement('canvas');
+    asciiCtx = asciiCanvas.getContext('2d');
+    asciiCtx.imageSmoothingEnabled = false;
 
     sampleLoop();
 
   }
 
   // ASCII character map for different brightness levels
-  const asciiChars = '@%#*+=-:. ';
+  // Richer character ramp for smoother gradients (light -> dark)
+  const asciiChars = " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 
   function sampleLoop() {
     if (!active) return;
     if (videoEl.readyState >= 2) {
-      canvasEl.width = videoEl.videoWidth;
-      canvasEl.height = videoEl.videoHeight;
+      canvasEl.width = videoEl.videoWidth || 640;
+      canvasEl.height = videoEl.videoHeight || 480;
       ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
       
       if (asciiActive) {
@@ -1776,24 +1792,47 @@ function initColorSampler() {
     const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
     if (!dots.length) return;
 
-    const cols = container._cols || Math.sqrt(dots.length);
+    const cols = container._cols || Math.round(Math.sqrt(dots.length));
     const rows = container._rows || Math.ceil(dots.length / cols);
-    
-    // Create a smaller canvas for ASCII sampling that matches dot grid dimensions
-    const asciiCanvas = document.createElement('canvas');
-    const asciiCtx = asciiCanvas.getContext('2d');
-    asciiCanvas.width = cols;
-    asciiCanvas.height = rows;
-    
-    // Draw the video frame scaled to match the dot grid
-    asciiCtx.drawImage(videoEl, 0, 0, cols, rows);
+
+    // Resize ASCII canvas if needed
+    if (asciiCanvas.width !== cols || asciiCanvas.height !== rows) {
+      asciiCanvas.width = cols;
+      asciiCanvas.height = rows;
+      asciiCtx.imageSmoothingEnabled = false;
+    }
+
+    // Draw the video frame onto the ASCII canvas preserving aspect ratio and mirroring if front camera
+    const srcW = videoEl.videoWidth || canvasEl.width;
+    const srcH = videoEl.videoHeight || canvasEl.height;
+    const targetW = cols;
+    const targetH = rows;
+    const scale = Math.max(targetW / srcW, targetH / srcH); // cover
+    const drawW = srcW * scale;
+    const drawH = srcH * scale;
+    const dx = (targetW - drawW) / 2;
+    const dy = (targetH - drawH) / 2;
+
+    asciiCtx.save();
+    asciiCtx.imageSmoothingEnabled = false;
+    if (isFrontCamera) {
+      // mirror horizontally for a natural selfie view
+      asciiCtx.translate(targetW, 0);
+      asciiCtx.scale(-1, 1);
+      asciiCtx.drawImage(videoEl, 0, 0, srcW, srcH, -dx - drawW, dy, drawW, drawH);
+    } else {
+      asciiCtx.drawImage(videoEl, 0, 0, srcW, srcH, dx, dy, drawW, drawH);
+    }
+    asciiCtx.restore();
+
     const imageData = asciiCtx.getImageData(0, 0, cols, rows);
     const data = imageData.data;
     
-    // Convert each pixel to ASCII character
-    dots.forEach((dot, index) => {
-      const row = Math.floor(index / cols);
-      const col = index % cols;
+    // Convert each pixel to ASCII character (map dot by stored row/col when available)
+    for (let i = 0; i < dots.length; i++) {
+      const dot = dots[i];
+      const row = (typeof dot._row === 'number') ? dot._row : Math.floor(i / cols);
+      const col = (typeof dot._col === 'number') ? dot._col : (i % cols);
       const pixelIndex = (row * cols + col) * 4;
       
       if (pixelIndex < data.length && row < rows && col < cols) {
@@ -1801,24 +1840,28 @@ function initColorSampler() {
         const g = data[pixelIndex + 1];
         const b = data[pixelIndex + 2];
         
-        // Calculate brightness (invert so darker areas get denser characters)
-        const brightness = (r + g + b) / 3;
-        const charIndex = Math.floor(((255 - brightness) / 255) * (asciiChars.length - 1));
-        const char = asciiChars[charIndex];
-        
-        // Apply ASCII character to dot
-        dot.textContent = char;
-        dot.style.backgroundColor = 'transparent'; // keep background clear; shapes use color
-        dot.style.color = lastColour;
+        // Linear luminance (sRGB) for better perceived brightness
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        // Map to character ramp (invert so dark areas show dense chars)
+        const charIndex = Math.max(0, Math.min(asciiChars.length - 1, Math.round(((255 - luminance) / 255) * (asciiChars.length - 1))));
+        const char = asciiChars.charAt(charIndex);
+
+        if (dot._asciiChar !== char) {
+          dot.textContent = char;
+          dot._asciiChar = char;
+        }
+        // Keep styling stable and crisp
+        dot.style.backgroundColor = 'transparent';
+        dot.style.color = lastColour; // keep consistent tint for theme
         dot.style.fontFamily = 'Courier New, Courier, monospace';
         dot.style.fontSize = 'inherit';
         dot.style.display = 'flex';
         dot.style.alignItems = 'center';
         dot.style.justifyContent = 'center';
         dot.style.lineHeight = '1';
-        dot.style.transform = 'none'; // Ensure no transforms interfere
+        dot.style.transform = 'none';
       }
-    });
+    }
   }
 
   function applyColour(colour) {
@@ -1852,6 +1895,8 @@ function initColorSampler() {
     
     if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     if (videoEl) videoEl.remove();
+    asciiCanvas = null;
+    asciiCtx = null;
     
     resetDotsAppearance();
     applyColour('#245E51');
@@ -1868,6 +1913,7 @@ function initColorSampler() {
     const dots = document.querySelectorAll('.dots-container .dot');
     dots.forEach(dot => {
       dot.textContent = '';
+      dot._asciiChar = undefined;
       dot.style.color = '';
       dot.style.backgroundColor = '';
       dot.style.fontFamily = '';

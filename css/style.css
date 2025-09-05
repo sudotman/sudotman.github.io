@@ -2914,19 +2914,29 @@ body::before {
   pointer-events: none;
   z-index: 900; /* beneath modals (which are > 999k) but above site content */
   background:
-    /* brighter alternating light/dark lines */
+    /* static scanlines */
     repeating-linear-gradient(
       to bottom,
       rgba(255,255,255,0.07) 0px,
       rgba(255,255,255,0.07) 2px,
       rgba(0,0,0,0.18) 2px,
       rgba(0,0,0,0.18) 4px
+    ),
+    /* moving scan beam */
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.15) 0%,
+      rgba(255,255,255,0.05) 10%,
+      rgba(0,0,0,0) 30%,
+      rgba(0,0,0,0) 70%,
+      rgba(0,0,0,0.12) 100%
     );
   mix-blend-mode: soft-light;
   opacity: 0.45;
-  background-size: 100% 4px;
-  background-position: 0 0;
-  animation: crtScan 2s linear infinite;
+  background-size: 100% 4px, 100% 200%;
+  background-position: 0 0, 0 -100%;
+  animation: crtRoll 6s linear infinite;
+  will-change: background-position;
 }
 
 /* vignette and chromatic noise */
@@ -2951,6 +2961,11 @@ body::after {
 @keyframes crtScan {
   from { background-position-y: 0; }
   to   { background-position-y: 4px; }
+}
+
+@keyframes crtRoll {
+  0%   { background-position: 0 0, 0 -100%; }
+  100% { background-position: 0 0, 0 100%; }
 }
 
 /* Slight flicker on big neon elements (cards header, center icon) */

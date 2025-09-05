@@ -1,5 +1,18 @@
 gsap.registerPlugin(InertiaPlugin);
 
+// -------- Global performance tuning --------
+const PERF = {
+  isLowEnd: (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || /mobile|android|iphone|ipad/i.test(navigator.userAgent)
+};
+
+try {
+  gsap.config({ autoSleep: 60, nullTargetWarn: false });
+  if (gsap.ticker && gsap.ticker.lagSmoothing) {
+    gsap.ticker.lagSmoothing(500, 16);
+  }
+  gsap.defaults({ force3D: true });
+} catch (_) { /* noop */ }
+
 function initGlowingInteractiveDotsGrid() {
   document.querySelectorAll('[data-dots-container-init]').forEach(container => {
     const colors         = { base: "#245E51", active: "#A8FF51" };
@@ -30,7 +43,7 @@ function initGlowingInteractiveDotsGrid() {
       }
       
       // Make spacing tighter when ASCII mode is active on this container
-      const gapPx = dotPx * (isAsciiActive ? 0.6 : 2);
+      let gapPx = dotPx * (isAsciiActive ? 0.6 : 2);
       let contW = container.clientWidth;
       let contH = container.clientHeight;
 
@@ -63,13 +76,27 @@ function initGlowingInteractiveDotsGrid() {
         return;
       }
       
-      const total = cols * rows;
+      // Density control: cap total dots for performance and scale gap accordingly
+      let total = cols * rows;
+      const maxDots = PERF.isLowEnd ? 450 : 900;
+      if (!isAsciiActive && total > maxDots) {
+        const scale = Math.max(1.0, Math.sqrt(total / maxDots));
+        gapPx = gapPx * scale;
+        cols = Math.floor((contW + gapPx) / (dotPx + gapPx));
+        rows = Math.floor((contH + gapPx) / (dotPx + gapPx));
+        total = cols * rows;
+      }
+
+      // Store interaction sampling stride to avoid touching every dot each frame
+      const stride = total > 1200 ? 3 : (total > 800 ? 2 : 1);
+      container._interactionStride = stride;
 
       const holeCols = centerHole ? (cols % 2 === 0 ? 4 : 5) : 0;
       const holeRows = centerHole ? (rows % 2 === 0 ? 4 : 5) : 0;
       const startCol = (cols - holeCols) / 2;
       const startRow = (rows - holeRows) / 2;
 
+      const shapeClasses = ['shape-diamond'];
       for (let i = 0; i < total; i++) {
         const row    = Math.floor(i / cols);
         const col    = i % cols;
@@ -79,6 +106,8 @@ function initGlowingInteractiveDotsGrid() {
 
         const d = document.createElement("div");
         d.classList.add("dot");
+        // uniform diamond aesthetic
+        d.classList.add('shape-diamond');
         d._row = row;
         d._col = col;
         container._cols = cols;
@@ -88,7 +117,7 @@ function initGlowingInteractiveDotsGrid() {
           d.style.visibility = "hidden";
           d._isHole = true;
         } else {
-          gsap.set(d, { x: 0, y: 0, backgroundColor: colors.base });
+          gsap.set(d, { x: 0, y: 0, color: colors.base });
           d._inertiaApplied = false;
         }
 
@@ -160,7 +189,9 @@ function initGlowingInteractiveDotsGrid() {
       lastX    = e.pageX;
       lastY    = e.pageY;
 
-      dotCenters.forEach(({ el, x, y }) => {
+      const stride = container._interactionStride || 1;
+      dotCenters.forEach(({ el, x, y }, index) => {
+        if (index % stride !== 0) return;
         const dist = Math.hypot(x - e.pageX, y - e.pageY);
         const t    = Math.max(0, 1 - dist / threshold);
         
@@ -169,7 +200,7 @@ function initGlowingInteractiveDotsGrid() {
         }
         
         const col  = gsap.utils.interpolate(colors.base, colors.active, t);
-        gsap.set(el, { backgroundColor: col });
+        gsap.set(el, { color: col });
 
         if (speed > speedThreshold && dist < threshold && !el._inertiaApplied) {
           el._inertiaApplied = true;
@@ -198,7 +229,9 @@ function initGlowingInteractiveDotsGrid() {
       // Skip click interactions if ASCII mode is active
       if (container.classList.contains('ascii-active')) return;
       
-      dotCenters.forEach(({ el, x, y }) => {
+      const stride = container._interactionStride || 1;
+      dotCenters.forEach(({ el, x, y }, index) => {
+        if (index % stride !== 0) return;
         const dist = Math.hypot(x - e.pageX, y - e.pageY);
         if (dist < shockRadius && !el._inertiaApplied) {
           el._inertiaApplied = true;
@@ -606,6 +639,8 @@ function initCardDragSystem() {
   let startX, startY;
   let highestZIndex = 100;
   let cardData = new Map();
+  let pendingMove = null;
+  let moveRAF = null;
 
   function handleStart(e, card) {
     // Ignore drag initiation if the user clicked on an interactive child such as the view-more button
@@ -656,23 +691,21 @@ function initCardDragSystem() {
 
   function handleMove(e) {
     if (!isDragging || !currentCard) return;
-    
-    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    
-    const deltaX = clientX - startX;
-    const deltaY = clientY - startY;
-    
-    const data = cardData.get(currentCard);
-    const newX = data.startX + deltaX;
-    const newY = data.startY + deltaY;
-    
-    // Use GSAP to move the card
-    gsap.set(currentCard, {
-      x: newX,
-      y: newY
+    pendingMove = e;
+    if (moveRAF) return;
+    moveRAF = requestAnimationFrame(() => {
+      const ev = pendingMove;
+      moveRAF = null;
+      if (!ev || !currentCard) return;
+      const clientX = ev.type.includes('touch') ? (ev.touches?.[0]?.clientX || ev.clientX) : ev.clientX;
+      const clientY = ev.type.includes('touch') ? (ev.touches?.[0]?.clientY || ev.clientY) : ev.clientY;
+      const deltaX = clientX - startX;
+      const deltaY = clientY - startY;
+      const data = cardData.get(currentCard);
+      const newX = data.startX + deltaX;
+      const newY = data.startY + deltaY;
+      gsap.set(currentCard, { x: newX, y: newY });
     });
-    
     e.preventDefault();
   }
 
@@ -1309,10 +1342,13 @@ function initScrollBasedDotAnimation() {
         const scrollHeight = projectsContent.scrollHeight - projectsContent.clientHeight;
         const scrollProgress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
         
+        const container = document.querySelector('[data-dots-container-init]');
+        const stride = (container && container._interactionStride) ? container._interactionStride : 1;
         dots.forEach((dot, index) => {
             if (dot._isHole) return;
             const container = dot.closest('[data-dots-container-init]');
             if (container && container.classList.contains('ascii-active')) return;
+            if (index % stride !== 0) return;
             
             const waveOffset = (index * 0.1) + (scrollProgress * Math.PI * 2);
             const waveX = Math.sin(waveOffset) * 15;
@@ -1347,10 +1383,12 @@ function initScrollBasedDotAnimation() {
 
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        dots.forEach((dot) => {
+        dots.forEach((dot, index) => {
           if (dot._isHole) return;
           const container = dot.closest('[data-dots-container-init]');
           if (container && container.classList.contains('ascii-active')) return;
+          const stride = (container && container._interactionStride) ? container._interactionStride : 1;
+          if (index % stride !== 0) return;
           
           if (typeof gsap !== 'undefined') {
             gsap.to(dot, {
@@ -1410,6 +1448,8 @@ async function loadProjects() {
     };
 
     window.projectMap = {};
+    // Reduce DOM thrash: use fragment
+    const frag = document.createDocumentFragment();
     data.projects.forEach((proj, idx) => {
       const card = document.createElement('div');
       card.className = 'project-card';
@@ -1461,8 +1501,9 @@ async function loadProjects() {
       const rot = (Math.random() * 8) - 4; // -4 to +4 degrees
       card.style.transform = `rotate(${rot}deg)`;
 
-      grid.appendChild(card);
+      frag.appendChild(card);
     });
+    grid.appendChild(frag);
   } catch (err) {
     console.error(err);
   }
@@ -1482,12 +1523,12 @@ function legacyColorSampler() {
       const y = rect.top + rect.height / 2;
       const color = getColorAtPixel(x, y);
       if (color) {
-        dot.style.backgroundColor = color;
+        dot.style.color = color;
       }
     });
 
     dot.addEventListener('mouseleave', () => {
-      dot.style.backgroundColor = colors.base;
+      dot.style.color = colors.base;
     });
   });
 }
@@ -1707,7 +1748,7 @@ function initColorSampler() {
         
         // Apply ASCII character to dot
         dot.textContent = char;
-        dot.style.backgroundColor = 'transparent';
+        dot.style.backgroundColor = 'transparent'; // keep background clear; shapes use color
         dot.style.color = lastColour;
         dot.style.fontFamily = 'Courier New, Courier, monospace';
         dot.style.fontSize = 'inherit';
@@ -1724,9 +1765,9 @@ function initColorSampler() {
     if (colour === lastColour) return;
     lastColour = colour;
     if (typeof gsap !== 'undefined') {
-      gsap.to('.dot', { backgroundColor: colour, duration: 0.6 });
+      gsap.to('.dot', { color: colour, duration: 0.6 });
     } else {
-      document.querySelectorAll('.dot').forEach(d => d.style.backgroundColor = colour);
+      document.querySelectorAll('.dot').forEach(d => d.style.color = colour);
     }
     if (window.__DOT_GRIDS) {
       window.__DOT_GRIDS.forEach(c => c.base = colour);
@@ -1768,7 +1809,7 @@ function initColorSampler() {
     dots.forEach(dot => {
       dot.textContent = '';
       dot.style.color = '';
-      dot.style.backgroundColor = lastColour;
+      dot.style.backgroundColor = '';
       dot.style.fontFamily = '';
       dot.style.fontSize = '';
       dot.style.display = '';
@@ -1862,6 +1903,7 @@ function stackProjectCards() {
     }
   });
 
+  const eased = gsap.parseEase('power3.out');
   cards.forEach((card, idx) => {
     // Reset any drag offsets gradually
     const currentX = gsap.getProperty(card, 'x');
@@ -1876,13 +1918,13 @@ function stackProjectCards() {
 
     // Calculate distance for speed variation
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const baseDuration = 0.4;
-    const duration = baseDuration + (distance / 1000) * 0.15; // Longer duration for farther cards
+    const baseDuration = PERF.isLowEnd ? 0.28 : 0.4;
+    const duration = baseDuration + (distance / 1000) * (PERF.isLowEnd ? 0.08 : 0.15);
 
     // Add anticipation micro-animation before main movement
     tl.to(card, {
       scale: 1.05,
-      rotation: (Math.random() - 0.5) * 10,
+      rotation: (Math.random() - 0.5) * (PERF.isLowEnd ? 6 : 10),
       duration: 0.08,
       ease: 'power2.out'
     }, idx * 0.04)
@@ -1890,9 +1932,9 @@ function stackProjectCards() {
       x: currentX + deltaX,
       y: currentY + deltaY,
       scale: 1,
-      rotation: -8 + idx * 1.5 + (Math.random() - 0.5) * 3, // More organic rotation
+      rotation: -8 + idx * 1.5 + (Math.random() - 0.5) * (PERF.isLowEnd ? 2 : 3),
       duration: duration,
-      ease: 'power3.out',
+      ease: eased,
       onStart: () => {
         card.style.zIndex = 100 + idx;
       }
@@ -1900,12 +1942,12 @@ function stackProjectCards() {
     // Small settling animation for weight feeling
     .to(card, {
       y: currentY + deltaY + 2, // Small drop
-      duration: 0.06,
+      duration: PERF.isLowEnd ? 0.04 : 0.06,
       ease: 'bounce.out'
     }, idx * 0.04 + 0.08 + duration - 0.03)
     .to(card, {
       y: currentY + deltaY, // Settle back
-      duration: 0.06,
+      duration: PERF.isLowEnd ? 0.04 : 0.06,
       ease: 'power2.out'
     }, idx * 0.04 + 0.08 + duration + 0.03);
   });
@@ -1941,14 +1983,14 @@ function shuffleProjectCards() {
 
   // Phase 1: Chaotic dispersion - cards fly apart
   tl.to(cards, {
-    x: () => (Math.random() - 0.5) * 400,
-    y: () => (Math.random() - 0.5) * 300,
-    rotation: () => (Math.random() - 0.5) * 180,
-    scale: () => 0.8 + Math.random() * 0.4,
-    duration: 0.35,
+    x: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 260 : 400),
+    y: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 180 : 300),
+    rotation: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 120 : 180),
+    scale: () => 0.88 + Math.random() * 0.3,
+    duration: PERF.isLowEnd ? 0.28 : 0.35,
     ease: 'power2.out',
     stagger: {
-      amount: 0.15,
+      amount: PERF.isLowEnd ? 0.1 : 0.15,
       from: 'center'
     }
   });
@@ -1981,11 +2023,11 @@ function shuffleProjectCards() {
       gsap.to(card, {
         x: 0,
         y: 0,
-        rotation: (Math.random() * 8) - 4,
+        rotation: (Math.random() * 6) - 3,
         scale: 1,
-        duration: 0.5,
+        duration: PERF.isLowEnd ? 0.38 : 0.5,
         ease: 'back.out(1.2)',
-        delay: Math.random() * 0.15, // Random delays for organic feel
+        delay: Math.random() * (PERF.isLowEnd ? 0.1 : 0.15), // Random delays for organic feel
         onStart: () => {
           card.style.zIndex = 1 + idx;
         }
@@ -2067,13 +2109,13 @@ function filterProjects(category) {
   if (hiddenCards.length > 0) {
     tl.to(hiddenCards, {
       opacity: 0,
-      scale: 0.7,
-      rotation: (i) => (Math.random() - 0.5) * 20, // Random rotation for organic feel
-      y: -30,
-      duration: 0.5,
+      scale: 0.85,
+      rotation: (i) => (Math.random() - 0.5) * (PERF.isLowEnd ? 8 : 20), // Random rotation for organic feel
+      y: -20,
+      duration: PERF.isLowEnd ? 0.35 : 0.5,
       ease: 'power3.in',
       stagger: {
-        amount: 0.2,
+        amount: PERF.isLowEnd ? 0.12 : 0.2,
         from: 'center'
       },
       onComplete: () => {
@@ -2089,19 +2131,19 @@ function filterProjects(category) {
     .fromTo(visibleCards, 
       { 
         opacity: 0, 
-        scale: 0.8, 
-        y: 50,
-        rotation: (i) => (Math.random() - 0.5) * 15
+        scale: 0.9, 
+        y: 40,
+        rotation: (i) => (Math.random() - 0.5) * (PERF.isLowEnd ? 6 : 15)
       },
       {
         opacity: 1,
         scale: 1,
         y: 0,
         rotation: (i) => (Math.random() - 0.5) * 4, // Subtle final rotation
-        duration: 0.7,
+        duration: PERF.isLowEnd ? 0.45 : 0.7,
         ease: 'back.out(1.7)',
         stagger: {
-          amount: 0.4,
+          amount: PERF.isLowEnd ? 0.25 : 0.4,
           from: 'start'
         }
       }, 
@@ -2568,9 +2610,9 @@ function applyHeatToDot(dot, count, animate=true) {
   }
   
   if (typeof gsap !== 'undefined') {
-    gsap.to(dot, { backgroundColor: col, duration: 0.6 });
+    gsap.to(dot, { color: col, duration: 0.6 });
   } else {
-    dot.style.backgroundColor = col;
+    dot.style.color = col;
   }
 }
 
@@ -2592,7 +2634,7 @@ async function animateHeatmapReveal(container) {
     const dots = Array.from(container.querySelectorAll('.dot')).filter(d => !d._isHole);
     const heatmapDots = dots.filter(d => d._heatmapCount && d._heatmapCount > 0);
     heatmapDots.forEach(dot => {
-      gsap.set(dot, { backgroundColor: dot._heatmapColor, scale: 1, opacity: 1 });
+      gsap.set(dot, { color: dot._heatmapColor, scale: 1, opacity: 1 });
     });
     return;
   }
@@ -2659,13 +2701,9 @@ async function animateHeatmapReveal(container) {
     });
   }
   
-  // Reset all heatmap dots to transparent initially
+  // Reset all heatmap dots initially
   heatmapDots.forEach(dot => {
-    gsap.set(dot, { 
-      backgroundColor: 'rgba(36, 94, 81, 0)',
-      scale: 0.3,
-      opacity: 0
-    });
+    gsap.set(dot, { color: dot._heatmapColor, scale: 0.3, opacity: 0 });
   });
   
   // Animate dots in waves with staggered timing
@@ -2709,7 +2747,7 @@ async function animateHeatmapReveal(container) {
     
     // Animate the actual dot
     gsap.to(dot, {
-      backgroundColor: dot._heatmapColor,
+      color: dot._heatmapColor,
       scale: 1,
       opacity: 1,
       duration: 0.6,
@@ -2802,7 +2840,7 @@ function showFallbackHeatmap(container) {
     
     // Apply subtle initial styling
     gsap.set(dot, { 
-      backgroundColor: color,
+      color: color,
       opacity: 0.3,
       scale: 0.8
     });
@@ -2924,7 +2962,7 @@ async function loadHeatmapDataProgressive(container) {
               
               // Smooth transition to new color
               gsap.to(dot, {
-                backgroundColor: color,
+                color: color,
                 opacity: 0.6,
                 scale: 0.9,
                 duration: 0.3
@@ -2989,7 +3027,7 @@ async function loadHeatmapDataProgressive(container) {
               
               // Smooth progressive update
               gsap.to(dot, {
-                backgroundColor: color,
+                color: color,
                 opacity: 0.8,
                 scale: 1,
                 duration: 0.4,

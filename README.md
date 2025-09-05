@@ -179,4 +179,4 @@ Troubleshooting
 
 todo:
 
-can we make it so that "dante's digital inferno everything is what it truly is" is actually clickable and once you click it, it turns the whole CRT blue color scheme into this pink-ish one. changes the text to "nothinge ever happens - we are so back" and changes the diamonds to hearts
+can we make it so that "dante's digital inferno everything is what it truly is" is actually clickable and once you click it, it turns the whole CRT blue/green color scheme into this pink-ish one. changes the text to "nothinge ever happens - we are so back" and changes the diamonds to hearts

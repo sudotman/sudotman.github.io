@@ -2850,6 +2850,13 @@ body.lightbox-open {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  /* Disable CRT scan/noise and flicker animations for reduced-motion */
+  body::before,
+  body::after,
+  .projects-title,
+  .osmo-icon__link {
+    animation: none !important;
+  }
 }
 
 .dots-container.dispersed {
@@ -2961,9 +2968,16 @@ body::after {
   pointer-events: none;
   z-index: 902; /* above scanlines/vignette */
   background:
-    radial-gradient(150% 130% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%),
+    /* corner falloff to enhance CRT barrel at edges */
+    radial-gradient(220% 180% at 0% 0%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, transparent 60%),
+    radial-gradient(220% 180% at 100% 0%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, transparent 60%),
+    radial-gradient(220% 180% at 0% 100%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, transparent 60%),
+    radial-gradient(220% 180% at 100% 100%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, transparent 60%),
+    /* side highlights to mimic glass curvature catchlight */
     radial-gradient(70% 140% at 0% 50%, rgba(255,255,255,0.035) 0%, transparent 60%),
-    radial-gradient(70% 140% at 100% 50%, rgba(255,255,255,0.035) 0%, transparent 60%);
+    radial-gradient(70% 140% at 100% 50%, rgba(255,255,255,0.035) 0%, transparent 60%),
+    /* central barrel darkening */
+    radial-gradient(150% 130% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%);
   mix-blend-mode: soft-light;
 }
 

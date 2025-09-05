@@ -176,3 +176,7 @@ Troubleshooting
 - Card image looks blurry: confirm the `.osmo-icon-svg` `image-rendering: pixelated` rule is not overridden and that the image isn’t constrained with HTML width/height attributes.
 
 
+
+todo:
+
+can we make it so that "dante's digital inferno everything is what it truly is" is actually clickable and once you click it, it turns the whole CRT blue color scheme into this pink-ish one. changes the text to "nothinge ever happens - we are so back" and changes the diamonds to hearts

@@ -2953,6 +2953,24 @@ body::after {
   animation: crtNoise 8s steps(8) infinite;
 }
 
+/* Subtle curved display: corner falloff and side highlights to mimic CRT barrel */
+.osmo-ui::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 902; /* above scanlines/vignette */
+  background:
+    radial-gradient(150% 130% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%),
+    radial-gradient(70% 140% at 0% 50%, rgba(255,255,255,0.035) 0%, transparent 60%),
+    radial-gradient(70% 140% at 100% 50%, rgba(255,255,255,0.035) 0%, transparent 60%);
+  mix-blend-mode: soft-light;
+}
+
+@media (max-width: 768px) {
+  .osmo-ui::before { opacity: 0.7; }
+}
+
 @keyframes crtNoise {
   0%, 100% { opacity: 0.18; filter: blur(0px); }
   50% { opacity: 0.24; filter: blur(0.1px); }

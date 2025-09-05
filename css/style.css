@@ -2835,6 +2835,67 @@ body.theme-pink .projects-title {
 /* Make the footer title clickable */
 .cloneable-title { cursor: pointer; }
 
+/* Subtle hover cue for clickable footer title */
+.cloneable-title .cloneable-title__nr,
+.cloneable-title .cloneable-title__h1 {
+  transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cloneable-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168,255,81,0.5), transparent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.cloneable-title:hover .cloneable-title__nr,
+.cloneable-title:hover .cloneable-title__h1 {
+  text-shadow: 0 0 10px rgba(168, 255, 81, 0.35);
+}
+
+.cloneable-title:hover::after { transform: scaleX(1); }
+
+body.theme-pink .cloneable-title::after {
+  background: linear-gradient(90deg, transparent, rgba(240,92,235,0.55), transparent);
+}
+
+body.theme-pink .cloneable-title:hover .cloneable-title__nr,
+body.theme-pink .cloneable-title:hover .cloneable-title__h1 {
+  text-shadow: 0 0 10px rgba(240, 92, 235, 0.35);
+}
+
+/* Oracle transition overlay */
+.oracle-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999997;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(80% 80% at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 100%);
+  color: #F05CEB;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.oracle-overlay.show { opacity: 1; }
+
+.oracle-overlay__text {
+  font-family: Tahoma, Geneva, sans-serif;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: lowercase;
+  text-shadow: 0 0 18px rgba(240, 92, 235, 0.5);
+}
+
 
 /* ensure ASCII mode overrides vector shapes */
 .dots-container.ascii-active .dot {

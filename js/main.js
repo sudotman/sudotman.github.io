@@ -285,7 +285,10 @@ function initThemeToggle() {
       const dots = document.querySelectorAll('.dots-container .dot');
       dots.forEach(dot => {
         const count = dot._heatmapCount || 0;
-        dot.style.color = colourFromCount(count);
+        if (count > 0) {
+          // Only recolor heatmap-activated dots; leave neutral dots unchanged
+          dot.style.color = colourFromCount(count);
+        }
       });
     } else {
       titleLine1.textContent = "dante's digital inferno";
@@ -294,7 +297,12 @@ function initThemeToggle() {
       const dots = document.querySelectorAll('.dots-container .dot');
       dots.forEach(dot => {
         const count = dot._heatmapCount || 0;
-        dot.style.color = colourFromCount(count);
+        if (count > 0) {
+          dot.style.color = colourFromCount(count);
+        } else {
+          // Clear any lingering explicit color so base system drives it
+          dot.style.removeProperty('color');
+        }
       });
     }
   }
@@ -310,10 +318,53 @@ function initThemeToggle() {
   } catch (_) { /* ignore */ }
 
   titleContainer.addEventListener('click', () => {
-    const isPink = document.body.classList.toggle('theme-pink');
-    try { localStorage.setItem('themeVariant', isPink ? 'pink' : 'default'); } catch (_) {}
-    applyThemeNow(isPink);
+    // Use consistent oracle animation+sound, custom message
+    showThemeSwitchOracle(() => {
+      const isPink = !document.body.classList.contains('theme-pink');
+      if (isPink) document.body.classList.add('theme-pink'); else document.body.classList.remove('theme-pink');
+      try { localStorage.setItem('themeVariant', isPink ? 'pink' : 'default'); } catch (_) {}
+      applyThemeNow(isPink);
+    });
   });
+}
+
+// Themed oracle overlay for theme switch: reuse style/sound with custom text
+function showThemeSwitchOracle(onFinish) {
+  const id = 'oracle-overlay-theme-switch';
+  let ov = document.getElementById(id);
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = id;
+    Object.assign(ov.style, {
+      position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10000, opacity: 0, background: 'transparent'
+    });
+    ov.innerHTML = `<div style="font-family: 'Cinzel', serif; color:#F05CEB; font-size:clamp(1.5rem,4vw,3rem); text-align:center; text-shadow:0 0 18px rgba(240,92,235,0.6); transform: translateY(-25vh);">
+        nothing ever happens...
+      </div>`;
+    document.body.appendChild(ov);
+  }
+
+  // play consistent mystical sound
+  try { playOracleSound(); } catch (_) {}
+
+  if (typeof gsap !== 'undefined') {
+    gsap.killTweensOf(ov);
+    gsap.set(ov, { opacity: 0, pointerEvents: 'auto' });
+    gsap.to(ov, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
+      setTimeout(() => {
+        if (onFinish) onFinish();
+      }, 600);
+      gsap.to(ov, { opacity: 0, duration: 0.8, delay: 0.8, ease: 'power2.in', onComplete: () => {
+        ov.style.pointerEvents = 'none';
+      }});
+    }});
+  } else {
+    // Fallback without GSAP
+    ov.style.transition = 'opacity 0.4s ease';
+    ov.style.opacity = '1';
+    setTimeout(() => { if (onFinish) onFinish(); }, 600);
+    setTimeout(() => { ov.style.opacity = '0'; }, 1200);
+  }
 }
 
 // Tab Switching Functionality
@@ -1819,7 +1870,8 @@ function initColorSampler() {
       // mirror horizontally for a natural selfie view
       asciiCtx.translate(targetW, 0);
       asciiCtx.scale(-1, 1);
-      asciiCtx.drawImage(videoEl, 0, 0, srcW, srcH, -dx - drawW, dy, drawW, drawH);
+      // draw so that the left margin equals dx after mirroring
+      asciiCtx.drawImage(videoEl, 0, 0, srcW, srcH, (targetW - dx - drawW), dy, drawW, drawH);
     } else {
       asciiCtx.drawImage(videoEl, 0, 0, srcW, srcH, dx, dy, drawW, drawH);
     }

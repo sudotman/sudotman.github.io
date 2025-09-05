@@ -768,9 +768,9 @@ body.lightbox-open {
   position: relative;
   overflow: hidden;
   min-height: 800px;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(255, 76, 36, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 76, 36, 0.04) 0%, transparent 60%);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(168, 255, 81, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(70, 230, 255, 0.06) 0%, transparent 60%);
 }
 
 .interests-header {
@@ -783,11 +783,11 @@ body.lightbox-open {
 .interests-header h2 {
   font-size: 4rem;
   font-weight: 100;
-  color: #ff4c24;
+  color: #A8FF51;
   text-transform: lowercase;
   letter-spacing: 8px;
   margin: 0;
-  text-shadow: 0 0 40px rgba(255, 76, 36, 0.4);
+  text-shadow: 0 0 40px rgba(168, 255, 81, 0.4);
   position: relative;
   animation: titlePulse 6s ease-in-out infinite;
 }
@@ -810,11 +810,11 @@ body.lightbox-open {
   left: -200px;
   right: -200px;
   height: 2px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 76, 36, 0.2), 
-    rgba(255, 76, 36, 0.6), 
-    rgba(255, 76, 36, 0.2), 
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(70, 230, 255, 0.25),
+    rgba(168, 255, 81, 0.7),
+    rgba(70, 230, 255, 0.25),
     transparent);
   transform: translateY(-50%);
   z-index: -1;
@@ -828,7 +828,7 @@ body.lightbox-open {
 
 .interests-subtitle {
   font-size: 1.1rem;
-  color: rgba(255, 76, 36, 0.7);
+  color: rgba(168, 255, 81, 0.8);
   font-weight: 200;
   margin-top: 1.5rem;
   letter-spacing: 4px;
@@ -845,43 +845,32 @@ body.lightbox-open {
 
 .interests-constellation {
   position: relative;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  height: 600px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 520px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 2rem;
+  align-items: start;
+  justify-items: center;
+  padding: 1rem;
 }
 
 .interest-node {
-  position: absolute;
+  position: relative;
   cursor: pointer;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: transform 0.3s ease, filter 0.3s ease;
   opacity: 0;
-  animation: nodeReveal 1.5s ease-out forwards;
+  animation: nodeReveal 0.6s ease-out forwards;
   z-index: 10;
 }
+.interest-node, .interest-node * { text-decoration: none; }
 
-.interest-node:nth-child(1) { 
-  top: 20%; 
-  left: 15%; 
-  animation-delay: 0.5s;
-}
-.interest-node:nth-child(2) { 
-  top: 15%; 
-  right: 20%; 
-  animation-delay: 0.8s;
-}
-.interest-node:nth-child(3) { 
-  bottom: 25%; 
-  left: 10%; 
-  animation-delay: 1.1s;
-}
-.interest-node:nth-child(4) { 
-  bottom: 20%; 
-  right: 15%; 
-  animation-delay: 1.4s;
-}
+/* simple stagger for first few to preserve subtle reveal */
+.interest-node:nth-child(1) { animation-delay: 0.1s; }
+.interest-node:nth-child(2) { animation-delay: 0.2s; }
+.interest-node:nth-child(3) { animation-delay: 0.3s; }
+.interest-node:nth-child(4) { animation-delay: 0.4s; }
 
 @keyframes nodeReveal {
   0% { 
@@ -899,27 +888,23 @@ body.lightbox-open {
 }
 
 .interest-orb {
-  width: 180px;
-  height: 180px;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 76, 36, 0.15) 0%, transparent 70%),
-    conic-gradient(from 0deg, 
-      rgba(255, 76, 36, 0.1) 0deg, 
-      rgba(255, 76, 36, 0.05) 90deg, 
-      rgba(255, 76, 36, 0.1) 180deg, 
-      rgba(255, 76, 36, 0.05) 270deg, 
-      rgba(255, 76, 36, 0.1) 360deg);
-  border: 1px solid rgba(255, 76, 36, 0.3);
-  border-radius: 50%;
+  width: 200px;
+  height: 160px;
+  background:
+    linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(21,37,37,0.85) 100%),
+    repeating-linear-gradient(90deg, rgba(168,255,81,0.14) 0 1px, transparent 1px 3px);
+  border: 2px solid rgba(168, 255, 81, 0.6);
+  border-radius: 8px; /* pixel card style */
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
+  backdrop-filter: blur(8px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  animation: orbFloat 6s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.35) inset, 0 4px 0 rgba(0,0,0,0.25);
+  z-index: 1;
 }
 
 @keyframes orbFloat {
@@ -934,19 +919,10 @@ body.lightbox-open {
 .interest-orb::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(from 0deg, 
-    transparent, 
-    rgba(255, 76, 36, 0.05), 
-    transparent, 
-    rgba(255, 76, 36, 0.03), 
-    transparent);
-  animation: orbRotate 10s linear infinite;
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 60%);
+  mix-blend-mode: overlay;
 }
 
 @keyframes orbRotate {
@@ -957,13 +933,10 @@ body.lightbox-open {
 .interest-orb::after {
   content: '';
   position: absolute;
-  top: 10%;
-  left: 10%;
-  right: 10%;
-  bottom: 10%;
-  border: 1px solid rgba(255, 76, 36, 0.2);
-  border-radius: 50%;
-  animation: innerRingPulse 4s ease-in-out infinite;
+  inset: 0;
+  border: 1px solid rgba(168, 255, 81, 0.45);
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 @keyframes innerRingPulse {
@@ -978,12 +951,12 @@ body.lightbox-open {
 }
 
 .interest-node:hover .interest-orb {
-  transform: scale(1.15) rotate(5deg);
-  border-color: rgba(255, 76, 36, 0.8);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.4),
-    0 10px 30px rgba(255, 76, 36, 0.3),
-    inset 0 0 30px rgba(255, 76, 36, 0.1);
+  transform: translateY(-6px);
+  border-color: rgba(168, 255, 81, 0.95);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 14px rgba(168, 255, 81, 0.25);
+  filter: brightness(1.05) saturate(1.05);
 }
 
 .interest-node:hover .interest-orb::before {
@@ -1001,9 +974,9 @@ body.lightbox-open {
 
 .interest-icon {
   font-size: 2.5rem;
-  color: rgba(255, 76, 36, 0.8);
+  color: rgba(168, 255, 81, 0.85);
   margin-bottom: 0.8rem;
-  transition: all 0.4s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1011,9 +984,9 @@ body.lightbox-open {
 }
 
 .interest-node:hover .interest-icon {
-  transform: scale(1.2) rotate(15deg);
-  color: #ff4c24;
-  text-shadow: 0 0 20px rgba(255, 76, 36, 0.6);
+  transform: scale(1.05);
+  color: #A8FF51;
+  text-shadow: 0 0 14px rgba(168, 255, 81, 0.5);
 }
 
 .interest-title {
@@ -1023,23 +996,23 @@ body.lightbox-open {
   text-transform: lowercase;
   letter-spacing: 2px;
   margin-bottom: 0.5rem;
-  transition: all 0.4s ease;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
   font-family: 'Courier New', monospace;
 }
 
 .interest-node:hover .interest-title {
-  color: #ff6b47;
-  text-shadow: 0 0 15px rgba(255, 76, 36, 0.5);
+  color: #A8FF51;
+  text-shadow: 0 0 15px rgba(168, 255, 81, 0.5);
 }
 
 .interest-essence {
   font-size: 0.8rem;
-  color: rgba(255, 76, 36, 0.6);
+  color: rgba(168, 255, 81, 0.75);
   font-weight: 300;
   letter-spacing: 1px;
   text-transform: lowercase;
   opacity: 0;
-  transition: all 0.4s ease;
+  transition: opacity 0.2s ease;
   font-style: italic;
 }
 
@@ -1048,31 +1021,26 @@ body.lightbox-open {
 }
 
 .interest-description {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 280px;
-  padding: 1.5rem;
-  background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(21, 37, 37, 0.9) 100%);
-  border: 1px solid rgba(255, 76, 36, 0.4);
-  border-radius: 15px;
+  position: static;
+  width: 100%;
+  max-width: 220px;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(21, 37, 37, 0.85) 100%);
+  border: 1px solid rgba(168, 255, 81, 0.45);
+  border-radius: 8px;
   color: rgba(239, 238, 236, 0.9);
   font-size: 0.85rem;
   line-height: 1.5;
   text-align: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
-  backdrop-filter: blur(20px);
-  z-index: 20;
-  box-shadow: 
-    0 15px 40px rgba(0, 0, 0, 0.6),
-    0 5px 20px rgba(255, 76, 36, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  font-weight: 300;
-  letter-spacing: 0.3px;
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.25s ease;
+  backdrop-filter: blur(10px);
+  z-index: 2;
+  pointer-events: auto;
+  user-select: text;
 }
 
 .interest-description::before {
@@ -1104,28 +1072,27 @@ body.lightbox-open {
 }
 
 .interest-links {
-  position: absolute;
-  bottom: -70px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: static;
+  margin-top: 0.5rem;
   display: flex;
-  gap: 1rem;
-  opacity: 0;
-  transition: all 0.6s ease;
-  z-index: 15;
+  gap: 0.5rem;
+  opacity: 1;
+  transition: none;
+  z-index: 3;
+  position: relative;
+  pointer-events: auto;
 }
 
-.interest-node:hover .interest-links {
-  opacity: 1;
-  bottom: -55px;
-}
+.interest-node:hover .interest-links { opacity: 1; }
 
 .interest-link {
-  background: rgba(255, 76, 36, 0.1);
-  border: 1px solid rgba(255, 76, 36, 0.4);
-  color: #ff6b47;
+  background:
+    linear-gradient(135deg, rgba(168, 255, 81, 0.22) 0%, rgba(70, 230, 255, 0.12) 100%),
+    repeating-linear-gradient(90deg, rgba(168,255,81,0.20) 0 1px, transparent 1px 3px);
+  border: 2px solid rgba(168, 255, 81, 0.6);
+  color: #A8FF51;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
+  border-radius: 6px;
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 500;
@@ -1134,7 +1101,10 @@ body.lightbox-open {
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  pointer-events: auto;
 }
+.interest-title, .interest-essence, .interest-description, .interest-links { transform: none !important; }
+
 
 .interest-link::before {
   content: '';
@@ -1145,7 +1115,7 @@ body.lightbox-open {
   height: 100%;
   background: linear-gradient(90deg, 
     transparent, 
-    rgba(255, 76, 36, 0.2), 
+    rgba(168, 255, 81, 0.2), 
     transparent);
   transition: left 0.5s ease;
 }
@@ -1155,30 +1125,29 @@ body.lightbox-open {
 }
 
 .interest-link:hover {
-  background: rgba(255, 76, 36, 0.2);
-  border-color: #ff4c24;
-  color: #ff4c24;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 76, 36, 0.3);
+  background:
+    linear-gradient(135deg, rgba(168, 255, 81, 0.3) 0%, rgba(70, 230, 255, 0.18) 100%),
+    repeating-linear-gradient(90deg, rgba(168,255,81,0.26) 0 1px, transparent 1px 3px);
+  border-color: #A8FF51;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset, 0 6px 18px rgba(168, 255, 81, 0.28);
 }
 
 .constellation-web {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
+  inset: 0;
+  pointer-events: none; /* do not block clicks */
+  z-index: 1;
 }
 
 .web-connection {
   position: absolute;
   height: 1px;
-  background: linear-gradient(90deg, 
-    rgba(255, 76, 36, 0.1), 
-    rgba(255, 76, 36, 0.3), 
-    rgba(255, 76, 36, 0.1));
+  background: linear-gradient(90deg,
+    rgba(70, 230, 255, 0.15),
+    rgba(168, 255, 81, 0.45),
+    rgba(70, 230, 255, 0.15));
   transform-origin: left center;
   animation: connectionPulse 4s ease-in-out infinite;
 }
@@ -1434,11 +1403,13 @@ body.lightbox-open {
   }
   
   .interests-constellation {
-    height: 500px;
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    gap: 1.25rem;
+    min-height: 0;
   }
   
   .interest-orb {
-    width: 140px;
+    width: 180px;
     height: 140px;
   }
   
@@ -1450,9 +1421,7 @@ body.lightbox-open {
     font-size: 1rem;
   }
   
-  .web-connection {
-    display: none;
-  }
+  .web-connection { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -1472,29 +1441,16 @@ body.lightbox-open {
   }
   
   .interests-constellation {
-    height: 400px;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    min-height: 0;
   }
   
-  .interest-node:nth-child(1) { 
-    top: 10%; 
-    left: 10%; 
-  }
-  .interest-node:nth-child(2) { 
-    top: 10%; 
-    right: 10%; 
-  }
-  .interest-node:nth-child(3) { 
-    bottom: 15%; 
-    left: 10%; 
-  }
-  .interest-node:nth-child(4) { 
-    bottom: 15%; 
-    right: 10%; 
-  }
+  /* absolute offsets not needed in grid layout */
   
   .interest-orb {
-    width: 120px;
-    height: 120px;
+    width: 170px;
+    height: 130px;
   }
   
   .interest-icon {
@@ -1505,21 +1461,11 @@ body.lightbox-open {
     font-size: 0.9rem;
   }
   
-  .interest-links {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+  .interest-links { flex-direction: column; gap: 0.4rem; }
   
-  .interest-link {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.7rem;
-  }
+  .interest-link { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
   
-  .interest-description {
-    width: 240px;
-    padding: 1rem;
-    font-size: 0.8rem;
-  }
+  .interest-description { max-width: 100%; width: 100%; padding: 0.75rem; font-size: 0.85rem; }
 } 
 
 /* Project Modal Styles */
@@ -2826,6 +2772,64 @@ body.lightbox-open {
                  calc(var(--u)*1)  calc(var(--u)*2) 0 0 currentColor,
     /* y=3 */   calc(var(--u)*0)  calc(var(--u)*3) 0 0 currentColor;
 }
+
+/* Pink theme: swap diamond pixels for a 7x7 pixel heart without touching DOM nodes */
+body.theme-pink .dots-container .dot.shape-diamond::before {
+  --u: calc(1em / 7);
+  left: 50%;
+  top: 50%;
+  width: var(--u);
+  height: var(--u);
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  /* Heart pixel map (7x7) with a notch between lobes */
+  box-shadow:
+    /* y=-3 */  calc(var(--u)*-1) calc(var(--u)*-3) 0 0 currentColor,
+                 calc(var(--u)*0)  calc(var(--u)*-3) 0 0 currentColor,
+                 calc(var(--u)*1)  calc(var(--u)*-3) 0 0 currentColor,
+    /* y=-2 */  calc(var(--u)*-2) calc(var(--u)*-2) 0 0 currentColor,
+                 calc(var(--u)*-1) calc(var(--u)*-2) 0 0 currentColor,
+                 /* center notch skipped at y=-2, x=0 */
+                 calc(var(--u)*1)  calc(var(--u)*-2) 0 0 currentColor,
+                 calc(var(--u)*2)  calc(var(--u)*-2) 0 0 currentColor,
+    /* y=-1 */  calc(var(--u)*-3) calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*-2) calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*-1) calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*0)  calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*1)  calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*2)  calc(var(--u)*-1) 0 0 currentColor,
+                 calc(var(--u)*3)  calc(var(--u)*-1) 0 0 currentColor,
+    /* y=0 */   calc(var(--u)*-3) calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*-2) calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*-1) calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*0)  calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*1)  calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*2)  calc(var(--u)*0) 0 0 currentColor,
+                 calc(var(--u)*3)  calc(var(--u)*0) 0 0 currentColor,
+    /* y=1 */   calc(var(--u)*-2) calc(var(--u)*1) 0 0 currentColor,
+                 calc(var(--u)*-1) calc(var(--u)*1) 0 0 currentColor,
+                 calc(var(--u)*0)  calc(var(--u)*1) 0 0 currentColor,
+                 calc(var(--u)*1)  calc(var(--u)*1) 0 0 currentColor,
+                 calc(var(--u)*2)  calc(var(--u)*1) 0 0 currentColor,
+    /* y=2 */   calc(var(--u)*-1) calc(var(--u)*2) 0 0 currentColor,
+                 calc(var(--u)*0)  calc(var(--u)*2) 0 0 currentColor,
+                 calc(var(--u)*1)  calc(var(--u)*2) 0 0 currentColor,
+    /* y=3 */   calc(var(--u)*0)  calc(var(--u)*3) 0 0 currentColor;
+}
+
+/* Subtle global hue shift for dots only (keeps images/text crisp) */
+body.theme-pink .dots-container {
+  filter: hue-rotate(285deg) saturate(1.15);
+}
+
+/* Title accents in pink */
+body.theme-pink .projects-title {
+  color: #F05CEB;
+  text-shadow: 0 0 20px rgba(240, 92, 235, 0.35);
+}
+
+/* Make the footer title clickable */
+.cloneable-title { cursor: pointer; }
 
 
 /* ensure ASCII mode overrides vector shapes */

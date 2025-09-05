@@ -268,7 +268,67 @@ document.addEventListener('DOMContentLoaded', function() {
   initTabSwitching();
   initScrollBasedDotAnimation();
   initColorSampler();
+  initThemeToggle();
 });
+// Theme toggle: footer title click switches to pink theme and back
+function initThemeToggle() {
+  const titleContainer = document.querySelector('.cloneable-title');
+  const titleLine1 = document.querySelector('.cloneable-title__nr');
+  const titleLine2 = document.querySelector('.cloneable-title__h1');
+  if (!titleContainer || !titleLine1 || !titleLine2) return;
+
+  function applyThemeNow(isPink) {
+    if (isPink) {
+      titleLine1.textContent = "nothing ever happens";
+      titleLine2.textContent = "we are so back";
+      document.documentElement.style.setProperty('--accent-default', '#F05CEB');
+      const dots = document.querySelectorAll('.dots-container .dot');
+      dots.forEach(dot => {
+        const count = dot._heatmapCount || 0;
+        dot.style.color = colourFromCount(count);
+      });
+      document.querySelectorAll('.project-card').forEach(card => {
+        card.style.setProperty('--accent', '#F05CEB');
+      });
+    } else {
+      titleLine1.textContent = "dante's digital inferno";
+      titleLine2.textContent = "everything is what it truly is";
+      document.documentElement.style.setProperty('--accent-default', '#A8FF51');
+      const dots = document.querySelectorAll('.dots-container .dot');
+      dots.forEach(dot => {
+        const count = dot._heatmapCount || 0;
+        dot.style.color = colourFromCount(count);
+      });
+      const projectMap = window.projectMap || {};
+      document.querySelectorAll('.project-card').forEach(card => {
+        const pid = card.dataset.project;
+        const proj = projectMap[pid];
+        if (proj) {
+          const accentMap = { game: '#FFB74C', programming: '#A8FF51', art: '#F05CEB', rnd: '#FF5C5C', open_source: '#F05CEB' };
+          card.style.setProperty('--accent', accentMap[proj.category] || '#A8FF51');
+        } else {
+          card.style.setProperty('--accent', '#A8FF51');
+        }
+      });
+    }
+  }
+
+  // Restore persisted preference
+  try {
+    const saved = localStorage.getItem('themeVariant');
+    if (saved === 'pink') {
+      document.body.classList.add('theme-pink');
+      // defer apply to after first frame so DOM nodes likely exist
+      requestAnimationFrame(() => applyThemeNow(true));
+    }
+  } catch (_) { /* ignore */ }
+
+  titleContainer.addEventListener('click', () => {
+    const isPink = document.body.classList.toggle('theme-pink');
+    try { localStorage.setItem('themeVariant', isPink ? 'pink' : 'default'); } catch (_) {}
+    applyThemeNow(isPink);
+  });
+}
 
 // Tab Switching Functionality
 function initTabSwitching() {
@@ -1440,11 +1500,11 @@ async function loadProjects() {
 
     const accentMap = {
       game: '#FFB74C',
-      programming: '#A8FF51',
+      programming: document.body.classList.contains('theme-pink') ? '#F05CEB' : '#A8FF51',
       art: '#F05CEB',
       design: '#5CB3FF',
-      rnd: '#F05CEB',
-      open_source: '#FF5C5C',
+      rnd: document.body.classList.contains('theme-pink') ? '#FF5C5C' : '#F05CEB',
+      open_source: document.body.classList.contains('theme-pink') ? '#F05CEB' : '#FF5C5C',
     };
 
     window.projectMap = {};
@@ -1963,76 +2023,42 @@ function shuffleProjectCards() {
   const grid = document.querySelector('.projects-grid');
   if (!grid) return;
   const cards = Array.from(grid.querySelectorAll('.project-card'));
-  if (!cards.length) return;
+  if (!cards.length) {
+    cardActionInProgress = false;
+    setCardActionButtonsDisabled(false);
+    return;
+  }
 
-  // Create satisfying shuffle animation with chaos and order
-  const tl = gsap.timeline({
-    onComplete: () => {
-      cardActionInProgress = false;
-      setCardActionButtonsDisabled(false);
-    }
-  });
-
-  // Ensure all cards start from grid-aligned position
+  // Reset any transforms so layout is authoritative
   cards.forEach(card => {
-    gsap.set(card, { x: 0, y: 0, rotation: 0 });
+    gsap.set(card, { x: 0, y: 0, rotation: 0, scale: 1 });
   });
 
-  // Capture initial positions
-  const firstRects = cards.map(c => c.getBoundingClientRect());
+  const fadeOutDuration = PERF && PERF.isLowEnd ? 0.08 : 0.12;
+  const fadeInDuration = PERF && PERF.isLowEnd ? 0.10 : 0.15;
 
-  // Phase 1: Chaotic dispersion - cards fly apart
-  tl.to(cards, {
-    x: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 260 : 400),
-    y: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 180 : 300),
-    rotation: () => (Math.random() - 0.5) * (PERF.isLowEnd ? 120 : 180),
-    scale: () => 0.88 + Math.random() * 0.3,
-    duration: PERF.isLowEnd ? 0.28 : 0.35,
-    ease: 'steps(8)',
-    stagger: {
-      amount: PERF.isLowEnd ? 0.1 : 0.15,
-      from: 'center'
-    }
-  });
+  gsap.to(cards, {
+    opacity: 0,
+    duration: fadeOutDuration,
+    ease: 'none',
+    onComplete: () => {
+      // Fisher–Yates shuffle and re-append to apply new order instantly
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      cards.forEach(card => grid.appendChild(card));
 
-  // Phase 2: Reorganization - shuffle array and reposition
-  tl.call(() => {
-    // Shuffle array (Fisher–Yates)
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-
-    // Re-append in new order to change layout flow
-    cards.forEach(card => grid.appendChild(card));
-  });
-
-  // Phase 3: Graceful return to new positions
-  tl.call(() => {
-    // Capture new positions after shuffle
-    const lastRects = cards.map(c => c.getBoundingClientRect());
-
-    cards.forEach((card, idx) => {
-      const dx = firstRects[idx].left - lastRects[idx].left;
-      const dy = firstRects[idx].top - lastRects[idx].top;
-
-      // Set the card to its original position temporarily
-      gsap.set(card, { x: dx, y: dy });
-
-      // Animate to new position with satisfying physics
-      gsap.to(card, {
-        x: 0,
-        y: 0,
-        rotation: (Math.random() * 6) - 3,
-        scale: 1,
-        duration: PERF.isLowEnd ? 0.38 : 0.5,
-        ease: 'steps(10)',
-        delay: Math.random() * (PERF.isLowEnd ? 0.1 : 0.15), // Random delays for organic feel
-        onStart: () => {
-          card.style.zIndex = 1 + idx;
+      gsap.to(cards, {
+        opacity: 1,
+        duration: fadeInDuration,
+        ease: 'power1.out',
+        onComplete: () => {
+          cardActionInProgress = false;
+          setCardActionButtonsDisabled(false);
         }
       });
-    });
+    }
   });
 }
 
@@ -2617,13 +2643,23 @@ function applyHeatToDot(dot, count, animate=true) {
 }
 
 function colourFromCount(count) {
-  // Color progression from green to red
-  if (count === 0) return '#245E51'; // Default dark green
-  if (count === 1) return '#A8FF51'; // Solid green for first click
-  if (count === 2) return '#FFFF51'; // Yellow for second click
-  if (count === 3) return '#FF9F51'; // Orange for third click
-  if (count <= 5) return '#FF6B47'; // Red-orange for 4-5 clicks
-  return '#FF4C24'; // Deep red for 6+ clicks
+  if (document.body.classList.contains('theme-pink')) {
+    // Magenta progression
+    if (count === 0) return '#6E1B59';
+    if (count === 1) return '#F05CEB';
+    if (count === 2) return '#FF8BD8';
+    if (count === 3) return '#FF70C8';
+    if (count <= 5) return '#E23ED6';
+    return '#C82CC5';
+  } else {
+    // Color progression from green to red
+    if (count === 0) return '#245E51'; // Default dark green
+    if (count === 1) return '#A8FF51'; // Solid green for first click
+    if (count === 2) return '#FFFF51'; // Yellow for second click
+    if (count === 3) return '#FF9F51'; // Orange for third click
+    if (count <= 5) return '#FF6B47'; // Red-orange for 4-5 clicks
+    return '#FF4C24'; // Deep red for 6+ clicks
+  }
 }
 
 // Beautiful avant-garde heatmap reveal animation

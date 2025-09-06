@@ -107,9 +107,9 @@
     },
     {
       "id": "p_everythingbagel",
-      "category": "design",
+      "category": "art",
       "title": "the everything bagel",
-      "short": "a website consisting of various functionalities/datasets mostly for fun but could be utilized for productivity.",
+      "short": "a website making use of various datasets mostly for fun but could be utilized for productivity.",
       "long": "A website consisting of various sections pertaining to multiple functionalities. Inspired by the movie Everything Everywhere All at Once by Daniel Kwan and Daniel Scheinert. The whole idea is a combination of various online datasets (all mostly through open source APIs) into a meaningful format - making a fun and mostly silly yet slightly productive experience.<br><br><strong>Main Components:</strong><br><br><strong>1. Art:</strong> Query and fetch art pieces from major museums (Metropolitan Museum of Modern Art and Chicago Art Museum) - over 700k art pieces available for browsing.<br><br><strong>2. World Information:</strong> Real-time world data including IP/email/DNS geolocation, world registered domains search, forex rates, and Indian postal codes lookup.<br><br><strong>3. Every Day is Special:</strong> Historical events, notable births and deaths for any given day to make dull days more interesting.<br><br><strong>4. Analytics and Data:</strong> Name-based estimations (age/gender/nationality guessing) and unified metadata fetching for any website URL.<br><br><strong>5. Religious Stuff:</strong> Random verses from three holy books: Bhagavad Gita, Bible, and Quran.<br><br><strong>6. Silly Things:</strong> Random cat/dog facts and images, plus fox and duck sections for entertainment.",
       "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/bagel.jpeg",
       "gallery": ["https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/bagel.jpeg","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/art_corner_1.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/art_corner_2.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/world_information_1.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/silly_things.png","https://raw.githubusercontent.com/sudotman/sudotman/main/demos/the-everything-bagel/estimations.png"],
@@ -200,7 +200,7 @@
     },
     {
       "id": "p_opengl",
-      "category": "programming",
+      "category": "open_source",
       "title": "OpenGL Experiments",
       "short": "Graphics algorithms and demos in C/OpenGL - graphics experiments.",
       "long": "Custom rasteriser, shader playground and real-time lighting maths.",
@@ -234,7 +234,7 @@
     },
     {
       "id": "a_wusic", 
-      "category": "design",
+      "category": "art",
       "title": "wusic — Minimal Music Player",
       "short": "Distraction-free music player born from personal frustrations with typical music apps.",
       "long": "A music player designed from personal experience with choice paralysis (always ending up with Kanye!) and distracting music interfaces. Built for focused work/study sessions with thoughtful UX choices:<br><br>- Swipe-based album view instead of overwhelming lists, forcing more deliberate music choices<br>- Intentional long-press to play mechanism that discourages frequent switching<br>- Single-click dark mode and fullscreen toggles (no more digging through menus!)<br>- Clean, consistent aesthetic with minimal UI elements<br><br>Features offline music library management with custom sorting and integrated lofi-music streams. The entire design philosophy stems from real frustrations with existing players, creating something that's both visually pleasing and mindfully engineered to reduce distractions.",
@@ -249,7 +249,7 @@
     },
     {
       "id": "p_tidbits",
-      "category": "programming",
+      "category": "open_source",
       "title": "tidbits",
       "short": "a collection of small projects and experiments.",
       "long": "A diverse collection of programming experiments and utility projects:<br><br><strong>1. Facial Expression Recognition:</strong> Keras/CNN model recognising seven basic emotions using OpenCV face detection with lightweight CNN trained on FER-2013 dataset.<br><br><strong>2. Discord Bot:</strong> Node.js bot providing role management and music playback that watches chat and responds with helpful tools and custom commands.<br><br><strong>3. Self-Driving Car (Genetic Algorithms):</strong> Unity simulation that evolves cars to drive autonomously using genetic algorithm that mutates sensor weights, improving navigation each generation.<br><br><strong>4. Custom TradingView Indicators:</strong> Scripts supporting various trading strategies including volume-weighted EMA combiner and range premium visualiser.<br><br><strong>5. CoinSentience:</strong> Cryptocurrency data suite for analysis and trading with historical price scraping, custom indicators and exchange order execution.",
@@ -257,16 +257,8 @@
       "gallery": ["images/facialRec.png", "images/discord.jpg", "images/selfdriving.png", "images/Premium1.png", "images/Backtester1.png"],
       "links": [
         {
-          "href": "https://github.com/sudotman/facial-expression-recognition",
-          "label": "Facial Recognition Source"
-        },
-        {
-          "href": "https://github.com/sudotman/discord-bot",
-          "label": "Discord Bot Source"
-        },
-        {
-          "href": "https://github.com/sudotman/self-driving-car",
-          "label": "Self-Driving Car Source"
+          "href": "https://github.com/sudotman/",
+          "label": "github profile"
         }
       ]
     },

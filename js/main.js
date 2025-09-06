@@ -1081,6 +1081,30 @@ function closeTldrModal() {
   }
 }
 
+// Sites Modal Functions
+function openSitesModal() {
+  const modal = document.getElementById('sites-modal');
+  if (modal) {
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    if (typeof gsap !== 'undefined') {
+      gsap.fromTo(modal.querySelector('.sites-modal-content'), { y: -40, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.25, ease: 'power2.out' });
+    }
+  }
+}
+
+function closeSitesModal() {
+  const modal = document.getElementById('sites-modal');
+  if (modal && modal.classList.contains('show')) {
+    document.body.classList.remove('modal-open');
+    if (typeof gsap !== 'undefined') {
+      gsap.to(modal.querySelector('.sites-modal-content'), { y: -20, opacity: 0, scale: 0.97, duration: 0.2, ease: 'power2.in', onComplete: () => { modal.classList.remove('show'); } });
+    } else {
+      modal.classList.remove('show');
+    }
+  }
+}
+
 // ---------------- Project Modal (dynamic) ----------------
 function openProjectModal(button) {
   const projectId = button?.dataset?.projectId || button?.closest('.project-card')?.dataset?.project;
@@ -1341,10 +1365,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Escape') {
       const tldrModal = document.getElementById('tldr-modal');
       const projectModal = document.getElementById('project-modal');
+      const sitesModal = document.getElementById('sites-modal');
       const projectsContent = document.getElementById('projects-content');
       
       if (projectModal && projectModal.classList.contains('show')) {
         closeProjectModal();
+      } else if (sitesModal && sitesModal.classList.contains('show')) {
+        closeSitesModal();
       } else if (tldrModal && tldrModal.classList.contains('show')) {
         closeTldrModal();
       } else if (projectsContent && projectsContent.classList.contains('revealed')) {
@@ -1398,6 +1425,46 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       e.stopPropagation();
       openTldrModal();
+    });
+  }
+
+  // Handle Sites modal clicks
+  const sitesModal = document.getElementById('sites-modal');
+  if (sitesModal) {
+    sitesModal.addEventListener('click', function(e) {
+      if (e.target === sitesModal) {
+        closeSitesModal();
+      }
+    });
+  }
+
+  // Sites modal backdrop
+  const sitesModalBackdrop = document.querySelector('.sites-modal-backdrop');
+  if (sitesModalBackdrop) {
+    sitesModalBackdrop.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeSitesModal();
+    });
+  }
+
+  // Sites modal close button
+  const sitesCloseButton = document.querySelector('.sites-modal-close');
+  if (sitesCloseButton) {
+    sitesCloseButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeSitesModal();
+    });
+  }
+
+  // Top-left master sites button
+  const sitesButton = document.getElementById('sites-btn');
+  if (sitesButton) {
+    sitesButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSitesModal();
     });
   }
 
@@ -1544,12 +1611,13 @@ async function loadProjects() {
     // Clear any hard-coded cards
     grid.innerHTML = '';
 
+    // once projects are loaded, set up drag events
     const accentMap = {
       game: '#FFB74C',
       programming: '#A8FF51',
       art: '#F05CEB',
       design: '#5CB3FF',
-      rnd: '#F05CEB',
+      rnd: '#d7f113',
       open_source: '#FF5C5C',
     };
 

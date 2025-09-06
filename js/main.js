@@ -2,7 +2,9 @@ gsap.registerPlugin(InertiaPlugin);
 
 // -------- Global performance tuning --------
 const PERF = {
-  isLowEnd: (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || /mobile|android|iphone|ipad/i.test(navigator.userAgent)
+  isLowEnd: (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || /mobile|android|iphone|ipad/i.test(navigator.userAgent),
+  isMobile: /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent),
+  isTouch: ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
 };
 
 try {
@@ -262,7 +264,14 @@ document.addEventListener('DOMContentLoaded', function() {
   initGlowingInteractiveDotsGrid();
   loadProjects().then(() => {
     // Once projects are loaded, set up drag events
-    initCardDragSystem();
+    // Disable drag only for small viewports or explicit mobile UAs
+    const isSmallViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches;
+    const shouldDisableDrag = PERF.isMobile || isSmallViewport;
+    if (!shouldDisableDrag) {
+      initCardDragSystem();
+    } else {
+      try { console.log('[mobile/small] skipping draggable cards'); } catch (_) {}
+    }
   });
   loadProfileData();
   initTabSwitching();
@@ -555,7 +564,7 @@ function loadInterestsData(interests) {
   const interestNodes = [
     {
       title: 'Cinema',
-      essence: 'visual storytelling',
+      essence: 'kinos and more',
       description: interests.cinema.description,
       icon: `
         <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -576,8 +585,8 @@ function loadInterestsData(interests) {
       links: [{ label: 'letterboxd', url: interests.cinema.letterboxd }]
     },
     {
-      title: 'Music',
-      essence: 'sonic landscapes',
+      title: 'music',
+      essence: 'grails and more',
       description: interests.music.description,
       icon: `
         <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -604,8 +613,8 @@ function loadInterestsData(interests) {
       ]
     },
     {
-      title: 'Books',
-      essence: 'written worlds',
+      title: 'books',
+      essence: 'performativeness and more',
       description: interests.books.description,
       icon: `
         <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -626,8 +635,8 @@ function loadInterestsData(interests) {
       links: []
     },
     {
-      title: 'Games',
-      essence: 'interactive art',
+      title: 'games',
+      essence: 'vidya and more',
       description: interests.games.description,
       icon: `
         <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

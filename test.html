@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CRT: Real Curved (Barrel Distortion) Demo</title>
+<style>
+  :root{
+    --bg: #000;
+    --text: #c8ffd0;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,monospace}
+  .page {
+    display:flex;
+    height:100vh;
+    gap:18px;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+    box-sizing:border-box;
+  }
+
+  /* The live DOM content you want curved */
+  .content {
+    width: min(1000px, 86vw);
+    height: calc(min(1000px, 86vw) * 0.62);
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg,#06110a,#0b1a0f);
+    color:var(--text);
+    overflow:auto;
+    position:relative;
+    z-index:1;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.8);
+  }
+  .content h1{margin-top:0}
+  .controls {
+    width: 300px;
+    color:var(--text);
+    font-size:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:stretch;
+  }
+  .controls label{font-size:13px;opacity:0.9}
+  .controls button { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; background:#142a1f; color:var(--text) }
+  .controls input[type="range"]{width:100%}
+
+  /* GL canvas sits on top of the content — hidden while snapshot not ready */
+  #glCanvas {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    z-index:50;
+    pointer-events:none; /* let clicks go to original content if you prefer */
+    border-radius:12px;
+  }
+
+  /* fallback: show CSS-only fake if JS is disabled */
+  .no-js-fallback {
+    display:none;
+  }
+  /* accessibility: respect reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .content { transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div style="position:relative; width:fit-content;">
+      <div class="content" id="captureTarget" aria-label="Curvable content">
+        <h1>CRT Curved Content (live)</h1>
+        <p>This content will be captured and the pixels will be barrel-distorted to emulate a curved CRT. Add buttons, images, text — everything will be warped in the final canvas overlay.</p>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button>Button A</button>
+          <button>Button B</button>
+          <button>Click me</button>
+        </div>
+
+        <p>Try making the browser window narrower and then click "Re-capture" to update the warped image.</p>
+
+        <img src="https://picsum.photos/640/300" alt="sample" style="max-width:100%;border-radius:8px">
+      </div>
+
+      <!-- WebGL canvas overlays the captured content (shows warped image) -->
+      <canvas id="glCanvas" width="100" height="100" aria-hidden="true"></canvas>
+    </div>
+
+    <div class="controls" aria-hidden="false">
+      <label>Distortion strength: <span id="val">0.35</span></label>
+      <input id="strength" type="range" min="0" max="1" step="0.01" value="0.35">
+      <label>Edge fill: <span id="edgeFill">black</span></label>
+      <select id="edgeMode">
+        <option value="black">black</option>
+        <option value="clamp">clamp (stretch)</option>
+        <option value="transparent">transparent</option>
+      </select>
+
+      <button id="captureBtn">Capture & Apply Curve</button>
+      <button id="hideBtn">Toggle Warp (show/hide)</button>
+      <div style="font-size:12px;color:#9fcf9b">Tip: Re-capture after you change content or resize.</div>
+    </div>
+  </div>
+
+  <noscript>
+    <style>
+      .no-js-fallback{display:block}
+      #glCanvas{display:none}
+    </style>
+    <div class="no-js-fallback" style="padding:20px;color:#fff">JS is required for pixel warping. The CSS-only CRT look won't actually curve pixels.</div>
+  </noscript>
+
+  <!-- html2canvas (used to snapshot DOM). CDN link — not required if you provide alternate snapshot method -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+  // ------- WebGL + shader code (barrel distortion) -------
+  (function(){
+    const canvas = document.getElementById('glCanvas');
+    const gl = canvas.getContext('webgl', {preserveDrawingBuffer: true});
+    if(!gl){ console.warn('WebGL not available — falling back to CSS-only approach'); return; }
+
+    // vertex shader (fullscreen quad)
+    const vsSrc = `
+      attribute vec2 a_pos;
+      attribute vec2 a_uv;
+      varying vec2 v_uv;
+      void main(){
+        v_uv = a_uv;
+        gl_Position = vec4(a_pos, 0.0, 1.0);
+      }`;
+    // fragment shader — barrel distortion with aspect correction
+    const fsSrc = `
+      precision mediump float;
+      varying vec2 v_uv;
+      uniform sampler2D u_tex;
+      uniform float u_strength;  // >0 => barrel (bulge), <0 => pincushion
+      uniform vec2 u_resolution;
+      uniform int u_edgeMode; // 0: black, 1: clamp, 2: transparent
+
+      void main(){
+        vec2 uv = v_uv;
+        // convert to [-1,1] centered coords with aspect correct
+        float aspect = u_resolution.x / u_resolution.y;
+        vec2 centered = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);
+
+        float r = length(centered);
+        // distortion function (simple quadratic)
+        float factor = 1.0 + u_strength * (r * r);
+
+        vec2 distorted = centered * factor;
+        // undo aspect scale
+        vec2 sample = vec2(distorted.x / aspect + 0.5, distorted.y + 0.5);
+
+        // handle edges
+        if(u_edgeMode == 1) { // clamp
+          sample = clamp(sample, 0.0, 1.0);
+          gl_FragColor = texture2D(u_tex, sample);
+        } else if(u_edgeMode == 2) { // transparent
+          if(sample.x < 0.0 || sample.x > 1.0 || sample.y < 0.0 || sample.y > 1.0){
+            gl_FragColor = vec4(0.0,0.0,0.0,0.0);
+          } else {
+            gl_FragColor = texture2D(u_tex, sample);
+          }
+        } else { // black fill
+          if(sample.x < 0.0 || sample.x > 1.0 || sample.y < 0.0 || sample.y > 1.0){
+            gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+          } else {
+            gl_FragColor = texture2D(u_tex, sample);
+          }
+        }
+      }`;
+
+    // compile helpers
+    function compileShader(src, type){
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+        console.error('Shader compile error:', gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+    const vs = compileShader(vsSrc, gl.VERTEX_SHADER);
+    const fs = compileShader(fsSrc, gl.FRAGMENT_SHADER);
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+      console.error('Program link error:', gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+
+    // full-screen quad (clipspace coordinates)
+    const quadVerts = new Float32Array([
+      -1, -1,  0, 0,
+       1, -1,  1, 0,
+      -1,  1,  0, 1,
+       1,  1,  1, 1
+    ]);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+
+    const a_pos = gl.getAttribLocation(prog, 'a_pos');
+    const a_uv  = gl.getAttribLocation(prog, 'a_uv');
+    gl.enableVertexAttribArray(a_pos);
+    gl.vertexAttribPointer(a_pos, 2, gl.FLOAT, false, 16, 0);
+    gl.enableVertexAttribArray(a_uv);
+    gl.vertexAttribPointer(a_uv, 2, gl.FLOAT, false, 16, 8);
+
+    // uniforms
+    const u_texLoc = gl.getUniformLocation(prog, 'u_tex');
+    const u_strengthLoc = gl.getUniformLocation(prog, 'u_strength');
+    const u_resLoc = gl.getUniformLocation(prog, 'u_resolution');
+    const u_edgeModeLoc = gl.getUniformLocation(prog, 'u_edgeMode');
+
+    // texture holder
+    let texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // setup texture params (will update image later)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    // clamp by default (we will control via shader if needed)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // draw once using current texture
+    function draw(resX, resY, strength, edgeMode){
+      canvas.width = resX;
+      canvas.height = resY;
+      gl.viewport(0,0,canvas.width, canvas.height);
+      gl.clearColor(0,0,0,0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.uniform1i(u_texLoc, 0); // texture unit 0
+      gl.uniform1f(u_strengthLoc, strength);
+      gl.uniform2f(u_resLoc, resX, resY);
+      gl.uniform1i(u_edgeModeLoc, edgeMode);
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    // capture DOM to canvas via html2canvas, upload texture, then draw
+    async function captureAndWarp(){
+      const target = document.getElementById('captureTarget');
+      // snapshot. set useCORS true if remote images are CORS-enabled
+      const snap = await html2canvas(target, {backgroundColor: null, scale: 1});
+      // get pixel size
+      const w = snap.width;
+      const h = snap.height;
+      // upload to texture
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, snap);
+      // draw with current settings
+      const strength = parseFloat(document.getElementById('strength').value);
+      const edgeModeStr = document.getElementById('edgeMode').value;
+      const edgeMode = edgeModeStr === 'clamp' ? 1 : (edgeModeStr === 'transparent' ? 2 : 0);
+      draw(w, h, strength, edgeMode);
+      // show canvas overlay
+      canvas.style.display = 'block';
+      canvas.style.width = target.offsetWidth + 'px';
+      canvas.style.height = target.offsetHeight + 'px';
+      canvas.style.pointerEvents = 'none';
+      canvas.style.zIndex = 999;
+      // center canvas size in device pixels to match snapshot resolution
+      canvas.width = w;
+      canvas.height = h;
+      gl.viewport(0,0,w,h);
+      draw(w, h, strength, edgeMode);
+    }
+
+    // UI wiring
+    document.getElementById('captureBtn').addEventListener('click', () => {
+      captureAndWarp().catch(e => console.error(e));
+    });
+    document.getElementById('strength').addEventListener('input', (e) => {
+      document.getElementById('val').textContent = e.target.value;
+      // redraw with same texture if already uploaded
+      const target = document.getElementById('captureTarget');
+      const w = canvas.width || target.offsetWidth;
+      const h = canvas.height || target.offsetHeight;
+      const edgeMode = document.getElementById('edgeMode').value === 'clamp' ? 1 : (document.getElementById('edgeMode').value === 'transparent' ? 2 : 0);
+      draw(w, h, parseFloat(e.target.value), edgeMode);
+    });
+    document.getElementById('edgeMode').addEventListener('change', () => {
+      const strength = parseFloat(document.getElementById('strength').value);
+      const w = canvas.width || document.getElementById('captureTarget').offsetWidth;
+      const h = canvas.height || document.getElementById('captureTarget').offsetHeight;
+      const edgeMode = document.getElementById('edgeMode').value === 'clamp' ? 1 : (document.getElementById('edgeMode').value === 'transparent' ? 2 : 0);
+      draw(w,h,strength, edgeMode);
+    });
+    document.getElementById('hideBtn').addEventListener('click', ()=> {
+      canvas.style.display = (canvas.style.display === 'none' || canvas.style.display === '') ? 'block' : 'none';
+    });
+
+    // initial capture on load
+    window.addEventListener('load', () => {
+      // slight delay so images/layout are ready
+      setTimeout(()=> captureAndWarp().catch(()=>{}), 300);
+    });
+
+    // optional: re-capture on resize (debounced)
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        // do not auto-capture if page heavy; but we do it here for convenience
+        captureAndWarp().catch(()=>{});
+      }, 300);
+    });
+
+  })();
+  </script>
+</body>
+</html>

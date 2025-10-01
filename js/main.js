@@ -516,8 +516,7 @@ function loadSkillsData(techStack) {
   // Create skill orbits and nodes
   const skillCategories = [
     { name: 'engines', items: techStack.gameEngines.slice(0, 4), label: 'game engines' },
-    { name: 'languages', items: techStack.languages.slice(0, 6), label: 'languages' },
-    { name: 'tools', items: techStack.tools.slice(0, 5), label: 'tools' }
+    { name: 'languages', items: techStack.languages.slice(0, 6), label: 'languages' }
   ];
   
   let orbitIndex = 0;
@@ -548,9 +547,7 @@ function loadSkillsData(techStack) {
   
   // Add category labels
   const labelsHtml = `
-    <div class="skill-category-label engines">game engines</div>
-    <div class="skill-category-label languages">languages</div>
-    <div class="skill-category-label tools">tools</div>
+    <div class="skill-category-label languages">as is often required, a lot of other hats are also worn</div>
   `;
   
   skillsOrbits.innerHTML = orbitsHtml + labelsHtml;
@@ -566,47 +563,12 @@ function loadInterestsData(interests) {
       title: 'Cinema',
       essence: 'kinos and more',
       description: interests.cinema.description,
-      icon: `
-        <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="cinemaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#ff4c24;stop-opacity:0.8" />
-              <stop offset="100%" style="stop-color:#ff6b47;stop-opacity:0.3" />
-            </linearGradient>
-          </defs>
-          <rect class="cinema-frame" x="10" y="20" width="80" height="50" fill="none" stroke="url(#cinemaGrad)" stroke-width="2" rx="5"/>
-          <rect class="cinema-screen" x="15" y="25" width="70" height="40" fill="url(#cinemaGrad)" opacity="0.3" rx="3"/>
-          <circle class="cinema-dot" cx="20" cy="15" r="3" fill="#ff4c24"/>
-          <circle class="cinema-dot" cx="30" cy="15" r="3" fill="#ff4c24"/>
-          <circle class="cinema-dot" cx="40" cy="15" r="3" fill="#ff4c24"/>
-          <path class="cinema-beam" d="M50 15 L25 25 L25 65 L50 75 Z" fill="url(#cinemaGrad)" opacity="0.4"/>
-        </svg>
-      `,
       links: [{ label: 'letterboxd', url: interests.cinema.letterboxd }]
     },
     {
       title: 'music',
       essence: 'grails and more',
       description: interests.music.description,
-      icon: `
-        <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="musicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#ff4c24;stop-opacity:0.9" />
-              <stop offset="50%" style="stop-color:#ff6b47;stop-opacity:0.6" />
-              <stop offset="100%" style="stop-color:#ff4c24;stop-opacity:0.3" />
-            </linearGradient>
-          </defs>
-          <path class="music-wave" d="M10 50 Q25 30 40 50 T70 50 T100 50" stroke="url(#musicGrad)" stroke-width="3" fill="none"/>
-          <path class="music-wave" d="M10 60 Q25 40 40 60 T70 60 T100 60" stroke="url(#musicGrad)" stroke-width="2" fill="none" opacity="0.7"/>
-          <circle class="music-node" cx="25" cy="35" r="4" fill="#ff4c24"/>
-          <circle class="music-node" cx="55" cy="45" r="4" fill="#ff4c24"/>
-          <circle class="music-node" cx="85" cy="55" r="4" fill="#ff4c24"/>
-          <rect class="music-bar" x="20" y="70" width="4" height="20" fill="url(#musicGrad)"/>
-          <rect class="music-bar" x="30" y="65" width="4" height="25" fill="url(#musicGrad)"/>
-          <rect class="music-bar" x="40" y="75" width="4" height="15" fill="url(#musicGrad)"/>
-        </svg>
-      `,
       links: [
         { label: 'last.fm', url: interests.music.lastfm },
         { label: 'topster', url: interests.music.topster }
@@ -616,44 +578,12 @@ function loadInterestsData(interests) {
       title: 'books',
       essence: 'performativeness and more',
       description: interests.books.description,
-      icon: `
-        <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="booksGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#ff4c24;stop-opacity:0.8" />
-              <stop offset="100%" style="stop-color:#ff6b47;stop-opacity:0.4" />
-            </linearGradient>
-          </defs>
-          <rect class="book-spine" x="20" y="20" width="15" height="60" fill="url(#booksGrad)" rx="2"/>
-          <rect class="book-spine" x="40" y="25" width="15" height="55" fill="url(#booksGrad)" rx="2" opacity="0.8"/>
-          <rect class="book-spine" x="60" y="30" width="15" height="50" fill="url(#booksGrad)" rx="2" opacity="0.6"/>
-          <path class="book-text" d="M25 35 L30 35 M25 40 L32 40 M25 45 L28 45" stroke="#ff4c24" stroke-width="1"/>
-          <path class="book-text" d="M45 40 L50 40 M45 45 L52 45" stroke="#ff4c24" stroke-width="1" opacity="0.8"/>
-          <circle class="book-dot" cx="67" cy="40" r="2" fill="#ff4c24"/>
-        </svg>
-      `,
       links: []
     },
     {
       title: 'games',
       essence: 'vidya and more',
       description: interests.games.description,
-      icon: `
-        <svg class="interest-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="gamesGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#ff4c24;stop-opacity:0.9" />
-              <stop offset="100%" style="stop-color:#ff6b47;stop-opacity:0.5" />
-            </linearGradient>
-          </defs>
-          <polygon class="game-hex" points="50,15 70,30 70,60 50,75 30,60 30,30" fill="none" stroke="url(#gamesGrad)" stroke-width="2"/>
-          <polygon class="game-hex" points="50,25 60,35 60,55 50,65 40,55 40,35" fill="url(#gamesGrad)" opacity="0.3"/>
-          <circle class="game-node" cx="45" cy="40" r="3" fill="#ff4c24"/>
-          <circle class="game-node" cx="55" cy="40" r="3" fill="#ff4c24"/>
-          <circle class="game-node" cx="50" cy="50" r="3" fill="#ff4c24"/>
-          <path class="game-connect" d="M45 40 L55 40 M50 40 L50 50" stroke="#ff4c24" stroke-width="1" opacity="0.6"/>
-        </svg>
-      `,
       links: []
     }
   ];
@@ -663,20 +593,19 @@ function loadInterestsData(interests) {
   const nodesHtml = interestNodes.map(node => `
     <div class="interest-node">
       <div class="interest-orb">
-        <div class="interest-core">
-          <div class="interest-icon">${node.icon}</div>
+        <div class="interest-content">
           <div class="interest-title">${node.title}</div>
           <div class="interest-essence">${node.essence}</div>
+          <div class="interest-description">${node.description}</div>
+          ${node.links.length > 0 ? `
+            <div class="interest-links">
+              ${node.links.map(link => `
+                <a href="${link.url}" target="_blank" class="interest-link">${link.label}</a>
+              `).join('')}
+            </div>
+          ` : ''}
         </div>
       </div>
-      <div class="interest-description">${node.description}</div>
-      ${node.links.length > 0 ? `
-        <div class="interest-links">
-          ${node.links.map(link => `
-            <a href="${link.url}" target="_blank" class="interest-link">${link.label}</a>
-          `).join('')}
-        </div>
-      ` : ''}
     </div>
   `).join('');
   

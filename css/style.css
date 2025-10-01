@@ -1003,7 +1003,7 @@ body.lightbox-open {
   margin: 0 auto;
   min-height: 520px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
   gap: 2rem;
   align-items: start;
   justify-items: center;
@@ -1042,22 +1042,27 @@ body.lightbox-open {
 }
 
 .interest-orb {
-  width: 200px;
-  height: 160px;
+  width: 280px;
+  min-height: 200px;
+  max-height: 300px;
   background:
-    linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(21,37,37,0.85) 100%),
-    repeating-linear-gradient(90deg, rgba(168,255,81,0.14) 0 1px, transparent 1px 3px);
-  border: 2px solid rgba(168, 255, 81, 0.6);
-  border-radius: 8px; /* pixel card style */
+    linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(21,37,37,0.9) 100%),
+    repeating-linear-gradient(90deg, rgba(168,255,81,0.12) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(70,230,255,0.08) 0 1px, transparent 1px 4px);
+  border: 2px solid rgba(168, 255, 81, 0.7);
+  border-radius: 8px;
   position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(8px);
+  overflow: visible;
+  backdrop-filter: blur(6px);
   transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   flex-direction: column;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.35) inset, 0 4px 0 rgba(0,0,0,0.25);
+  box-shadow: 
+    0 0 0 2px rgba(0,0,0,0.4) inset, 
+    0 4px 0 rgba(0,0,0,0.3),
+    0 0 20px rgba(70, 230, 255, 0.1);
   z-index: 1;
 }
 
@@ -1117,84 +1122,85 @@ body.lightbox-open {
   opacity: 1;
 }
 
-.interest-core {
+.interest-content {
   position: relative;
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 1.2rem;
+  width: 100%;
+  flex: 1;
+  justify-content: flex-start;
+  gap: 0.8rem;
 }
 
-.interest-icon {
-  font-size: 2.5rem;
-  color: rgba(168, 255, 81, 0.85);
-  margin-bottom: 0.8rem;
-  transition: transform 0.2s ease, color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-}
-
-.interest-node:hover .interest-icon {
-  transform: scale(1.05);
-  color: #A8FF51;
-  text-shadow: 0 0 14px rgba(168, 255, 81, 0.5);
-}
+/* Removed interest-icon styles since icons are no longer used */
 
 .interest-title {
   font-size: 1.2rem;
-  font-weight: 600;
-  color: #efeeec;
+  font-weight: 700;
+  color: #A8FF51;
   text-transform: lowercase;
   letter-spacing: 2px;
-  margin-bottom: 0.5rem;
+  margin: 0;
   transition: color 0.2s ease, text-shadow 0.2s ease;
   font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(168, 255, 81, 0.3);
+  line-height: 1.2;
 }
 
 .interest-node:hover .interest-title {
-  color: #A8FF51;
-  text-shadow: 0 0 15px rgba(168, 255, 81, 0.5);
+  color: #46E6FF;
+  text-shadow: 0 0 20px rgba(70, 230, 255, 0.6);
 }
 
 .interest-essence {
   font-size: 0.8rem;
-  color: rgba(168, 255, 81, 0.75);
-  font-weight: 300;
+  color: rgba(70, 230, 255, 0.8);
+  font-weight: 400;
   letter-spacing: 1px;
   text-transform: lowercase;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  margin: 0;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
   font-style: italic;
+  text-shadow: 0 0 8px rgba(70, 230, 255, 0.2);
+  line-height: 1.3;
 }
 
 .interest-node:hover .interest-essence {
-  opacity: 1;
+  color: #A8FF51;
+  text-shadow: 0 0 12px rgba(168, 255, 81, 0.4);
 }
 
 .interest-description {
   position: static;
   width: 100%;
-  max-width: 220px;
-  margin-top: 0.75rem;
-  padding: 0.75rem;
+  margin: 0;
+  padding: 0.6rem;
   background:
-    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(21, 37, 37, 0.85) 100%);
-  border: 1px solid rgba(168, 255, 81, 0.45);
-  border-radius: 8px;
+    linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(21, 37, 37, 0.75) 100%),
+    repeating-linear-gradient(90deg, rgba(70,230,255,0.06) 0 1px, transparent 1px 2px);
+  border: 1px solid rgba(70, 230, 255, 0.3);
+  border-radius: 6px;
   color: rgba(239, 238, 236, 0.9);
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  line-height: 1.4;
   text-align: center;
   opacity: 1;
   visibility: visible;
-  transition: transform 0.25s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(6px);
   z-index: 2;
   pointer-events: auto;
   user-select: text;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .interest-description::before {
@@ -1225,7 +1231,7 @@ body.lightbox-open {
 
 .interest-links {
   position: static;
-  margin-top: 0.5rem;
+  margin: 0;
   display: flex;
   gap: 0.5rem;
   opacity: 1;
@@ -1233,27 +1239,32 @@ body.lightbox-open {
   z-index: 3;
   position: relative;
   pointer-events: auto;
-  min-height: 0; /* lock height to prevent jitter */
+  min-height: 0;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .interest-node:hover .interest-links { opacity: 1; }
 
 .interest-link {
   background:
-    linear-gradient(135deg, rgba(168, 255, 81, 0.22) 0%, rgba(70, 230, 255, 0.12) 100%),
-    repeating-linear-gradient(90deg, rgba(168,255,81,0.20) 0 1px, transparent 1px 3px);
-  border: 2px solid rgba(168, 255, 81, 0.6);
-  color: #A8FF51;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+    linear-gradient(135deg, rgba(70, 230, 255, 0.15) 0%, rgba(168, 255, 81, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(70,230,255,0.12) 0 1px, transparent 1px 3px);
+  border: 1px solid rgba(70, 230, 255, 0.5);
+  color: #46E6FF;
+  padding: 0.4rem 0.8rem;
+  border-radius: 3px;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  text-transform: lowercase;
+  letter-spacing: 1px;
+  font-family: 'Courier New', monospace;
   pointer-events: auto;
 }
 .interest-title, .interest-essence, .interest-description, .interest-links { transform: none !important; }
@@ -1279,11 +1290,12 @@ body.lightbox-open {
 
 .interest-link:hover {
   background:
-    linear-gradient(135deg, rgba(168, 255, 81, 0.3) 0%, rgba(70, 230, 255, 0.18) 100%),
-    repeating-linear-gradient(90deg, rgba(168,255,81,0.26) 0 1px, transparent 1px 3px);
+    linear-gradient(135deg, rgba(168, 255, 81, 0.25) 0%, rgba(70, 230, 255, 0.15) 100%),
+    repeating-linear-gradient(90deg, rgba(168,255,81,0.18) 0 1px, transparent 1px 3px);
   border-color: #A8FF51;
-  color: #ffffff;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset, 0 6px 18px rgba(168, 255, 81, 0.28);
+  color: #A8FF51;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3) inset, 0 4px 12px rgba(168, 255, 81, 0.2);
+  text-shadow: 0 0 8px rgba(168, 255, 81, 0.4);
 }
 
 /* prevent any vertical nudge on hover/focus/active */
@@ -1358,11 +1370,7 @@ body.lightbox-open {
   opacity: 0.8;
 }
 
-.interest-svg {
-  width: 60px;
-  height: 60px;
-  transition: all 0.4s ease;
-}
+/* Removed interest-svg styles since icons are no longer used */
 
 /* Cinema SVG Animations */
 .cinema-frame {
@@ -1561,22 +1569,23 @@ body.lightbox-open {
   }
   
   .interests-constellation {
-    grid-template-columns: repeat(2, minmax(200px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    gap: 1.5rem;
     min-height: 0;
   }
   
   .interest-orb {
-    width: 180px;
-    height: 140px;
-  }
-  
-  .interest-icon {
-    font-size: 2rem;
+    width: 240px;
+    min-height: 180px;
+    max-height: 250px;
   }
   
   .interest-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .interest-essence {
+    font-size: 0.75rem;
   }
   
   .web-connection { display: none; }
@@ -1600,23 +1609,24 @@ body.lightbox-open {
   
   .interests-constellation {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
     min-height: 0;
   }
   
   /* absolute offsets not needed in grid layout */
   
   .interest-orb {
-    width: 170px;
-    height: 130px;
-  }
-  
-  .interest-icon {
-    font-size: 1.8rem;
+    width: 220px;
+    min-height: 160px;
+    max-height: 220px;
   }
   
   .interest-title {
-    font-size: 0.9rem;
+    font-size: 1rem;
+  }
+  
+  .interest-essence {
+    font-size: 0.7rem;
   }
   
   .interest-links { flex-direction: column; gap: 0.4rem; }

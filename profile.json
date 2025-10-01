@@ -51,9 +51,8 @@
   ],
 
   "techStack": {
-    "gameEngines": ["Unity", "Unreal", "Godot (basic)"],
-    "languages": ["C++", "C", "C#", "Python", "Pinescript"],
-    "tools": ["Adobe Premiere Pro", "Adobe Photoshop", "Linux (various distros)"]
+    "gameEngines": ["unity", "unreal"],
+    "languages": ["C++", "C", "C#", "python", "Pinescript"]
   },
 
   "interests": {

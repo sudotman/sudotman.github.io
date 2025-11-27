@@ -4,6 +4,10 @@
   visibility: hidden !important;
 }
 
+.hidden{
+  display: none;
+}
+
 /* Prevent body scroll when modal is open */
 body.modal-open {
   overflow: hidden !important;
@@ -2692,7 +2696,6 @@ body.lightbox-open {
   padding: 1.5rem 2rem 2rem;
   border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   background: transparent;
-  position: relative;
   z-index: 2;
 }
 
@@ -4374,6 +4377,7 @@ body.theme-pink .osmo-ui::before {
   }
   
   .experience-role-period {
+    padding-right: 5%;
     font-size: 0.6rem;
   }
   
@@ -4475,6 +4479,7 @@ body.theme-pink .osmo-ui::before {
   }
   
   .experience-role-title {
+    padding-left: 5%;
     font-size: 0.7rem;
   }
   
@@ -4528,7 +4533,7 @@ body.theme-pink .osmo-ui::before {
     top: auto !important;
     margin: 0;
     overflow: visible;
-    height: auto;
+    height: auto !important;
   }
   
   .interest-orb {
@@ -4541,6 +4546,8 @@ body.theme-pink .osmo-ui::before {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     overflow: visible;
+    display: flex;
+    flex-direction: column;
   }
   
   .interest-content {
@@ -4565,11 +4572,7 @@ body.theme-pink .osmo-ui::before {
     font-size: 0.6rem;
     line-height: 1.4;
     margin-top: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: block;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
@@ -5081,7 +5084,7 @@ body.theme-pink .osmo-ui::before {
     margin: 0;
     padding-bottom: 0;
     transform: none !important;
-    border-radius: 14px;
+    border-radius: 0px;
     /* Use category accent color for border */
     border: 2px solid color-mix(in srgb, var(--accent) 50%, transparent) !important;
     box-shadow: 

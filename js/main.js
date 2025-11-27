@@ -453,6 +453,14 @@ function morphConstellation(activeTab) {
   const constellation = document.querySelector('.constellation-nav');
   const connections = document.querySelectorAll('.connection-line');
   const center = document.querySelector('.constellation-center');
+
+  
+  // const navNodesClasses = constellation.querySelectorAll('.nav-node');
+  // navNodesClasses.forEach((node, index) => {
+  //   node.addEventListener('click', () => {
+  //     playExperienceCardSound();
+  //   });
+  // });
   
   // Add morphing class for enhanced effects
   constellation.classList.add('morphing');
@@ -513,8 +521,39 @@ function loadExperienceData(workExperience) {
       <div class="experience-summary">${job.summary}</div>
     </div>
   `).join('');
-}
+  
+  // Major scale frequencies (C4, D4, E4, F4, G4, A4, B4, C5, D5, E5...)
+  // Creates a different but harmonious sound compared to pentatonic
+  const majorScale = [
+    261.63, // C4
+    293.66, // D4
+    329.63, // E4
+    349.23, // F4
+    392.00, // G4
+    440.00, // A4
+    493.88, // B4
+    523.25, // C5
+    587.33, // D5
+    659.25  // E5
+  ];
+  
+  // Add click event listeners to experience-role elements
+  const roleTitles = experienceCards.querySelectorAll('.experience-role');
+  roleTitles.forEach((title, index) => {
+    // Assign each title a different note from the major scale
+    const frequency = majorScale[index % majorScale.length];
+    title.addEventListener('click', () => {
+      playExperienceRoleTitleSound(frequency);
+    });
+  });
 
+  // const fullCards = experienceCards.querySelectorAll('.experience-card');
+  // fullCards.forEach((card, index) => {
+  //   card.addEventListener('click', () => {
+  //     playExperienceCardSound();
+  //   });
+  // });
+}
 // Load Skills Data into constellation
 function loadSkillsData(techStack) {
   const skillsOrbits = document.querySelector('.skills-orbits');
@@ -558,6 +597,31 @@ function loadSkillsData(techStack) {
   `;
   
   skillsOrbits.innerHTML = orbitsHtml + labelsHtml;
+  
+  // Pentatonic scale frequencies (C4, D4, E4, G4, A4, C5, D5, E5, G5, A5...)
+  // These create pleasant, harmonious sounds
+  const pentatonicScale = [
+    261.63, // C4
+    293.66, // D4
+    329.63, // E4
+    392.00, // G4
+    440.00, // A4
+    523.25, // C5
+    587.33, // D5
+    659.25, // E5
+    783.99, // G5
+    880.00  // A5
+  ];
+  
+  // Add click event listeners to skill nodes for soothing sound
+  const skillNodes = skillsOrbits.querySelectorAll('.skill-node');
+  skillNodes.forEach((node, index) => {
+    // Assign each node a different note from the pentatonic scale
+    const frequency = pentatonicScale[index % pentatonicScale.length];
+    node.addEventListener('click', () => {
+      playSkillNodeSound(frequency);
+    });
+  });
 }
 
 // Load Interests Data
@@ -851,11 +915,13 @@ function revealProjects() {
   const dotsContainer = document.querySelector('.dots-container');
   const projectsContent = document.getElementById('projects-content');
   const centerIcon = document.querySelector('.osmo-icon__link');
+  const tldrButton = document.querySelector('.website-link.is--alt');
   
   if (dotsContainer && projectsContent && centerIcon) {
     // Hide center icon first
     centerIcon.classList.add('hidden');
-    
+
+    tldrButton.style.display = 'none';
     // Animate dots to disperse
     setTimeout(() => {
       animateDotsDisperse();
@@ -874,10 +940,12 @@ function returnToDots() {
   const dotsContainer = document.querySelector('.dots-container');
   const projectsContent = document.getElementById('projects-content');
   const centerIcon = document.querySelector('.osmo-icon__link');
+  const tldrButton = document.querySelector('.website-link.is--alt');
   
   if (dotsContainer && projectsContent && centerIcon) {
     // Hide projects content
     projectsContent.classList.remove('revealed');
+    tldrButton.style.display = 'flex';
     
     // Animate dots back to normal
     setTimeout(() => {
@@ -3406,7 +3474,7 @@ function showOracleOverlay(onFinish) {
 }
 
 // Play mystical sound effect during oracle overlay
-function playOracleSound() {
+function playOracleSound(isShort) {
   try {
     // Create a subtle mystical sound using Web Audio API
     if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
@@ -3422,17 +3490,129 @@ function playOracleSound() {
       // Set up mystical frequency sweep
       oscillator.frequency.setValueAtTime(150, audioContext.currentTime); // A3
 
-      
-      oscillator.type = 'sine';
+      if(isShort) {
+        oscillator.type = 'cosine';
+      } else {
+        oscillator.type = 'sine';
+      }
+
+      shortEndTime = 0.5;
+      longEndTime = 2.5;
       
       // Gentle fade in and out
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.3);
-      gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 2.0);
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2.5);
+      if (isShort) {
+        gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + shortEndTime*0.25);
+        gainNode.gain.linearRampToValueAtTime(0.025, audioContext.currentTime + shortEndTime*0.8);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + shortEndTime);
+      } else {
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.3);
+        gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 2.0);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + longEndTime);
+      }
+
       
       oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 2.5);
+      oscillator.stop(audioContext.currentTime + (isShort ? shortEndTime : longEndTime));
+    }
+  } catch (error) {
+    console.log('Audio not available:', error);
+  }
+}
+
+// Play soothing sound effect for skill-node clicks
+// Uses a pentatonic scale for pleasant, harmonious notes
+function playSkillNodeSound(frequency) {
+  try {
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+      const audioContext = new (AudioContext || webkitAudioContext)();
+      
+      // Create a gentle, soothing chime-like sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Use the provided frequency (defaults to 330 Hz if not provided)
+      oscillator.frequency.setValueAtTime(frequency || 330, audioContext.currentTime);
+      oscillator.type = 'sine'; // Smooth sine wave for soothing sound
+      
+      // Quick, gentle fade in and out for a pleasant chime
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.15);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.4);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.4);
+    }
+  } catch (error) {
+    console.log('Audio not available:', error);
+  }
+}
+
+function playExperienceCardSound() {
+  try {
+    playOracleSound(true);
+  } catch (error) {
+    console.log('Audio not available:', error);
+  }
+}
+
+// Play harmonious sound effect for experience-role-title clicks
+// Uses a major scale with a bell-like chime using harmonics
+function playExperienceRoleTitleSound(frequency) {
+  try {
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+      const audioContext = new (AudioContext || webkitAudioContext)();
+      const baseFreq = frequency || 330;
+      const now = audioContext.currentTime;
+      
+      // Create a bell-like sound using multiple oscillators with harmonics
+      // Main tone
+      const osc1 = audioContext.createOscillator();
+      const gain1 = audioContext.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(baseFreq, now);
+      osc1.connect(gain1);
+      gain1.connect(audioContext.destination);
+      
+      // First harmonic (octave)
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(baseFreq * 2, now);
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      
+      // Second harmonic (fifth)
+      const osc3 = audioContext.createOscillator();
+      const gain3 = audioContext.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(baseFreq * 3, now);
+      osc3.connect(gain3);
+      gain3.connect(audioContext.destination);
+      
+      // Bell-like envelope: quick attack, slow decay
+      gain1.gain.setValueAtTime(0, now);
+      gain1.gain.linearRampToValueAtTime(0.12, now + 0.03);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      
+      gain2.gain.setValueAtTime(0, now);
+      gain2.gain.linearRampToValueAtTime(0.06, now + 0.03);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      
+      gain3.gain.setValueAtTime(0, now);
+      gain3.gain.linearRampToValueAtTime(0.03, now + 0.03);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      
+      osc1.start(now);
+      osc1.stop(now + 0.8);
+      osc2.start(now);
+      osc2.stop(now + 0.6);
+      osc3.start(now);
+      osc3.stop(now + 0.4);
     }
   } catch (error) {
     console.log('Audio not available:', error);

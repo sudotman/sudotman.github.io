@@ -80,7 +80,7 @@ function initGlowingInteractiveDotsGrid() {
       
       // Density control: cap total dots for performance and scale gap accordingly
       let total = cols * rows;
-      const maxDots = PERF.isLowEnd ? 450 : 900;
+      const maxDots = PERF.maxDots;
       if (!isAsciiActive && total > maxDots) {
         const scale = Math.max(1.0, Math.sqrt(total / maxDots));
         gapPx = gapPx * scale;
@@ -90,7 +90,14 @@ function initGlowingInteractiveDotsGrid() {
       }
 
       // Store interaction sampling stride to avoid touching every dot each frame
-      const stride = total > 1200 ? 3 : (total > 800 ? 2 : 1);
+      let stride;
+      if (PERF.tier === 'low') {
+        stride = Math.max(3, Math.ceil(total / 100));
+      } else if (PERF.tier === 'medium') {
+        stride = total > 600 ? 2 : 1;
+      } else {
+        stride = total > 1000 ? 2 : 1;
+      }
       container._interactionStride = stride;
 
       const holeCols = centerHole ? (cols % 2 === 0 ? 4 : 5) : 0;

@@ -323,15 +323,34 @@ async function animateHeatmapReveal(container) {
   if (!field) return;
 
   if (typeof gsap !== 'undefined') {
-    field.revealBoost = 1;
+    field.revealBoost = 1.2;
+    field.introOpacity = 0;
+    field.introProgress = 0;
+    field.triggerRipple(field.width * 0.5, field.height * 0.5, {
+      duration: 900,
+      radius: Math.max(field.width, field.height) * 0.52,
+      band: field.cellSize * 3.2,
+      push: field.cellSize * 0.55
+    });
+
     gsap.to(field, {
       revealBoost: 0,
-      duration: 0.9,
+      duration: 1.05,
       ease: 'power2.out',
+      onUpdate: () => field.requestRender()
+    });
+
+    gsap.to(field, {
+      introOpacity: 1,
+      introProgress: 1,
+      duration: 0.82,
+      ease: 'power3.out',
       onUpdate: () => field.requestRender()
     });
   } else {
     field.revealBoost = 0.6;
+    field.introOpacity = 1;
+    field.introProgress = 1;
     field.requestRender();
   }
 }
@@ -556,11 +575,25 @@ function playOracleSound(isShort) {
   }
 }
 
+function getSharedUiAudioContext(key) {
+  try {
+    if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') return null;
+    const fn = getSharedUiAudioContext;
+    fn._contexts = fn._contexts || {};
+    const ctx = fn._contexts[key] || (fn._contexts[key] = new (AudioContext || webkitAudioContext)());
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    return ctx;
+  } catch (_) {
+    return null;
+  }
+}
+
 function playSkillNodeSound(frequency) {
   try {
-    if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') return;
-
-    const audioContext = playSkillNodeSound._ctx || (playSkillNodeSound._ctx = new (AudioContext || webkitAudioContext)());
+    const audioContext = getSharedUiAudioContext('skill');
+    if (!audioContext) return;
     const now = audioContext.currentTime;
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
@@ -590,9 +623,8 @@ function playExperienceCardSound() {
 
 function playExperienceRoleTitleSound(frequency) {
   try {
-    if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') return;
-
-    const audioContext = new (AudioContext || webkitAudioContext)();
+    const audioContext = getSharedUiAudioContext('experience');
+    if (!audioContext) return;
     const baseFreq = frequency || 330;
     const now = audioContext.currentTime;
 
@@ -625,6 +657,55 @@ function playExperienceRoleTitleSound(frequency) {
   } catch (_) {
     // ignore audio failures
   }
+}
+
+function playInterestNodeSound(baseFrequency, harmonicFrequency) {
+  try {
+    const audioContext = getSharedUiAudioContext('interest');
+    if (!audioContext) return;
+
+    const now = audioContext.currentTime;
+    const root = baseFrequency || 293.66;
+    const accent = harmonicFrequency || (root * 1.5);
+    const osc1 = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gain1 = audioContext.createGain();
+    const gain2 = audioContext.createGain();
+
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+    osc1.frequency.setValueAtTime(root, now);
+    osc1.frequency.exponentialRampToValueAtTime(root * 1.12, now + 0.18);
+    osc2.frequency.setValueAtTime(accent, now + 0.03);
+
+    gain1.gain.setValueAtTime(0.0001, now);
+    gain1.gain.exponentialRampToValueAtTime(0.055, now + 0.03);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+
+    gain2.gain.setValueAtTime(0.0001, now);
+    gain2.gain.exponentialRampToValueAtTime(0.028, now + 0.05);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+
+    osc1.connect(gain1).connect(audioContext.destination);
+    osc2.connect(gain2).connect(audioContext.destination);
+    osc1.start(now);
+    osc2.start(now + 0.02);
+    osc1.stop(now + 0.44);
+    osc2.stop(now + 0.34);
+  } catch (_) {
+    // ignore audio failures
+  }
+}
+
+function playTabSwitchSound(targetTab) {
+  const tabFrequencies = {
+    projects: [261.63, 392.0],
+    experience: [329.63, 493.88],
+    interests: [392.0, 587.33]
+  };
+
+  const [root, accent] = tabFrequencies[targetTab] || [261.63, 392.0];
+  playInterestNodeSound(root, accent);
 }
 
 function startLoadingAnimation() {

@@ -1222,7 +1222,7 @@ body.theme-pink .osmo-ui::before {
   color: #FF6B47;
   font-size: 1rem;
   line-height: 1;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -1237,9 +1237,15 @@ body.theme-pink .osmo-ui::before {
 }
 
 .ascii-sampler-btn.visible {
+  display: flex;
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+.ascii-sampler-btn:not(.enabled) {
+  opacity: 0.42;
+  visibility: visible;
 }
 
 .ascii-sampler-btn::after {

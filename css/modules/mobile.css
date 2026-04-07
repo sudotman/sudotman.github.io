@@ -378,22 +378,24 @@
 /* === Experience Tab Mobile === */
 @media (max-width: 768px) {
   .experience-container {
-    padding: 0.75rem;
+    padding: 0.9rem;
+    border-radius: 18px;
   }
   
   .experience-header {
-    text-align: center;
-    margin-bottom: 0.75rem;
+    text-align: left;
+    margin-bottom: 1rem;
   }
   
   .experience-header h2 {
-    font-size: 1.1rem;
+    font-size: 1.45rem;
     letter-spacing: 1px;
   }
   
   .experience-subtitle {
-    font-size: 0.7rem;
-    margin-top: 0.25rem;
+    font-size: 0.62rem;
+    margin-top: 0.45rem;
+    letter-spacing: 0.22em;
   }
   
   .experience-main {
@@ -408,11 +410,11 @@
   }
   
   .experience-card {
-    padding: 0.75rem;
+    padding: 0.85rem;
     margin-bottom: 0;
     margin-left: 0 !important;
     transform: none !important;
-    border-radius: 10px;
+    border-radius: 16px 6px 16px 6px;
     border-width: 1px;
     overflow: visible;
   }
@@ -422,14 +424,32 @@
     margin-left: 0 !important;
   }
   
+  .experience-card-meta {
+    margin-bottom: 0.7rem;
+  }
+
+  .experience-chip,
+  .experience-index {
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+  }
+
+  .experience-card-header {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
   .experience-org {
-    font-size: 0.95rem;
-    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    margin-bottom: 0;
   }
   
   .experience-period {
-    font-size: 0.65rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.56rem;
+    margin-bottom: 0;
+    text-align: left;
+    padding: 0.35rem 0 0.35rem 0.55rem;
   }
   
   .experience-roles {
@@ -437,35 +457,39 @@
   }
   
   .experience-role {
-    padding: 0.35rem 0;
-    border-bottom: 1px solid rgba(168, 255, 81, 0.08);
-  }
-  
-  .experience-role:last-child {
+    padding: 0.55rem 0.65rem;
     border-bottom: none;
   }
   
+  .experience-role-copy {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  
   .experience-role-title {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .experience-role-period {
-    padding-right: 5%;
-    font-size: 0.6rem;
+    padding-right: 0;
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+
+  .experience-role-index {
+    min-width: 1.65rem;
+    height: 1.65rem;
+    font-size: 0.52rem;
   }
   
   .experience-summary {
-    font-size: 0.7rem;
-    margin-top: 0.5rem;
+    font-size: 0.68rem;
+    margin-top: 0;
     line-height: 1.4;
     opacity: 0.8;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    padding: 0.75rem 0.8rem;
   }
   
   .skills-constellation {
@@ -473,21 +497,22 @@
     height: auto;
     min-height: auto;
     padding: 0.75rem;
-    border-radius: 12px;
+    border-radius: 16px;
     margin-top: 0.5rem;
     animation: none;
   }
   
   .skills-header {
     margin-bottom: 0.5rem;
+    padding: 0 0 0.35rem;
   }
   
   .skills-header h3 {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
   
   .skills-subtitle {
-    font-size: 0.6rem;
+    font-size: 0.52rem;
   }
   
   .skills-orbits {
@@ -517,11 +542,11 @@
     position: relative !important;
     left: auto !important;
     top: auto !important;
-    font-size: 0.6rem;
+    width: auto;
+    height: auto;
+    font-size: 0.58rem;
     padding: 0.25rem 0.5rem;
-    background: rgba(168, 255, 81, 0.1);
-    border: 1px solid rgba(168, 255, 81, 0.2);
-    border-radius: 4px;
+    border-radius: 999px;
     transform: none !important;
   }
   
@@ -569,32 +594,40 @@
 /* === Interests Tab Mobile === */
 @media (max-width: 768px) {
   .interests-container {
-    padding: 0.75rem;
+    padding: 0.9rem;
     min-height: auto;
-    background: none;
+    border-radius: 18px;
   }
   
   .interests-header {
-    text-align: center;
-    margin-bottom: 0.75rem;
+    text-align: left;
+    margin-bottom: 1rem;
   }
   
   .interests-header h2 {
-    font-size: 1.1rem;
+    font-size: 1.55rem;
     letter-spacing: 1px;
   }
   
   .interests-subtitle {
-    font-size: 0.7rem;
-    margin-top: 0.25rem;
+    font-size: 0.6rem;
+    margin-top: 0.45rem;
+    letter-spacing: 0.22em;
   }
   
   .interests-constellation {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     min-height: auto;
     padding: 0;
+  }
+
+  .interest-node:nth-child(1),
+  .interest-node:nth-child(2),
+  .interest-node:nth-child(3),
+  .interest-node:nth-child(4) {
+    grid-column: auto;
   }
   
   .interest-node {
@@ -611,30 +644,44 @@
   
   .interest-orb {
     width: 100%;
-    min-height: 120px;
+    min-height: auto;
     max-height: none;
     height: auto;
-    padding: 0.6rem;
-    border-radius: 10px;
+    padding: 0 0 0.8rem;
+    border-radius: 16px 6px 16px 6px;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     overflow: visible;
     display: flex;
     flex-direction: column;
   }
+
+  .interest-meta {
+    padding: 0.8rem 0.8rem 0;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .interest-code,
+  .interest-kicker,
+  .interest-tag {
+    font-size: 0.5rem;
+    letter-spacing: 0.14em;
+  }
   
   .interest-content {
-    padding: 0;
+    padding: 0.15rem 0.8rem 0;
   }
   
   .interest-title {
-    font-size: 0.8rem;
-    margin-bottom: 0.15rem;
+    font-size: 1rem;
+    margin-bottom: 0;
   }
   
   .interest-essence {
-    font-size: 0.55rem;
-    margin-bottom: 0.35rem;
+    font-size: 0.5rem;
+    margin-bottom: 0;
+    letter-spacing: 0.14em;
   }
   
   .interest-description {
@@ -642,24 +689,32 @@
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
-    font-size: 0.6rem;
+    font-size: 0.64rem;
     line-height: 1.4;
-    margin-top: 0;
+    margin-top: 0.1rem;
     display: block;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    padding: 0.75rem;
+  }
+
+  .interest-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
   }
   
   .interest-links {
     margin-top: 0.4rem;
     gap: 0.25rem;
     flex-wrap: wrap;
+    justify-content: flex-start;
   }
   
   .interest-link {
-    font-size: 0.55rem;
-    padding: 0.2rem 0.4rem;
+    font-size: 0.52rem;
+    padding: 0.22rem 0.45rem;
   }
   
   .constellation-web {
@@ -673,7 +728,7 @@
   }
   
   .interests-header h2 {
-    font-size: 1rem;
+    font-size: 1.25rem;
   }
   
   .interests-constellation {
@@ -681,18 +736,15 @@
   }
   
   .interest-orb {
-    min-height: 100px;
-    padding: 0.5rem;
+    padding-bottom: 0.6rem;
   }
   
   .interest-title {
-    font-size: 0.75rem;
+    font-size: 0.9rem;
   }
   
   .interest-description {
-    font-size: 0.55rem;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    font-size: 0.58rem;
   }
   
   .interest-link {

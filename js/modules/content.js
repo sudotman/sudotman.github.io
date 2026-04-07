@@ -262,7 +262,13 @@ function initColorSampler() {
   });
 
   function syncAsciiButtonVisibility() {
-    asciiBtn.classList.toggle('visible', active && asciiSupported);
+    const shouldShow = active && supportsMedia;
+    asciiBtn.hidden = !shouldShow;
+    asciiBtn.disabled = !asciiSupported;
+    asciiBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+    asciiBtn.classList.toggle('visible', shouldShow);
+    asciiBtn.classList.toggle('enabled', asciiSupported);
+    asciiBtn.style.display = shouldShow ? 'flex' : 'none';
   }
 
   function startSampling(stream) {

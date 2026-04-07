@@ -653,7 +653,10 @@ function initTabSwitching() {
   
   navNodes.forEach(node => {
     node.addEventListener('click', () => {
+      if (node.classList.contains('active')) return;
+
       const targetTab = node.dataset.tab;
+      try { playTabSwitchSound(targetTab); } catch (_) {}
       
       // Remove active class from all nodes and contents
       navNodes.forEach(n => n.classList.remove('active'));
@@ -981,6 +984,31 @@ function loadInterestsData(interests) {
   `).join('');
   
   constellationWeb.insertAdjacentHTML('beforebegin', nodesHtml);
+
+  const notePairs = [
+    [293.66, 440.0],
+    [329.63, 493.88],
+    [392.0, 587.33],
+    [261.63, 392.0]
+  ];
+
+  const interestElements = interestsConstellation.querySelectorAll('.interest-node');
+  interestElements.forEach((node, index) => {
+    const [root, accent] = notePairs[index % notePairs.length];
+    node.addEventListener('click', event => {
+      if (event.target.closest('.interest-link')) return;
+      try { playInterestNodeSound(root, accent); } catch (_) {}
+    });
+  });
+
+  const interestLinks = interestsConstellation.querySelectorAll('.interest-link');
+  interestLinks.forEach((link, index) => {
+    const [root, accent] = notePairs[(index + 1) % notePairs.length];
+    link.addEventListener('click', event => {
+      event.stopPropagation();
+      try { playInterestNodeSound(root * 1.12, accent * 1.05); } catch (_) {}
+    });
+  });
 }
 
 // Animation Functions
@@ -1029,12 +1057,12 @@ function animateSkillCards() {
 }
 
 function animateInterestCards() {
-  const interestCards = document.querySelectorAll('.interest-card');
+  const interestCards = document.querySelectorAll('.interest-node');
   interestCards.forEach((card, index) => {
     card.style.animation = 'none';
     card.offsetHeight; // Trigger reflow
-    card.style.animation = `floatInInterest 1s ease forwards`;
-    card.style.animationDelay = `${(index + 1) * 0.2}s`;
+    card.style.animation = 'nodeReveal 0.75s ease-out forwards';
+    card.style.animationDelay = `${(index + 1) * 0.12}s`;
   });
 }
 

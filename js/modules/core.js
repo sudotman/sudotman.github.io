@@ -690,23 +690,21 @@ function updateCardActionsForTab(activeTab) {
   const filterDropdown = document.getElementById('filter-dropdown');
   
   if (activeTab === 'projects') {
-    // Enable card actions for projects tab
     if (cardActions) {
       cardActions.style.opacity = '1';
       cardActions.style.pointerEvents = 'auto';
+      cardActions.classList.remove('is-collapsed');
     }
-    // Close filter dropdown if open
     if (filterDropdown) {
       filterDropdown.classList.remove('show');
       document.querySelector('.filter-cards-btn')?.classList.remove('active');
     }
   } else {
-    // Disable card actions for other tabs
     if (cardActions) {
-      cardActions.style.opacity = '0.3';
+      cardActions.style.opacity = '0';
       cardActions.style.pointerEvents = 'none';
+      cardActions.classList.add('is-collapsed');
     }
-    // Close filter dropdown if open
     if (filterDropdown) {
       filterDropdown.classList.remove('show');
       document.querySelector('.filter-cards-btn')?.classList.remove('active');

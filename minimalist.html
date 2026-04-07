@@ -7,6 +7,10 @@
     <meta content="width=device-width,initial-scale=1.0,user-scalable=yes" name="viewport">
     <title> satyam's site </title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #ffffff;
             margin: 0;
@@ -159,6 +163,62 @@
 
         img {
             max-width: 100%;
+        }
+
+        @media (max-width: 720px) {
+            nav,
+            main,
+            footer div {
+                max-width: none;
+            }
+
+            main {
+                margin: 0 12px;
+                padding: 18px 16px 22px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            }
+
+            h1,
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            h1.title {
+                font-size: 2rem;
+            }
+
+            p,
+            li,
+            dl,
+            summary {
+                font-size: 1rem;
+                line-height: 1.65;
+            }
+
+            footer {
+                margin-top: 24px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            main {
+                margin: 0 8px;
+                padding: 16px 14px 20px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.35rem;
+            }
+
+            h1.title {
+                font-size: 1.75rem;
+            }
+
+            .anchor {
+                display: none;
+            }
         }
 
         .dim {

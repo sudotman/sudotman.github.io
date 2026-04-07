@@ -86,13 +86,46 @@ function toggleProjectDetails(button) {
   openProjectModal(button);
 }
 
+let bodyScrollLockDepth = 0;
+let bodyScrollLockY = 0;
+
+function syncBodyScrollLock() {
+  const shouldLock = document.body.classList.contains('modal-open') || document.body.classList.contains('lightbox-open');
+
+  if (shouldLock) {
+    if (bodyScrollLockDepth === 0) {
+      bodyScrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.top = `-${bodyScrollLockY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    }
+    bodyScrollLockDepth = 1;
+    return;
+  }
+
+  if (bodyScrollLockDepth > 0) {
+    const restoreY = Math.abs(parseInt(document.body.style.top || '0', 10)) || bodyScrollLockY;
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    bodyScrollLockDepth = 0;
+    bodyScrollLockY = 0;
+    window.scrollTo(0, restoreY);
+  }
+}
+
+function setBodyOverlayState(className, enabled) {
+  document.body.classList.toggle(className, enabled);
+  syncBodyScrollLock();
+}
+
 // TLDR Modal Functions
 function openTldrModal() {
   console.log('Opening TLDR modal...');
   const modal = document.getElementById('tldr-modal');
   if (modal) {
     modal.classList.add('show');
-    document.body.classList.add('modal-open');
+    setBodyOverlayState('modal-open', true);
     
     // Add smooth animation using GSAP if available
     if (typeof gsap !== 'undefined') {
@@ -108,7 +141,7 @@ function closeTldrModal() {
   console.log('Closing TLDR modal...');
   const modal = document.getElementById('tldr-modal');
   if (modal && modal.classList.contains('show')) {
-    document.body.classList.remove('modal-open');
+    setBodyOverlayState('modal-open', false);
     
     // Add smooth animation using GSAP if available
     if (typeof gsap !== 'undefined') {
@@ -133,7 +166,7 @@ function openSitesModal() {
   const modal = document.getElementById('sites-modal');
   if (modal) {
     modal.classList.add('show');
-    document.body.classList.add('modal-open');
+    setBodyOverlayState('modal-open', true);
     if (typeof gsap !== 'undefined') {
       gsap.fromTo(modal.querySelector('.sites-modal-content'), { y: -40, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.25, ease: 'power2.out' });
     }
@@ -143,7 +176,7 @@ function openSitesModal() {
 function closeSitesModal() {
   const modal = document.getElementById('sites-modal');
   if (modal && modal.classList.contains('show')) {
-    document.body.classList.remove('modal-open');
+    setBodyOverlayState('modal-open', false);
     if (typeof gsap !== 'undefined') {
       gsap.to(modal.querySelector('.sites-modal-content'), { y: -20, opacity: 0, scale: 0.97, duration: 0.2, ease: 'power2.in', onComplete: () => { modal.classList.remove('show'); } });
     } else {
@@ -168,7 +201,7 @@ function openProjectModal(button) {
     gsap.killTweensOf(modal.querySelector('.project-modal-content'));
   }
   modal.classList.add('show'); // Ensure visible before populating
-  document.body.classList.add('modal-open');
+  setBodyOverlayState('modal-open', true);
 
   const body = modal.querySelector('.project-modal-body');
   if (!body) return;
@@ -331,7 +364,7 @@ function openImageLightbox(src, currentIndex, imagesJson) {
   window.currentLightboxImages = images;
   
   lightbox.classList.add('show');
-  document.body.classList.add('lightbox-open');
+  setBodyOverlayState('lightbox-open', true);
   
   // Add keyboard navigation
   document.addEventListener('keydown', lightboxKeyHandler);
@@ -352,7 +385,7 @@ function closeImageLightbox() {
   const lightbox = document.getElementById('image-lightbox');
   if (lightbox) {
     lightbox.classList.remove('show');
-    document.body.classList.remove('lightbox-open');
+    setBodyOverlayState('lightbox-open', false);
     document.removeEventListener('keydown', lightboxKeyHandler);
     window.currentLightboxImages = null;
   }
@@ -393,12 +426,12 @@ function closeProjectModal() {
       ease: 'power2.in',
       onComplete: () => {
         modal.classList.remove('show');
-        document.body.classList.remove('modal-open');
+        setBodyOverlayState('modal-open', false);
       }
     });
   } else {
     modal.classList.remove('show');
-    document.body.classList.remove('modal-open');
+    setBodyOverlayState('modal-open', false);
   }
 }
 // ---------------- End Project Modal ----------------

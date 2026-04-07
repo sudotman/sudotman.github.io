@@ -787,13 +787,14 @@ function loadExperienceData(workExperience) {
         <div class="experience-period">${job.period}</div>
       </div>
       <div class="experience-roles">
-        ${job.roles.map((role, roleIndex) => `
+        ${job.roles.map((role) => `
           <div class="experience-role">
-            <span class="experience-role-index">0${roleIndex + 1}</span>
+            <span class="experience-role-head" aria-hidden="true"></span>
             <div class="experience-role-copy">
               <span class="experience-role-title">${role.title}</span>
               <span class="experience-role-period">${role.period}</span>
             </div>
+            <span class="experience-role-resonator" aria-hidden="true"></span>
           </div>
         `).join('')}
       </div>

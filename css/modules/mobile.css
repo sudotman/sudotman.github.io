@@ -473,28 +473,30 @@
   .experience-role {
     width: 100% !important;
     margin-left: 0 !important;
-    padding: 0.65rem 0.72rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    padding: 0.65rem 0.72rem 0.65rem 0.58rem;
     border-bottom: none;
-    border-radius: 999px 16px 16px 999px;
+    border-radius: 999px 18px 18px 999px;
   }
 
   .experience-role::before {
-    left: 3.05rem;
-    right: 2rem;
-    top: 20%;
-    bottom: 20%;
+    left: 2.85rem;
+    right: 2.45rem;
+    height: 50%;
   }
 
   .experience-role::after {
-    right: 0.78rem;
-    width: 1.35rem;
-    height: 0.9rem;
+    right: 2rem;
+    width: 0.14rem;
+    height: 52%;
   }
   
   .experience-role-copy {
     grid-template-columns: 1fr;
     gap: 0.2rem;
-    padding-right: 1.9rem;
+    padding-right: 0;
+    padding-top: 0.1rem;
   }
   
   .experience-role-title {
@@ -509,11 +511,34 @@
     padding: 0.16rem 0.42rem;
   }
 
-  .experience-role-index {
-    min-width: 1.65rem;
-    height: 1.65rem;
-    font-size: 0.52rem;
+  .experience-role-head {
+    min-width: 1.95rem;
+    width: 1.95rem;
+    height: 1.95rem;
     transform: none;
+  }
+
+  .experience-role-head::before {
+    top: 0.45rem;
+    right: 0.32rem;
+    width: 0.24rem;
+    height: 0.24rem;
+  }
+
+  .experience-role-head::after {
+    bottom: 0.45rem;
+    right: 0.32rem;
+    width: 0.24rem;
+    height: 0.24rem;
+  }
+
+  .experience-role-resonator {
+    width: 1.95rem;
+    height: 1.95rem;
+  }
+
+  .experience-role-resonator::before {
+    inset: 0.4rem 0.48rem;
   }
   
   .experience-summary {

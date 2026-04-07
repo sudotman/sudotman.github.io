@@ -232,12 +232,10 @@ function renderDotField(field) {
       const intensity = clamp(1 - (distance / field.pointer.radius), 0, 1);
       if (intensity > 0) {
         colour = interpolateColour(field.colors.base, accent, intensity);
-        const direction = distance > 0 ? 1 / distance : 0;
-        const push = intensity * field.cellSize * 0.9;
-        drawX += dx * direction * push;
-        drawY += dy * direction * push;
-        scale += intensity * 0.9;
-        alpha = Math.min(1, alpha + (intensity * 0.22));
+        const verticalLift = intensity * field.cellSize * 0.18;
+        drawY += dy < 0 ? -verticalLift : verticalLift;
+        scale += intensity * 1.08;
+        alpha = Math.min(1, alpha + (intensity * 0.24));
       }
     }
 
@@ -430,19 +428,19 @@ function createDotField(container) {
     field.disperse = clamp(value, 0, 1);
     queueDotFieldRender(field);
   };
-  field.triggerRipple = (x, y) => {
+  field.triggerRipple = (x, y, options = {}) => {
     field.clickRipples.push({
       x,
       y,
       start: performance.now(),
-      duration: 520,
-      radius: Math.max(field.width, field.height) * 0.42,
-      band: field.cellSize * 2.4,
-      push: field.cellSize * 0.95
+      duration: options.duration || 520,
+      radius: options.radius || (Math.max(field.width, field.height) * 0.42),
+      band: options.band || (field.cellSize * 2.4),
+      push: options.push || (field.cellSize * 0.95)
     });
     queueDotFieldRender(field);
   };
-  field.getCellFromPoint = (x, y) => {
+  field.getCellFromPoint = (x, y, requireExact = false) => {
     const col = Math.floor(x / field.stepX);
     const row = Math.floor(y / field.stepY);
 
@@ -450,7 +448,32 @@ function createDotField(container) {
 
     const cell = field.cells[(row * container._cols) + col];
     if (!cell || cell._isHole) return null;
+
+    if (requireExact) {
+      const hitRadius = Math.max(3.5, field.cellSize * 0.58);
+      if (Math.hypot(x - cell.x, y - cell.y) > hitRadius) {
+        return null;
+      }
+    }
+
     return cell;
+  };
+  field.getNearestCell = (x, y, maxDistance = Math.max(field.stepX, field.stepY) * 0.85) => {
+    let nearest = null;
+    let nearestDistance = maxDistance;
+
+    for (let i = 0; i < field.cells.length; i++) {
+      const cell = field.cells[i];
+      if (!cell || cell._isHole) continue;
+
+      const distance = Math.hypot(x - cell.x, y - cell.y);
+      if (distance <= nearestDistance) {
+        nearest = cell;
+        nearestDistance = distance;
+      }
+    }
+
+    return nearest;
   };
 
   container._rebuildGrid = buildGrid;
@@ -746,20 +769,33 @@ function loadExperienceData(workExperience) {
   const experienceCards = document.querySelector('.experience-cards');
   if (!experienceCards) return;
   
-  experienceCards.innerHTML = workExperience.map(job => `
-    <div class="experience-card">
-      <div class="experience-org">${job.organization}</div>
-      <div class="experience-period">${job.period}</div>
+  experienceCards.innerHTML = workExperience.map((job, index) => `
+    <article class="experience-card">
+      <div class="experience-card-meta">
+        <span class="experience-index">0${index + 1}</span>
+        <span class="experience-chip">${job.roles.length} role${job.roles.length > 1 ? 's' : ''}</span>
+      </div>
+      <div class="experience-card-header">
+        ${job.website ? `
+          <a class="experience-org" href="${job.website}" target="_blank" rel="noopener noreferrer">${job.organization}</a>
+        ` : `
+          <div class="experience-org">${job.organization}</div>
+        `}
+        <div class="experience-period">${job.period}</div>
+      </div>
       <div class="experience-roles">
-        ${job.roles.map(role => `
+        ${job.roles.map((role, roleIndex) => `
           <div class="experience-role">
-            <span class="experience-role-title">${role.title}</span>
-            <span class="experience-role-period">${role.period}</span>
+            <span class="experience-role-index">0${roleIndex + 1}</span>
+            <div class="experience-role-copy">
+              <span class="experience-role-title">${role.title}</span>
+              <span class="experience-role-period">${role.period}</span>
+            </div>
           </div>
         `).join('')}
       </div>
       <div class="experience-summary">${job.summary}</div>
-    </div>
+    </article>
   `).join('');
   
   // Major scale frequencies (C4, D4, E4, F4, G4, A4, B4, C5, D5, E5...)
@@ -833,6 +869,7 @@ function loadSkillsData(techStack) {
   
   // Add category labels
   const labelsHtml = `
+    <div class="skill-category-label engines">engines orbit</div>
     <div class="skill-category-label languages">as is often required, a lot of other hats are also worn</div>
   `;
   
@@ -871,13 +908,21 @@ function loadInterestsData(interests) {
   
   const interestNodes = [
     {
-      title: 'Cinema',
+      title: 'cinema',
+      tone: 'cinema',
+      code: '01',
+      kicker: 'shot / memory / fever',
+      tag: 'screening ritual',
       essence: 'kinos and more',
       description: interests.cinema.description,
       links: [{ label: 'letterboxd', url: interests.cinema.letterboxd }]
     },
     {
       title: 'music',
+      tone: 'music',
+      code: '02',
+      kicker: 'noise / devotion / loop',
+      tag: 'headphones required',
       essence: 'grails and more',
       description: interests.music.description,
       links: [
@@ -887,12 +932,20 @@ function loadInterestsData(interests) {
     },
     {
       title: 'books',
+      tone: 'books',
+      code: '03',
+      kicker: 'margin / spine / confession',
+      tag: 'paper cuts welcome',
       essence: 'performativeness and more',
       description: interests.books.description,
       links: []
     },
     {
       title: 'games',
+      tone: 'games',
+      code: '04',
+      kicker: 'systems / wonder / punishment',
+      tag: 'controller drift',
       essence: 'vidya and more',
       description: interests.games.description,
       links: []
@@ -902,22 +955,29 @@ function loadInterestsData(interests) {
   // Insert nodes before the constellation-web div
   const constellationWeb = interestsConstellation.querySelector('.constellation-web');
   const nodesHtml = interestNodes.map(node => `
-    <div class="interest-node">
+    <article class="interest-node tone-${node.tone}">
       <div class="interest-orb">
+        <div class="interest-meta">
+          <span class="interest-code">${node.code}</span>
+          <span class="interest-kicker">${node.kicker}</span>
+        </div>
         <div class="interest-content">
-          <div class="interest-title">${node.title}</div>
-          <div class="interest-essence">${node.essence}</div>
+          <div class="interest-heading">
+            <div class="interest-title">${node.title}</div>
+            <div class="interest-essence">${node.essence}</div>
+          </div>
           <div class="interest-description">${node.description}</div>
-          ${node.links.length > 0 ? `
+          <div class="interest-footer">
+            <span class="interest-tag">${node.tag}</span>
             <div class="interest-links">
               ${node.links.map(link => `
-                <a href="${link.url}" target="_blank" class="interest-link">${link.label}</a>
+                <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="interest-link">${link.label}</a>
               `).join('')}
             </div>
-          ` : ''}
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   `).join('');
   
   constellationWeb.insertAdjacentHTML('beforebegin', nodesHtml);

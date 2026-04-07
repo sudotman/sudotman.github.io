@@ -370,14 +370,32 @@ function initHeatmapClickHandler() {
     if (field.asciiMode) return;
 
     const rect = container.getBoundingClientRect();
-    const cell = field.getCellFromPoint(
-      event.clientX - rect.left,
-      event.clientY - rect.top
-    );
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const cell = field.getCellFromPoint(x, y, true);
 
-    if (!cell || cell._isHole) return;
+    if (!cell || cell._isHole) {
+      const nearbyCell = typeof field.getNearestCell === 'function'
+        ? field.getNearestCell(x, y, Math.max(field.stepX, field.stepY) * 0.9)
+        : null;
 
-    field.triggerRipple(event.clientX - rect.left, event.clientY - rect.top);
+      if (!nearbyCell) return;
+
+      field.triggerRipple(nearbyCell.x, nearbyCell.y, {
+        duration: 1850,
+        radius: Math.max(field.stepX, field.stepY) * 4.2,
+        band: field.cellSize * 3.8,
+        push: field.cellSize * 0.42
+      });
+      return;
+    }
+
+    field.triggerRipple(x, y, {
+      duration: 620,
+      radius: Math.max(field.width, field.height) * 0.46,
+      band: field.cellSize * 2.7,
+      push: field.cellSize * 1.05
+    });
     showOracleOverlay(() => revealHeatmap(container));
     incrementHeat(cell).catch(() => {});
   });

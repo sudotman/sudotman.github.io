@@ -176,7 +176,6 @@ function initColorSampler() {
   const asciiBtn = document.createElement('button');
   asciiBtn.className = 'ascii-sampler-btn';
   asciiBtn.title = 'Enable ASCII camera view';
-  asciiBtn.style.display = 'none';
   asciiBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3L11 7H13L11 3H9ZM13 8H11L9 12H11L13 8ZM15 13H13L11 17H13L15 13ZM7 8H5L3 12H5L7 8ZM5 13H3L1 17H3L5 13ZM19 8H17L15 12H17L19 8ZM17 13H15L13 17H15L17 13ZM21 8H19L17 12H19L21 8Z"/></svg><span>ascii</span>';
   document.body.appendChild(asciiBtn);
 
@@ -262,11 +261,15 @@ function initColorSampler() {
     }
   });
 
+  function syncAsciiButtonVisibility() {
+    asciiBtn.classList.toggle('visible', active && asciiSupported);
+  }
+
   function startSampling(stream) {
     active = true;
     asciiSupported = true;
     btn.classList.add('active');
-    asciiBtn.style.display = 'block';
+    syncAsciiButtonVisibility();
     videoStream = stream;
 
     videoEl = document.createElement('video');
@@ -400,7 +403,7 @@ function initColorSampler() {
     asciiSupported = false;
     btn.classList.remove('active');
     asciiBtn.classList.remove('active');
-    asciiBtn.style.display = 'none';
+    syncAsciiButtonVisibility();
 
     if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     if (videoEl) videoEl.remove();
@@ -425,7 +428,7 @@ function initColorSampler() {
     asciiSupported = false;
     btn.classList.add('active');
     asciiBtn.classList.remove('active');
-    asciiBtn.style.display = 'none';
+    syncAsciiButtonVisibility();
     const computed = getComputedStyle(document.body).backgroundColor || '#245E51';
     applyColour(computed);
   }

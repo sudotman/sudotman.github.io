@@ -1,0 +1,1491 @@
+/* ============== COMPREHENSIVE MOBILE RESPONSIVE FIXES =========== */
+/* ================================================================ */
+
+/* === Mobile Performance Optimizations === */
+@media (max-width: 768px) {
+  /* Disable expensive CRT overlays on mobile for performance */
+  body::before {
+    display: none !important;
+  }
+  
+  body::after {
+    display: none !important;
+  }
+  
+  .osmo-ui::before {
+    display: none !important;
+  }
+  
+  .osmo-ui::after {
+    box-shadow: none !important;
+  }
+  
+  /* Reduce/disable backdrop-filter on mobile */
+  .project-card,
+  .tag,
+  .project-expand-btn,
+  .filter-dropdown,
+  .tldr-modal-backdrop,
+  .sites-modal-backdrop,
+  .project-modal-backdrop {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Disable complex animations on mobile */
+  .project-icon::before {
+    animation: none !important;
+  }
+  
+  .connection-line,
+  .connection-node,
+  .constellation-center {
+    animation: none !important;
+  }
+  
+  .nav-node.active .node-ring {
+    animation: none !important;
+  }
+  
+  .nav-node.active .node-core {
+    animation: none !important;
+  }
+}
+
+/* === Header Mobile Styles === */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem 0;
+  }
+  
+  .container.is--full {
+    padding: 0 1rem;
+  }
+  
+  .nav-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .nav-logo__wordmark {
+    width: 100px !important;
+  }
+  
+  .nav-logo__icon {
+    width: 28px !important;
+  }
+  
+  .website-link.is--alt {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .inline-link__p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo__wordmark {
+    width: 80px !important;
+  }
+  
+  .nav-logo__icon {
+    width: 24px !important;
+  }
+}
+
+/* === Footer Mobile Styles === */
+@media (max-width: 768px) {
+  .footer {
+    padding: 1rem 0;
+  }
+  
+  .footer-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .cloneable-title {
+    padding: 0 1rem;
+  }
+  
+  .cloneable-title__nr {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+  
+  .cloneable-title__h1 {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .cloneable-title__nr {
+    font-size: 0.65rem;
+  }
+  
+  .cloneable-title__h1 {
+    font-size: 0.85rem;
+  }
+}
+
+/* === Dots Container Mobile Optimization === */
+@media (max-width: 768px) {
+  .dots-wrap {
+    overflow: hidden;
+  }
+  
+  .dots-container {
+    /* Reduce dot density on mobile via larger gap */
+    font-size: 12px !important;
+  }
+  
+  .dots-container .dot {
+    /* Simpler dot rendering on mobile */
+    transition: none !important;
+  }
+  
+  /* Larger touch target for center button on mobile */
+  .osmo-icon__link {
+    padding: 1.5rem !important;
+    min-width: 100px;
+    min-height: 150px;
+  }
+}
+
+/* === Projects Content Mobile Layout === */
+@media (max-width: 768px) {
+  .projects-content {
+    padding: 1rem;
+    padding-top: 0.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .projects-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem 0 1.5rem 0;
+    gap: 0.75rem;
+    position: relative;
+  }
+  
+  .projects-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .projects-tabs {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .projects-return-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 36px;
+    height: 36px;
+    margin-top: 0;
+  }
+  
+  .projects-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.5rem 0 2rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-content {
+    padding: 0.75rem;
+  }
+  
+  .projects-header {
+    padding: 0.5rem 0 1.25rem 0;
+  }
+  
+  .projects-title {
+    font-size: 1.25rem;
+  }
+  
+  .projects-grid {
+    gap: 1rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* === Project Cards Mobile === */
+@media (max-width: 768px) {
+  .project-card {
+    width: 90vw !important;
+    max-width: 360px !important;
+    height: auto !important;
+    min-height: 320px;
+    cursor: default !important;
+    transform: none !important;
+    margin: 0 auto;
+    /* Disable drag cursor on mobile */
+    touch-action: pan-y;
+  }
+  
+  .project-card:active {
+    cursor: default !important;
+  }
+  
+  .project-card:hover {
+    transform: none !important;
+  }
+  
+  .project-card-header {
+    padding: 1rem 1rem 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .project-card-header::before,
+  .project-card-header::after {
+    font-size: 16px;
+    top: 8px;
+  }
+  
+  .project-card-header::before {
+    left: 8px;
+  }
+  
+  .project-card-header::after {
+    right: 8px;
+  }
+  
+  .project-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .project-header-text h3 {
+    font-size: 1.1rem;
+  }
+  
+  .project-type {
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+  
+  .project-card-body {
+    padding: 0.75rem 1rem;
+  }
+  
+  .project-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    /* Limit text height on mobile */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .project-tags {
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .tag {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+  }
+  
+  .project-card-footer {
+    padding: 0.75rem 1rem 1rem;
+  }
+  
+  .project-card-footer::before,
+  .project-card-footer::after {
+    font-size: 16px;
+    bottom: 8px;
+  }
+  
+  .project-card-footer::before {
+    left: 8px;
+  }
+  
+  .project-card-footer::after {
+    right: 8px;
+  }
+  
+  .project-expand-btn {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-card {
+    width: 94vw !important;
+    max-width: 340px !important;
+    min-height: 300px;
+  }
+  
+  .project-card-header {
+    padding: 0.75rem 0.75rem 0.6rem;
+  }
+  
+  .project-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .project-header-text h3 {
+    font-size: 1rem;
+  }
+  
+  .project-card-body {
+    padding: 0.6rem 0.75rem;
+  }
+  
+  .project-description {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+  
+  .project-card-footer {
+    padding: 0.6rem 0.75rem 0.8rem;
+  }
+  
+  .project-expand-btn {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* === Experience Tab Mobile === */
+@media (max-width: 768px) {
+  .experience-container {
+    padding: 0.75rem;
+  }
+  
+  .experience-header {
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .experience-header h2 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+  
+  .experience-subtitle {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+  
+  .experience-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .experience-cards {
+    width: 100%;
+    gap: 0.75rem;
+  }
+  
+  .experience-card {
+    padding: 0.75rem;
+    margin-bottom: 0;
+    margin-left: 0 !important;
+    transform: none !important;
+    border-radius: 10px;
+    border-width: 1px;
+    overflow: visible;
+  }
+  
+  .experience-card:nth-child(even) {
+    transform: none !important;
+    margin-left: 0 !important;
+  }
+  
+  .experience-org {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .experience-period {
+    font-size: 0.65rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .experience-roles {
+    gap: 0.25rem;
+  }
+  
+  .experience-role {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(168, 255, 81, 0.08);
+  }
+  
+  .experience-role:last-child {
+    border-bottom: none;
+  }
+  
+  .experience-role-title {
+    font-size: 0.75rem;
+  }
+  
+  .experience-role-period {
+    padding-right: 5%;
+    font-size: 0.6rem;
+  }
+  
+  .experience-summary {
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+    opacity: 0.8;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .skills-constellation {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    padding: 0.75rem;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    animation: none;
+  }
+  
+  .skills-header {
+    margin-bottom: 0.5rem;
+  }
+  
+  .skills-header h3 {
+    font-size: 0.85rem;
+  }
+  
+  .skills-subtitle {
+    font-size: 0.6rem;
+  }
+  
+  .skills-orbits {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    height: auto;
+    min-height: auto;
+  }
+  
+  .skill-orbit {
+    position: relative !important;
+    width: auto !important;
+    height: auto !important;
+    border: none;
+    border-radius: 0;
+    animation: none !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: center;
+  }
+  
+  .skill-node {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    font-size: 0.6rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(168, 255, 81, 0.1);
+    border: 1px solid rgba(168, 255, 81, 0.2);
+    border-radius: 4px;
+    transform: none !important;
+  }
+  
+  .skill-category-label {
+    font-size: 0.55rem;
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 480px) {
+  .experience-container {
+    padding: 0.5rem;
+  }
+  
+  .experience-header h2 {
+    font-size: 1rem;
+  }
+  
+  .experience-card {
+    padding: 0.6rem;
+  }
+  
+  .experience-org {
+    font-size: 0.85rem;
+  }
+  
+  .experience-role-title {
+    padding-left: 5%;
+    font-size: 0.7rem;
+  }
+  
+  .skills-constellation {
+    padding: 0.5rem;
+  }
+  
+  .skill-node {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* === Interests Tab Mobile === */
+@media (max-width: 768px) {
+  .interests-container {
+    padding: 0.75rem;
+    min-height: auto;
+    background: none;
+  }
+  
+  .interests-header {
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .interests-header h2 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+  
+  .interests-subtitle {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+  
+  .interests-constellation {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    min-height: auto;
+    padding: 0;
+  }
+  
+  .interest-node {
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0;
+    overflow: visible;
+    height: auto !important;
+  }
+  
+  .interest-orb {
+    width: 100%;
+    min-height: 120px;
+    max-height: none;
+    height: auto;
+    padding: 0.6rem;
+    border-radius: 10px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .interest-content {
+    padding: 0;
+  }
+  
+  .interest-title {
+    font-size: 0.8rem;
+    margin-bottom: 0.15rem;
+  }
+  
+  .interest-essence {
+    font-size: 0.55rem;
+    margin-bottom: 0.35rem;
+  }
+  
+  .interest-description {
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    font-size: 0.6rem;
+    line-height: 1.4;
+    margin-top: 0;
+    display: block;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .interest-links {
+    margin-top: 0.4rem;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  
+  .interest-link {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .constellation-web {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .interests-container {
+    padding: 0.5rem;
+  }
+  
+  .interests-header h2 {
+    font-size: 1rem;
+  }
+  
+  .interests-constellation {
+    gap: 0.5rem;
+  }
+  
+  .interest-orb {
+    min-height: 100px;
+    padding: 0.5rem;
+  }
+  
+  .interest-title {
+    font-size: 0.75rem;
+  }
+  
+  .interest-description {
+    font-size: 0.55rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  .interest-link {
+    font-size: 0.5rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+/* === Modal Mobile Styles === */
+@media (max-width: 768px) {
+  .tldr-modal-content,
+  .sites-modal-content,
+  .project-modal-content {
+    width: 95% !important;
+    max-width: none !important;
+    max-height: 92vh !important;
+    border-radius: 10px;
+    margin: 0 auto;
+  }
+  
+  .tldr-modal-header,
+  .sites-modal-header {
+    padding: 1rem;
+  }
+  
+  .tldr-modal-title,
+  .sites-modal-title {
+    font-size: 1.2rem;
+  }
+  
+  .tldr-modal-body,
+  .sites-modal-body {
+    padding: 1rem;
+    max-height: calc(92vh - 80px);
+  }
+  
+  .tldr-section h2 {
+    font-size: 1.1rem;
+  }
+  
+  .tldr-section p,
+  .tldr-section li {
+    font-size: 0.9rem;
+  }
+  
+  .tldr-link-item {
+    padding: 0.75rem;
+  }
+  
+  .tldr-link-item a {
+    font-size: 1rem;
+  }
+  
+  .tldr-link-item span {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tldr-modal-content,
+  .sites-modal-content,
+  .project-modal-content {
+    width: 98% !important;
+    max-height: 95vh !important;
+    border-radius: 8px;
+  }
+  
+  .tldr-modal-header,
+  .sites-modal-header {
+    padding: 0.75rem;
+  }
+  
+  .tldr-modal-title,
+  .sites-modal-title {
+    font-size: 1rem;
+    letter-spacing: 2px;
+  }
+  
+  .tldr-modal-body,
+  .sites-modal-body {
+    padding: 0.75rem;
+  }
+}
+
+/* === Project Modal Mobile === */
+@media (max-width: 768px) {
+  .project-modal-content {
+    max-height: 95vh !important;
+  }
+  
+  .project-modal-layout {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .project-modal-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .project-modal-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .project-modal-category,
+  .project-modal-date {
+    font-size: 0.8rem;
+  }
+  
+  .project-modal-description {
+    font-size: 0.9rem;
+  }
+  
+  .project-modal-gallery {
+    gap: 0.75rem;
+  }
+  
+  .project-modal-image {
+    max-height: 200px;
+  }
+  
+  .project-modal-links {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .project-modal-link {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .project-modal-close {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* === Utility Buttons Mobile === */
+@media (max-width: 768px) {
+  .color-sampler-btn,
+  .ascii-sampler-btn {
+    bottom: 12px;
+    right: 12px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .color-sampler-btn svg,
+  .ascii-sampler-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .ascii-sampler-btn {
+    bottom: 56px;
+  }
+}
+
+/* === Touch-Friendly Interactions === */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .nav-node {
+    padding: 0.5rem;
+    margin: 0 0.5rem;
+  }
+  
+  .node-core {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .node-ring {
+    width: 48px;
+    height: 48px;
+  }
+  
+  /* Disable hover effects that don't work well on touch */
+  .project-card:hover {
+    transform: none;
+    filter: none;
+  }
+  
+  .site-card:hover {
+    transform: none;
+  }
+  
+  /* Active states for touch feedback */
+  .project-card:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+  
+  .project-expand-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .site-card:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+  
+  .nav-node:active .node-core {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(168, 255, 81, 0.5);
+  }
+}
+
+/* === Safe Area Insets for Notched Devices === */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+  
+  .projects-content {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+  
+  .color-sampler-btn {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  
+  .ascii-sampler-btn {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+}
+
+/* === Landscape Mobile Optimization === */
+@media (max-width: 900px) and (orientation: landscape) {
+  .projects-content {
+    padding-top: 0.5rem;
+  }
+  
+  .projects-header {
+    padding: 0.5rem 0 1rem 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .projects-title {
+    font-size: 1.2rem;
+  }
+  
+  .constellation-nav {
+    height: 80px;
+  }
+  
+  .project-card {
+    width: 280px !important;
+    height: auto !important;
+    min-height: 280px;
+  }
+  
+  .projects-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* === Very Small Screens (iPhone SE, etc.) === */
+@media (max-width: 375px) {
+  .projects-title {
+    font-size: 1.1rem;
+  }
+  
+  .project-card {
+    width: 96vw !important;
+    min-height: 280px;
+  }
+  
+  .project-header-text h3 {
+    font-size: 0.95rem;
+  }
+  
+  .project-description {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  .constellation-nav {
+    height: 90px;
+  }
+  
+  .node-label {
+    font-size: 0.65rem;
+  }
+  
+  .tldr-modal-title,
+  .sites-modal-title {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+  }
+}
+
+/* ================================================================ */
+/* ============== ADDITIONAL MOBILE FIXES ========================== */
+/* ================================================================ */
+
+/* === Fix TLDR Modal Header Overlap on Mobile === */
+@media (max-width: 480px) {
+  .tldr-modal-header,
+  .sites-modal-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem !important;
+  }
+  
+  .tldr-modal-title,
+  .sites-modal-title {
+    flex: 1;
+    min-width: 0;
+    padding-right: 2.5rem; /* Space for close button */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 1.1rem !important;
+  }
+  
+  .tldr-modal-close,
+  .sites-modal-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    padding: 0.35rem;
+    z-index: 10;
+  }
+  
+  .tldr-modal-close svg,
+  .sites-modal-close svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* === Fix Project Modal Footer Metadata Clipping on Mobile === */
+@media (max-width: 768px) {
+  .project-modal-footer {
+    padding: 1rem 0.5rem;
+    border-top: 1px solid rgba(168, 255, 81, 0.08);
+  }
+  
+  .project-modal-metadata {
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    justify-content: center;
+    font-size: 0.75rem;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .metadata-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  
+  .metadata-value::before {
+    display: none;
+  }
+  
+  .metadata-label {
+    font-size: 0.65rem;
+    opacity: 0.7;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-modal-footer {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .project-modal-metadata {
+    gap: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+  }
+  
+  .metadata-item {
+    min-width: 60px;
+  }
+  
+  .project-modal-section-title {
+    font-size: 0.8rem;
+  }
+  
+  .project-modal-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .project-modal-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .project-modal-link {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .project-modal-category {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .project-modal-title {
+    font-size: 1.4rem !important;
+  }
+  
+  .project-modal-gallery {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .project-modal-img-container {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* === Improved Project Card Aesthetics on Mobile === */
+@media (max-width: 768px) {
+  /* Reorder header items - tabs first, then actions */
+  .projects-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .projects-tabs {
+    order: 1;
+  }
+  
+  .cards-actions {
+    order: 2;
+    margin-top: 1rem !important;
+  }
+  
+  .projects-return-btn {
+    order: 3;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 0.75rem;
+    justify-items: center;
+  }
+  
+  /* Card styling - proper card appearance with category colors */
+  .project-card {
+    width: 100% !important;
+    max-width: 180px !important;
+    height: auto !important;
+    min-height: 260px;
+    margin: 0;
+    padding-bottom: 0;
+    transform: none !important;
+    border-radius: 0px;
+    /* Use category accent color for border */
+    border: 2px solid color-mix(in srgb, var(--accent) 50%, transparent) !important;
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.4),
+      0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--accent) 10%, transparent);
+    /* Card background with subtle category tint */
+    background: 
+      linear-gradient(145deg, 
+        color-mix(in srgb, var(--accent) 5%, rgba(21,37,37,0.98)) 0%, 
+        rgba(15,28,28,0.98) 100%) !important;
+  }
+  
+  .project-card-header {
+    padding: 0.75rem 0.75rem 0.5rem !important;
+    gap: 0.5rem !important;
+    border-radius: 12px 12px 0 0;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 60%);
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+  
+  /* Show decorative card suits on mobile with category colors */
+  .project-card-header::before,
+  .project-card-header::after {
+    display: block;
+    font-size: 12px;
+    top: 6px;
+    color: var(--accent);
+    opacity: 0.6;
+  }
+  
+  .project-card-header::before {
+    left: 6px;
+  }
+  
+  .project-card-header::after {
+    right: 6px;
+  }
+  
+  .project-card-footer::before,
+  .project-card-footer::after {
+    display: block;
+    font-size: 12px;
+    bottom: 6px;
+    color: var(--accent);
+    opacity: 0.6;
+  }
+  
+  .project-card-footer::before {
+    left: 6px;
+  }
+  
+  .project-card-footer::after {
+    right: 6px;
+  }
+  
+  .project-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    border-radius: 8px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, transparent) 0%, color-mix(in srgb, var(--accent) 8%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+  
+  .project-icon svg {
+    width: 16px;
+    height: 16px;
+    color: var(--accent);
+  }
+  
+  .project-header-text h3 {
+    font-size: 0.85rem !important;
+    margin-bottom: 0;
+    line-height: 1.25;
+    color: #efeeec;
+  }
+  
+  .project-type {
+    font-size: 0.65rem !important;
+    opacity: 0.7;
+    text-transform: lowercase;
+    letter-spacing: 0.3px;
+    color: var(--accent);
+  }
+  
+  .project-card-body {
+    padding: 0.6rem 0.75rem !important;
+    flex: 1 1 auto;
+  }
+  
+  .project-description {
+    font-size: 0.75rem !important;
+    line-height: 1.45;
+    color: #c8c8c8;
+    margin-bottom: 0.5rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .project-tags {
+    gap: 0.25rem !important;
+    flex-wrap: wrap;
+    margin-bottom: 0 !important;
+  }
+  
+  .tag {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.55rem !important;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    color: var(--accent);
+  }
+  
+  .project-card-footer {
+    padding: 0.6rem 0.75rem 0.75rem !important;
+    border-radius: 0 0 12px 12px;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--accent) 3%, transparent) 100%);
+    border-top: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+  
+  .project-expand-btn {
+    width: 100%;
+    padding: 0.5rem 0.6rem !important;
+    font-size: 0.7rem !important;
+    border-radius: 8px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, transparent) 0%, color-mix(in srgb, var(--accent) 8%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--accent);
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+  }
+  
+  .project-expand-btn:active {
+    transform: scale(0.98);
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+  
+  .project-expand-btn svg {
+    width: 12px;
+    height: 12px;
+    color: var(--accent);
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .project-card {
+    max-width: 165px !important;
+    min-height: 230px;
+  }
+  
+  .project-card-header {
+    padding: 0.55rem 0.55rem 0.4rem !important;
+    gap: 0.4rem !important;
+  }
+  
+  .project-icon {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 11px !important;
+  }
+  
+  .project-header-text h3 {
+    font-size: 0.75rem !important;
+  }
+  
+  .project-type {
+    font-size: 0.55rem !important;
+  }
+  
+  .project-card-body {
+    padding: 0.45rem 0.55rem !important;
+  }
+  
+  .project-description {
+    font-size: 0.68rem !important;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .tag {
+    padding: 0.12rem 0.3rem !important;
+    font-size: 0.5rem !important;
+  }
+  
+  .project-card-footer {
+    padding: 0.45rem 0.55rem 0.55rem !important;
+  }
+  
+  .project-expand-btn {
+    padding: 0.4rem 0.45rem !important;
+    font-size: 0.62rem !important;
+  }
+  
+  .project-expand-btn span {
+    display: inline;
+  }
+  
+  .project-expand-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* === Mobile Dot Grid Ambient Background Fallback === */
+/* When dots are sparse, add ambient glow for atmosphere */
+@media (max-width: 480px) {
+  .dots-container {
+    background: 
+      radial-gradient(ellipse at 50% 40%, rgba(168, 255, 81, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 30% 70%, rgba(36, 94, 81, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 30%, rgba(168, 255, 81, 0.03) 0%, transparent 40%);
+  }
+  
+  .dot {
+    font-size: 10px !important;
+    opacity: 0.9;
+  }
+}
+
+/* === Very Small Screens Additional Fixes === */
+@media (max-width: 375px) {
+  .projects-grid {
+    gap: 0.4rem;
+  }
+  
+  .project-card {
+    max-width: 140px !important;
+    min-height: 180px;
+    border-radius: 10px;
+  }
+  
+  .project-card-header,
+  .project-card-body,
+  .project-card-footer {
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+  
+  .project-header-text h3 {
+    font-size: 0.65rem !important;
+  }
+  
+  .project-description {
+    font-size: 0.55rem !important;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  .tldr-modal-content,
+  .sites-modal-content {
+    width: 99% !important;
+    border-radius: 10px;
+  }
+  
+  .tldr-modal-title,
+  .sites-modal-title {
+    font-size: 0.95rem !important;
+    padding-right: 2.25rem;
+  }
+  
+  /* Experience on very small screens */
+  .experience-card {
+    padding: 0.5rem;
+  }
+  
+  .experience-org {
+    font-size: 0.8rem;
+  }
+  
+  .experience-role-title {
+    font-size: 0.65rem;
+  }
+  
+  .experience-summary {
+    font-size: 0.6rem;
+  }
+  
+  /* Interests on very small screens */
+  .interest-orb {
+    min-height: 90px;
+    padding: 0.4rem;
+  }
+  
+  .interest-title {
+    font-size: 0.7rem;
+  }
+  
+  .interest-essence {
+    font-size: 0.5rem;
+  }
+  
+  .interest-description {
+    font-size: 0.5rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+/* === Improve Touch Feedback === */
+@media (hover: none) and (pointer: coarse) {
+  .project-card {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  
+  .project-card:active {
+    transform: scale(0.985) !important;
+    opacity: 0.95;
+  }
+  
+  .project-expand-btn:active {
+    transform: scale(0.96);
+    background: rgba(168, 255, 81, 0.15);
+  }
+}

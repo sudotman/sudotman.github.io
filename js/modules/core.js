@@ -11,8 +11,8 @@ PERF.tier = PERF.isLowEnd ? 'low' : (PERF.isMobile ? 'medium' : 'high');
 PERF.maxDots = PERF.tier === 'low' ? 240 : (PERF.tier === 'medium' ? 420 : 620);
 PERF.asciiFps = PERF.tier === 'low' ? 8 : 12;
 PERF.moodFps = PERF.tier === 'low' ? 10 : 14;
-PERF.asciiMaxCols = PERF.tier === 'low' ? 58 : (PERF.tier === 'medium' ? 72 : 88);
-PERF.asciiMaxRows = PERF.tier === 'low' ? 32 : (PERF.tier === 'medium' ? 40 : 48);
+PERF.asciiMaxCols = PERF.tier === 'low' ? 72 : (PERF.tier === 'medium' ? 96 : 118);
+PERF.asciiMaxRows = PERF.tier === 'low' ? 40 : (PERF.tier === 'medium' ? 54 : 68);
 
 try {
   gsap.config({ autoSleep: 60, nullTargetWarn: false });
@@ -118,8 +118,7 @@ function renderAsciiFrame(field) {
   const chars = window.__ASCII_CHARSET || " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
   const cellW = field.width / frame.cols;
   const cellH = field.height / frame.rows;
-  const fontSize = Math.max(8, Math.min(cellW, cellH) * 0.95);
-  const themeAccent = document.body.classList.contains('theme-pink') ? '#F05CEB' : '#A8FF51';
+  const fontSize = Math.max(6, Math.min(cellW, cellH) * 0.92);
 
   ctx.save();
   ctx.textAlign = 'center';
@@ -142,11 +141,7 @@ function renderAsciiFrame(field) {
 
       if (glyph === ' ') continue;
 
-      const tint = interpolateColour(
-        themeAccent,
-        `rgb(${r}, ${g}, ${b})`,
-        0.4
-      );
+      const tint = `rgb(${Math.min(255, Math.round((r * 1.18) + 10))}, ${Math.min(255, Math.round((g * 1.18) + 10))}, ${Math.min(255, Math.round((b * 1.18) + 10))})`;
 
       ctx.fillStyle = colourToCss(tint, 0.95);
       ctx.fillText(
@@ -203,7 +198,16 @@ function renderDotField(field) {
     let drawX = cell.x;
     let drawY = cell.y;
     let scale = 1;
-    let alpha = 0.9;
+    let alpha = 0.9 * field.introOpacity;
+
+    if (field.introProgress < 1) {
+      const localIntro = clamp((field.introProgress - cell.introOffset) / (1 - cell.introOffset || 1), 0, 1);
+      const easedIntro = localIntro * localIntro * (3 - (2 * localIntro));
+      const introShift = 10 * (1 - easedIntro);
+      drawY += introShift;
+      scale *= 0.72 + (0.28 * easedIntro);
+      alpha *= easedIntro;
+    }
 
     if (field.disperse > 0) {
       const keepFactor = cell.scatterKeep ? 0.28 : 1;
@@ -222,11 +226,18 @@ function renderDotField(field) {
     let colour = cell._heatmapCount > 0 ? colourFromCount(cell._heatmapCount) : field.colors.base;
 
     if (field.pointer.active && cell._heatmapCount === 0) {
-      const distance = Math.hypot(drawX - field.pointer.x, drawY - field.pointer.y);
+      const dx = drawX - field.pointer.x;
+      const dy = drawY - field.pointer.y;
+      const distance = Math.hypot(dx, dy);
       const intensity = clamp(1 - (distance / field.pointer.radius), 0, 1);
       if (intensity > 0) {
         colour = interpolateColour(field.colors.base, accent, intensity);
-        scale += intensity * 0.35;
+        const direction = distance > 0 ? 1 / distance : 0;
+        const push = intensity * field.cellSize * 0.9;
+        drawX += dx * direction * push;
+        drawY += dy * direction * push;
+        scale += intensity * 0.9;
+        alpha = Math.min(1, alpha + (intensity * 0.22));
       }
     }
 
@@ -269,7 +280,7 @@ function renderDotField(field) {
     );
   }
 
-  if (field.pointer.active || field.clickRipples.length || field.scrollInfluence > 0 || field.disperse > 0 || field.revealBoost > 0) {
+  if (field.pointer.active || field.clickRipples.length || field.scrollInfluence > 0 || field.disperse > 0 || field.revealBoost > 0 || field.introOpacity < 1 || field.introProgress < 1) {
     queueDotFieldRender(field);
   }
 }
@@ -304,7 +315,7 @@ function createDotField(container) {
       active: false,
       x: 0,
       y: 0,
-      radius: PERF.isMobile ? 110 : 150
+      radius: PERF.isMobile ? 135 : 185
     },
     clickRipples: [],
     asciiMode: false,
@@ -313,6 +324,8 @@ function createDotField(container) {
     scrollInfluence: 0,
     disperse: 0,
     revealBoost: 0,
+    introOpacity: 0,
+    introProgress: 0,
     _renderQueued: false
   };
 
@@ -380,6 +393,7 @@ function createDotField(container) {
           scatterY: Math.sin(seed * Math.PI * 2) * (90 + (seed * 140)),
           scatterKeep: seed > 0.62,
           wavePhase: seed * Math.PI * 2,
+          introOffset: seed * 0.18,
           _heatmapCount: previous?.count || 0,
           _heatmapColor: previous?.colour || null
         });
@@ -448,6 +462,18 @@ function createDotField(container) {
     resizeTimeout = setTimeout(buildGrid, 120);
   });
 
+  window.addEventListener('load', buildGrid, { once: true });
+
+  container.addEventListener('pointerenter', event => {
+    if (field.asciiMode) return;
+
+    const rect = container.getBoundingClientRect();
+    field.pointer.active = true;
+    field.pointer.x = event.clientX - rect.left;
+    field.pointer.y = event.clientY - rect.top;
+    queueDotFieldRender(field);
+  });
+
   container.addEventListener('pointermove', event => {
     const rect = container.getBoundingClientRect();
     field.pointer.active = !field.asciiMode;
@@ -462,6 +488,27 @@ function createDotField(container) {
   });
 
   buildGrid();
+  field.introOpacity = 0;
+  field.introProgress = 0;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (typeof gsap !== 'undefined') {
+        gsap.to(field, {
+          introOpacity: 1,
+          introProgress: 1,
+          duration: 0.55,
+          ease: 'power2.out',
+          onUpdate: () => field.requestRender()
+        });
+      } else {
+        field.introOpacity = 1;
+        field.introProgress = 1;
+        field.requestRender();
+      }
+    });
+  });
+
   return field;
 }
 

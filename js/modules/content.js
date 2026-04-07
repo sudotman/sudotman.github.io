@@ -191,6 +191,7 @@ function initColorSampler() {
   let isFrontCamera = true;
   let lastColour = '#245E51';
   let lastSampleAt = 0;
+  let asciiSupported = false;
   const asciiChars = " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
   window.__ASCII_CHARSET = asciiChars;
 
@@ -200,37 +201,40 @@ function initColorSampler() {
       return;
     }
 
-    // Show oracle overlay before starting mood sampling
-    showMoodOracleOverlay(async () => {
-      if (supportsMedia) {
+    let stream = null;
+    let usedCamera = false;
+
+    if (supportsMedia) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'user' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+        isFrontCamera = true;
+        usedCamera = true;
+      } catch (errFront) {
         try {
-          // Prefer front camera for a natural mirrored ASCII selfie, with a reasonable resolution
-          const stream = await navigator.mediaDevices.getUserMedia({
+          stream = await navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: { ideal: 'user' },
+              facingMode: { ideal: 'environment' },
               width: { ideal: 1280 },
               height: { ideal: 720 }
             }
           });
-          isFrontCamera = true;
-          startSampling(stream);
-        } catch (errFront) {
-          try {
-            // Fallback to environment camera
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              }
-            });
-            isFrontCamera = false;
-            startSampling(stream);
-          } catch (errEnv) {
-            console.warn('Webcam permission denied or unavailable, using fallback colour', errEnv);
-            fallbackSample();
-          }
+          isFrontCamera = false;
+          usedCamera = true;
+        } catch (errEnv) {
+          console.warn('Webcam permission denied or unavailable, using fallback colour', errEnv);
         }
+      }
+    }
+
+    showMoodOracleOverlay(() => {
+      if (usedCamera && stream) {
+        startSampling(stream);
       } else {
         fallbackSample();
       }
@@ -238,19 +242,29 @@ function initColorSampler() {
   });
 
   asciiBtn.addEventListener('click', () => {
-    if (!active) return; // Only works when mood is active
+    if (!active || !asciiSupported) return;
     
     asciiActive = !asciiActive;
     asciiBtn.classList.toggle('active', asciiActive);
 
-    if (!asciiActive && field) {
-      field.clearAsciiFrame();
+    if (field) {
       field.pointer.active = false;
+    }
+
+    if (asciiActive && field) {
+      field.setAsciiFrame({
+        cols: 1,
+        rows: 1,
+        data: new Uint8ClampedArray([0, 0, 0, 0])
+      });
+    } else if (field) {
+      field.clearAsciiFrame();
     }
   });
 
   function startSampling(stream) {
     active = true;
+    asciiSupported = true;
     btn.classList.add('active');
     asciiBtn.style.display = 'block';
     videoStream = stream;
@@ -340,8 +354,8 @@ function initColorSampler() {
     if (!field || !asciiCtx || !videoEl) return;
 
     const rect = field.container.getBoundingClientRect();
-    const cols = clamp(Math.floor(rect.width / 12), 36, PERF.asciiMaxCols);
-    const rows = clamp(Math.floor(rect.height / 16), 20, PERF.asciiMaxRows);
+    const cols = clamp(Math.floor(rect.width / 8), 48, PERF.asciiMaxCols);
+    const rows = clamp(Math.floor(rect.height / 12), 28, PERF.asciiMaxRows);
 
     if (asciiCanvas.width !== cols || asciiCanvas.height !== rows) {
       asciiCanvas.width = cols;
@@ -383,6 +397,7 @@ function initColorSampler() {
   function stopSampling() {
     active = false;
     asciiActive = false;
+    asciiSupported = false;
     btn.classList.remove('active');
     asciiBtn.classList.remove('active');
     asciiBtn.style.display = 'none';
@@ -405,7 +420,12 @@ function initColorSampler() {
   }
 
   function fallbackSample() {
+    active = true;
+    asciiActive = false;
+    asciiSupported = false;
     btn.classList.add('active');
+    asciiBtn.classList.remove('active');
+    asciiBtn.style.display = 'none';
     const computed = getComputedStyle(document.body).backgroundColor || '#245E51';
     applyColour(computed);
   }

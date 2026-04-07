@@ -453,17 +453,48 @@
   }
   
   .experience-roles {
-    gap: 0.25rem;
+    gap: 0.45rem;
+    padding: 0.7rem 0.7rem 0.8rem;
+    border-radius: 16px;
+  }
+
+  .experience-roles::before {
+    inset: 0.55rem 0.6rem;
+    border-radius: 12px;
+  }
+
+  .experience-roles::after {
+    top: 0.55rem;
+    bottom: 0.55rem;
+    left: 0.6rem;
+    width: 0.42rem;
   }
   
   .experience-role {
-    padding: 0.55rem 0.65rem;
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0.65rem 0.72rem;
     border-bottom: none;
+    border-radius: 999px 16px 16px 999px;
+  }
+
+  .experience-role::before {
+    left: 3.05rem;
+    right: 2rem;
+    top: 20%;
+    bottom: 20%;
+  }
+
+  .experience-role::after {
+    right: 0.78rem;
+    width: 1.35rem;
+    height: 0.9rem;
   }
   
   .experience-role-copy {
     grid-template-columns: 1fr;
     gap: 0.2rem;
+    padding-right: 1.9rem;
   }
   
   .experience-role-title {
@@ -474,12 +505,15 @@
     padding-right: 0;
     font-size: 0.5rem;
     letter-spacing: 0.12em;
+    width: fit-content;
+    padding: 0.16rem 0.42rem;
   }
 
   .experience-role-index {
     min-width: 1.65rem;
     height: 1.65rem;
     font-size: 0.52rem;
+    transform: none;
   }
   
   .experience-summary {

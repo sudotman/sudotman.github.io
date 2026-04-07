@@ -262,12 +262,12 @@ function initColorSampler() {
   });
 
   function syncAsciiButtonVisibility() {
-    const shouldShow = active && supportsMedia;
+    const shouldShow = active && asciiSupported;
     asciiBtn.hidden = !shouldShow;
-    asciiBtn.disabled = !asciiSupported;
+    asciiBtn.disabled = !shouldShow;
     asciiBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
     asciiBtn.classList.toggle('visible', shouldShow);
-    asciiBtn.classList.toggle('enabled', asciiSupported);
+    asciiBtn.classList.toggle('enabled', shouldShow);
     asciiBtn.style.display = shouldShow ? 'flex' : 'none';
   }
 

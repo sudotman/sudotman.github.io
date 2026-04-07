@@ -986,10 +986,10 @@ function loadInterestsData(interests) {
   constellationWeb.insertAdjacentHTML('beforebegin', nodesHtml);
 
   const notePairs = [
-    [293.66, 440.0],
-    [329.63, 493.88],
     [392.0, 587.33],
-    [261.63, 392.0]
+    [440.0, 659.25],
+    [493.88, 739.99],
+    [349.23, 523.25]
   ];
 
   const interestElements = interestsConstellation.querySelectorAll('.interest-node');

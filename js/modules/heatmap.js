@@ -590,6 +590,52 @@ function getSharedUiAudioContext(key) {
   }
 }
 
+function playSoftUiChime(key, tones, options = {}) {
+  try {
+    const audioContext = getSharedUiAudioContext(key);
+    if (!audioContext || !Array.isArray(tones) || tones.length === 0) return;
+
+    const now = audioContext.currentTime;
+    const attack = options.attack || 0.02;
+    const decay = options.decay || 0.52;
+    const spacing = options.spacing || 0.018;
+    const volume = options.volume || 0.042;
+    const cutoff = options.cutoff || 1800;
+    const masterGain = options.masterGain || 1.15;
+    const destinationGain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(cutoff, now);
+    filter.Q.setValueAtTime(0.3, now);
+    destinationGain.gain.setValueAtTime(masterGain, now);
+    destinationGain.connect(filter);
+    filter.connect(audioContext.destination);
+
+    tones.forEach((tone, index) => {
+      const startAt = now + (index * spacing);
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const level = volume / (1 + (index * 0.42));
+
+      oscillator.type = index === 0 ? 'sine' : 'triangle';
+      oscillator.frequency.setValueAtTime(tone, startAt);
+      oscillator.frequency.exponentialRampToValueAtTime(tone * 1.006, startAt + Math.min(0.08, decay * 0.2));
+
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(level, startAt + attack);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + decay);
+
+      oscillator.connect(gain);
+      gain.connect(destinationGain);
+      oscillator.start(startAt);
+      oscillator.stop(startAt + decay + 0.04);
+    });
+  } catch (_) {
+    // ignore audio failures
+  }
+}
+
 function playSkillNodeSound(frequency) {
   try {
     const audioContext = getSharedUiAudioContext('skill');
@@ -601,13 +647,13 @@ function playSkillNodeSound(frequency) {
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(frequency || 440, now);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    gain.gain.exponentialRampToValueAtTime(0.11, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
 
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
     oscillator.start(now);
-    oscillator.stop(now + 0.3);
+    oscillator.stop(now + 0.36);
   } catch (_) {
     // ignore audio failures
   }
@@ -623,8 +669,9 @@ function playExperienceCardSound() {
 
 function playExperienceRoleTitleSound(frequency) {
   try {
-    const audioContext = getSharedUiAudioContext('experience');
-    if (!audioContext) return;
+    if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') return;
+
+    const audioContext = new (AudioContext || webkitAudioContext)();
     const baseFreq = frequency || 330;
     const now = audioContext.currentTime;
 
@@ -661,37 +708,16 @@ function playExperienceRoleTitleSound(frequency) {
 
 function playInterestNodeSound(baseFrequency, harmonicFrequency) {
   try {
-    const audioContext = getSharedUiAudioContext('interest');
-    if (!audioContext) return;
-
-    const now = audioContext.currentTime;
-    const root = baseFrequency || 293.66;
-    const accent = harmonicFrequency || (root * 1.5);
-    const osc1 = audioContext.createOscillator();
-    const osc2 = audioContext.createOscillator();
-    const gain1 = audioContext.createGain();
-    const gain2 = audioContext.createGain();
-
-    osc1.type = 'triangle';
-    osc2.type = 'sine';
-    osc1.frequency.setValueAtTime(root, now);
-    osc1.frequency.exponentialRampToValueAtTime(root * 1.12, now + 0.18);
-    osc2.frequency.setValueAtTime(accent, now + 0.03);
-
-    gain1.gain.setValueAtTime(0.0001, now);
-    gain1.gain.exponentialRampToValueAtTime(0.055, now + 0.03);
-    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
-
-    gain2.gain.setValueAtTime(0.0001, now);
-    gain2.gain.exponentialRampToValueAtTime(0.028, now + 0.05);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
-
-    osc1.connect(gain1).connect(audioContext.destination);
-    osc2.connect(gain2).connect(audioContext.destination);
-    osc1.start(now);
-    osc2.start(now + 0.02);
-    osc1.stop(now + 0.44);
-    osc2.stop(now + 0.34);
+    const root = baseFrequency || 440;
+    const accent = harmonicFrequency || (root * 1.333);
+    playSoftUiChime('interest', [root, accent], {
+      decay: 0.48,
+      volume: 0.044,
+      cutoff: 1650,
+      spacing: 0.028,
+      attack: 0.022,
+      masterGain: 1.2
+    });
   } catch (_) {
     // ignore audio failures
   }
@@ -699,13 +725,20 @@ function playInterestNodeSound(baseFrequency, harmonicFrequency) {
 
 function playTabSwitchSound(targetTab) {
   const tabFrequencies = {
-    projects: [261.63, 392.0],
-    experience: [329.63, 493.88],
-    interests: [392.0, 587.33]
+    projects: [392.0, 587.33],
+    experience: [493.88, 739.99],
+    interests: [587.33, 880.0]
   };
 
-  const [root, accent] = tabFrequencies[targetTab] || [261.63, 392.0];
-  playInterestNodeSound(root, accent);
+  const [root, accent] = tabFrequencies[targetTab] || [392.0, 587.33];
+  playSoftUiChime('tab', [root, accent], {
+    decay: 0.34,
+    volume: 0.04,
+    cutoff: 1550,
+    spacing: 0.03,
+    attack: 0.02,
+    masterGain: 1.12
+  });
 }
 
 function startLoadingAnimation() {

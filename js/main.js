@@ -29,6 +29,23 @@ function initGlowingInteractiveDotsGrid() {
 
     let dots       = [];
     let dotCenters = [];
+    let centerRefreshRaf = null;
+
+    function refreshDotCenters() {
+      if (centerRefreshRaf) cancelAnimationFrame(centerRefreshRaf);
+      centerRefreshRaf = requestAnimationFrame(() => {
+        dotCenters = dots
+          .filter(d => !d._isHole)
+          .map(d => {
+            const r = d.getBoundingClientRect();
+            return {
+              el: d,
+              x:  r.left + window.scrollX + r.width / 2,
+              y:  r.top + window.scrollY + r.height / 2
+            };
+          });
+      });
+    }
 
     function buildGrid() {
       container.innerHTML = "";
@@ -44,8 +61,9 @@ function initGlowingInteractiveDotsGrid() {
         dotPx = 16; // Default to 16px
       }
       
-      // Make spacing tighter when ASCII mode is active on this container
-      let gapPx = dotPx * (isAsciiActive ? 0.6 : 2);
+      // Make ASCII denser (smaller glyph cells + tighter spacing)
+      const effectiveDotPx = isAsciiActive ? Math.max(6, dotPx * 0.55) : dotPx;
+      let gapPx = effectiveDotPx * (isAsciiActive ? 0.3 : 2);
       let contW = container.clientWidth;
       let contH = container.clientHeight;
 
@@ -64,13 +82,13 @@ function initGlowingInteractiveDotsGrid() {
         contH = viewportH;
       }
 
-      let cols = Math.floor((contW + gapPx) / (dotPx + gapPx));
-      let rows = Math.floor((contH + gapPx) / (dotPx + gapPx));
+      let cols = Math.floor((contW + gapPx) / (effectiveDotPx + gapPx));
+      let rows = Math.floor((contH + gapPx) / (effectiveDotPx + gapPx));
       
       // Further limit ASCII grid size for better performance and visibility
       if (isAsciiActive) {
-        cols = Math.min(cols, 120); // Max 120 columns
-        rows = Math.min(rows, 60);  // Max 60 rows
+        cols = Math.min(cols, PERF.isLowEnd ? 140 : 220);
+        rows = Math.min(rows, PERF.isLowEnd ? 80 : 130);
       }
       
       // Safety check: ensure we have valid grid dimensions
@@ -84,8 +102,8 @@ function initGlowingInteractiveDotsGrid() {
       if (!isAsciiActive && total > maxDots) {
         const scale = Math.max(1.0, Math.sqrt(total / maxDots));
         gapPx = gapPx * scale;
-        cols = Math.floor((contW + gapPx) / (dotPx + gapPx));
-        rows = Math.floor((contH + gapPx) / (dotPx + gapPx));
+        cols = Math.floor((contW + gapPx) / (effectiveDotPx + gapPx));
+        rows = Math.floor((contH + gapPx) / (effectiveDotPx + gapPx));
         total = cols * rows;
       }
 
@@ -134,31 +152,36 @@ function initGlowingInteractiveDotsGrid() {
         dots.push(d);
       }
 
-      requestAnimationFrame(() => {
-        dotCenters = dots
-          .filter(d => !d._isHole)
-          .map(d => {
-            const r = d.getBoundingClientRect();
-            return {
-              el: d,
-              x:  r.left + window.scrollX + r.width  / 2,
-              y:  r.top  + window.scrollY + r.height / 2
-            };
-          });
-      });
+      refreshDotCenters();
+      setTimeout(refreshDotCenters, 120);
+      setTimeout(refreshDotCenters, 420);
     }
 
     // expose control helpers
     container._rebuildGrid = buildGrid;
+    container._refreshDotCenters = refreshDotCenters;
     container._origFs = parseFloat(getComputedStyle(container).fontSize);
 
     // Debounce resize handler for performance
     let resizeTimeout;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(buildGrid, 150);
+      resizeTimeout = setTimeout(() => {
+        buildGrid();
+        refreshDotCenters();
+      }, 150);
     });
+    let scrollRefreshQueued = false;
+    window.addEventListener('scroll', () => {
+      if (scrollRefreshQueued) return;
+      scrollRefreshQueued = true;
+      requestAnimationFrame(() => {
+        scrollRefreshQueued = false;
+        refreshDotCenters();
+      });
+    }, { passive: true });
     buildGrid();
+    setTimeout(refreshDotCenters, 280);
 
     let lastTime = 0, lastX = 0, lastY = 0;
     let lastEvent = null;
@@ -1945,6 +1968,7 @@ function initColorSampler() {
     const dx = (targetW - drawW) / 2;
     const dy = (targetH - drawH) / 2;
 
+    asciiCtx.clearRect(0, 0, targetW, targetH);
     asciiCtx.save();
     asciiCtx.imageSmoothingEnabled = false;
     if (isFrontCamera) {
@@ -1983,9 +2007,13 @@ function initColorSampler() {
           dot.textContent = char;
           dot._asciiChar = char;
         }
+        const boost = 1.08;
+        const cr = Math.min(255, Math.round(r * boost));
+        const cg = Math.min(255, Math.round(g * boost));
+        const cb = Math.min(255, Math.round(b * boost));
         // Keep styling stable and crisp
         dot.style.backgroundColor = 'transparent';
-        dot.style.color = lastColour; // keep consistent tint for theme
+        dot.style.color = `rgb(${cr}, ${cg}, ${cb})`;
         dot.style.fontFamily = 'Courier New, Courier, monospace';
         dot.style.fontSize = 'inherit';
         dot.style.display = 'flex';
@@ -2032,7 +2060,8 @@ function initColorSampler() {
     asciiCtx = null;
     
     resetDotsAppearance();
-    applyColour('#245E51');
+    const baseColour = document.body.classList.contains('theme-pink') ? '#6E1B59' : '#245E51';
+    applyColour(baseColour);
   }
 
   function fallbackSample() {
@@ -2860,155 +2889,29 @@ async function animateHeatmapReveal(container) {
   const heatmapDots = dots.filter(d => d._heatmapCount && d._heatmapCount > 0);
   
   if (heatmapDots.length === 0) return;
-  
-  // Create ripple effect from center
-  const centerX = container.clientWidth / 2;
-  const centerY = container.clientHeight / 2;
-  
-  // Sort dots by distance from center for wave effect
-  const sortedDots = heatmapDots.map(dot => {
-    const rect = dot.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const x = rect.left - containerRect.left + rect.width / 2;
-    const y = rect.top - containerRect.top + rect.height / 2;
-    const distance = Math.hypot(x - centerX, y - centerY);
-    return { dot, distance, x, y };
-  }).sort((a, b) => a.distance - b.distance);
-  
-  // Create multiple ripple waves for better effect
-  const maxDimension = Math.max(container.clientWidth, container.clientHeight);
-  const rippleCount = 3;
-  
-  for (let i = 0; i < rippleCount; i++) {
-    const ripple = document.createElement('div');
-    ripple.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      border: 2px solid rgba(168,255,81,${0.8 - i * 0.2});
-      pointer-events: none;
-      z-index: 1000;
-      transform: translate(-50%, -50%);
-    `;
-    container.appendChild(ripple);
-    
-    // Animate ripple expansion with staggered timing
-    gsap.to(ripple, {
-      width: maxDimension * 2.5,
-      height: maxDimension * 2.5,
-      duration: 1.8,
-      delay: i * 0.15,
-      ease: "power2.out"
-    });
-    
-    // Animate ripple fade out
-    gsap.to(ripple, {
-      opacity: 0,
-      duration: 0.8,
-      delay: i * 0.15 + 1.0,
-      ease: "power2.out",
-      onComplete: () => {
-        ripple.remove();
-      }
-    });
-  }
-  
-  // Reset all heatmap dots initially
-  heatmapDots.forEach(dot => {
-    gsap.set(dot, { color: dot._heatmapColor, scale: 0.3, opacity: 0 });
+
+  gsap.killTweensOf(heatmapDots);
+  gsap.set(heatmapDots, {
+    opacity: 0.1,
+    scale: 0.94,
+    color: (i) => heatmapDots[i]._heatmapColor
   });
-  
-  // Animate dots in waves with staggered timing
-  for (let i = 0; i < sortedDots.length; i++) {
-    const { dot, distance } = sortedDots[i];
-    const delay = (distance / 200) * 0.1; // Stagger based on distance
-    
-    // Create individual particle effect for each dot
-    const particle = document.createElement('div');
-    particle.style.cssText = `
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: ${dot._heatmapColor};
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 999;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 10px ${dot._heatmapColor};
-    `;
-    container.appendChild(particle);
-    
-    // Animate particle from center to dot position
-    const rect = dot.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const targetX = rect.left - containerRect.left + rect.width / 2;
-    const targetY = rect.top - containerRect.top + rect.height / 2;
-    
-    gsap.to(particle, {
-      x: targetX - centerX,
-      y: targetY - centerY,
-      duration: 0.8,
-      delay: delay,
-      ease: "power2.out",
-      onComplete: () => {
-        particle.remove();
-      }
-    });
-    
-    // Animate the actual dot
-    gsap.to(dot, {
-      color: dot._heatmapColor,
-      scale: 1,
+
+  await new Promise(resolve => {
+    gsap.to(heatmapDots, {
       opacity: 1,
-      duration: 0.6,
-      delay: delay + 0.4,
-      ease: "elastic.out(1, 0.5)",
-      onStart: () => {
-        // Add glow effect
-        gsap.to(dot, {
-          boxShadow: `0 0 20px ${dot._heatmapColor}`,
-          duration: 0.3,
-          yoyo: true,
-          repeat: 1
-        });
-      }
+      scale: 1,
+      color: (i) => heatmapDots[i]._heatmapColor,
+      duration: 0.55,
+      ease: "power2.out",
+      stagger: {
+        grid: "auto",
+        from: "center",
+        amount: 0.45
+      },
+      onComplete: resolve
     });
-  }
-  
-  // Create floating energy particles
-  for (let i = 0; i < 15; i++) {
-    setTimeout(() => {
-      const floater = document.createElement('div');
-      floater.style.cssText = `
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        background: rgba(168,255,81,0.6);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 998;
-        top: ${Math.random() * 100}%;
-        left: ${Math.random() * 100}%;
-      `;
-      container.appendChild(floater);
-      
-      gsap.to(floater, {
-        y: -100,
-        x: Math.random() * 100 - 50,
-        opacity: 0,
-        duration: 2 + Math.random() * 2,
-        ease: "power1.out",
-        onComplete: () => {
-          floater.remove();
-        }
-      });
-    }, Math.random() * 1000);
-  }
+  });
 }
 
 async function revealHeatmap(container) {

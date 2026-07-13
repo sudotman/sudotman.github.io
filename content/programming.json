@@ -149,7 +149,7 @@
       "title": "realistic colors visualizer",
       "short": "unreal-engine powered colors visualizer made for birla opus.",
       "long": "a unreal engine front end that interfaces with hardware knobs and a controller simulateneously and allows for real-time color visualization of about ~2300 colors on varied houses and very seamless customer onboarding and analytics. deployed across 10+ locations in india [mumbai, delhi, kolkata, etc].",
-      "image": "images/zer.png",
+      "image": "images/birlaOpus0.png",
       "gallery": ["images/birlaOpus0.png", "images/birlaOpus1.jpg", "images/birlaOpus2.jpg", "images/birlaOpus3.jpg", "images/birlaOpus4.jpg"],
       "links": [
         {

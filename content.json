@@ -1,61 +1,95 @@
 {
   "schemaVersion": 2,
   "siteHeader": {
-    "title": "satyam.lol",
-    "subtitle": "software, games, immersive systems, and—soon—the films and art made beside them.",
-    "kicker": "archive // systems, images, peculiar signals",
-    "bannerImage": "images/banner.jpg"
+    "title": "Satyam Kashyap — impossible rooms",
+    "subtitle": "XR systems, peculiar tools, games, and moving images from Mumbai.",
+    "kicker": "an illuminated field manual // edition 2026",
+    "thesis": "I build systems for realities that refuse to stay imaginary.",
+    "manifesto": "Mission simulators, stubborn tools, games that misbehave, and images still learning their names.",
+    "bannerImage": "images/isro1.jpg"
   },
+  "identity": {
+    "name": "Satyam Kashyap",
+    "shortName": "Satyam",
+    "role": "XR lead, programmer, and maker of peculiar worlds",
+    "location": "Mumbai, India",
+    "languages": ["English", "Hindi", "Pahadi"],
+    "email": "satyamsudo@gmail.com",
+    "bio": "A programmer specialising in immersive technology, moving between simulation, open tools, games, and an enduring obsession with cinema.",
+    "socials": [
+      { "label": "GitHub", "href": "https://github.com/sudotman" },
+      { "label": "LinkedIn", "href": "https://www.linkedin.com/in/satyam-kashyap-a93657176/" },
+      { "label": "Letterboxd", "href": "https://letterboxd.com/actuallysatyam/" },
+      { "label": "Last.fm", "href": "https://www.last.fm/user/satyams" }
+    ]
+  },
+  "curation": {
+    "featuredWorkIds": [
+      "p_isro",
+      "p_betterUnity",
+      "g_unwind",
+      "p_colorsVisualizer",
+      "p_everythingbagel",
+      "p_floorPlanGenerator"
+    ]
+  },
+  "sites": [
+    { "title": "Blog & musings", "note": "peculiar thoughts, given structure", "href": "https://blog.satyamkashyap.com" },
+    { "title": "Pahadi dictionary", "note": "a small instrument for a living language", "href": "https://pahadi.satyamkashyap.com" },
+    { "title": "Missed You Mumbai", "note": "missed connections in a city of twenty million", "href": "https://missedyoumumbai.com" },
+    { "title": "Seek", "note": "a machine for finding visual inspiration", "href": "https://seek.satyamkashyap.com" },
+    { "title": "Closet", "note": "another private branch of the archive", "href": "https://closet.satyamkashyap.com" }
+  ],
   "catalog": {
     "tracks": [
       {
         "id": "programming",
         "label": "programming",
         "displayLabel": "systems",
-        "accent": "#A8FF51"
+        "accent": "#C6A762"
       },
       {
         "id": "arts",
         "label": "film & art",
         "displayLabel": "visions",
-        "accent": "#F05CEB"
+        "accent": "#B57C9E"
       }
     ],
     "mediums": [
       {
         "id": "open_source",
         "label": "open source",
-        "accent": "#FF5C5C"
+        "accent": "#78A096"
       },
       {
         "id": "game",
         "label": "games",
-        "accent": "#FFB74C"
+        "accent": "#E2775D"
       },
       {
         "id": "rnd",
         "label": "research & development",
-        "accent": "#D7F113"
+        "accent": "#C6A762"
       },
       {
         "id": "art",
         "label": "creative code",
-        "accent": "#F05CEB"
+        "accent": "#8098C2"
       },
       {
         "id": "film",
         "label": "film",
-        "accent": "#8AA4FF"
+        "accent": "#B28BAA"
       },
       {
         "id": "installation",
         "label": "installation",
-        "accent": "#67D5C4"
+        "accent": "#6F9B91"
       },
       {
         "id": "visual_art",
         "label": "visual art",
-        "accent": "#DC82FF"
+        "accent": "#B57C9E"
       }
     ],
     "sources": [

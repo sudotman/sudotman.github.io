@@ -2,7 +2,7 @@
 
 Static personal website and portfolio repo.
 
-This repo currently contains one main interactive homepage plus a few standalone side pages and experiments. The homepage is data-driven and runs with plain HTML, CSS, and JavaScript loaded directly by `index.html`.
+This repo contains one main editorial portfolio plus a few standalone side pages and experiments. The homepage is a data-driven “field manual of impossible machines” and runs with plain HTML, CSS, and JavaScript loaded directly by `index.html`.
 
 ## What Is Live
 
@@ -28,21 +28,21 @@ This repo currently contains one main interactive homepage plus a few standalone
 - `css/modules/base.css`: shared foundations and generic UI
 - `css/modules/sections.css`: main content sections and layouts
 - `css/modules/project-ui.css`: project modal and lightbox UI
-- `css/modules/interactive-system.css`: dots renderer visuals, cards, CRT effects, controls
+- `css/modules/interactive-system.css`: instrument engraving, reveal motion, pointer registration, and interaction states
 - `css/modules/mobile.css`: responsive overrides
 
 ### JavaScript
 
-- `js/modules/core.js`: performance flags, canvas dot field, theme wiring, tab bootstrapping
-- `js/modules/interface.js`: reveal/return flows, modals, lightbox behavior
-- `js/modules/content.js`: content loading, sampler, filters, card controls, scroll-wave behavior
-- `js/modules/heatmap.js`: click heatmap, oracle/loading overlays, sound helpers
+- `js/modules/core.js`: shared state, scroll progress, section tracking, reveal wiring, and the canvas instrument engraving
+- `js/modules/interface.js`: navigation, hash-addressable project folios, safe legacy body rendering, and the image lightbox
+- `js/modules/content.js`: manifest/feed normalization plus rendering for work, experience, education, interests, and satellite sites
+- `js/modules/heatmap.js`: lightweight pointer registration, lens parallax, and project-plate coordinate details
 
 ## Data Model
 
 ### `content.json`
 
-This is the source of truth for the portfolio catalog contract. It defines the schema version, site header, track and medium taxonomy, and the ordered list of publishing feeds. Do not add an unregistered feed.
+This is the source of truth for the portfolio catalog contract. It defines the schema version, identity and contact details, homepage language, curated work, satellite sites, track and medium taxonomy, and the ordered list of publishing feeds. Do not add an unregistered feed.
 
 The current feeds are:
 
@@ -150,10 +150,11 @@ Then open the served URL in a browser.
 
 ## Current Notes
 
-- The homepage dots are now canvas-backed rather than DOM-dot based.
-- Heatmap clicks still work on the normal homepage view.
-- ASCII mode is rendered from the webcam feed into the canvas path instead of rewriting DOM nodes.
-- Vendor assets are committed locally under `vendor/`.
+- The homepage opens directly on the portfolio; there is no entrance gate or hidden archive.
+- The hero engraving is canvas-backed, low-density, capped at 27 fps, and static when reduced motion is requested.
+- Project details use native dialogs and retain `#work/<id>` deep links.
+- The film/art publishing feed remains intentionally empty and is represented as a developing branch.
+- Vendor assets remain committed for standalone legacy surfaces, but the homepage no longer loads them.
 
 ## Maintenance Rule Of Thumb
 

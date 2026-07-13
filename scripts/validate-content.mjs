@@ -433,6 +433,59 @@ function validateProfile(profile) {
   if (!isObject(profile.interests)) addError(`${PROFILE_PATH}.interests`, 'must be an object');
 }
 
+function validateHomepageIdentity(manifest) {
+  if (!isObject(manifest.identity)) {
+    addError(`${MANIFEST_PATH}.identity`, 'must be an object');
+  } else {
+    for (const field of ['name', 'shortName', 'role', 'location', 'email', 'bio']) {
+      validateText(manifest.identity[field], `${MANIFEST_PATH}.identity.${field}`, field);
+    }
+    validateStringArray(manifest.identity.languages, `${MANIFEST_PATH}.identity.languages`);
+    if (!Array.isArray(manifest.identity.socials) || manifest.identity.socials.length === 0) {
+      addError(`${MANIFEST_PATH}.identity.socials`, 'must be a non-empty array');
+    } else {
+      manifest.identity.socials.forEach((link, index) => {
+        const location = `${MANIFEST_PATH}.identity.socials[${index}]`;
+        if (!isObject(link)) {
+          addError(location, 'must be an object');
+          return;
+        }
+        validateText(link.label, `${location}.label`, 'label');
+        validateLinkHref(link.href, `${location}.href`);
+      });
+    }
+  }
+
+  if (!Array.isArray(manifest.sites) || manifest.sites.length === 0) {
+    addError(`${MANIFEST_PATH}.sites`, 'must be a non-empty array');
+  } else {
+    manifest.sites.forEach((site, index) => {
+      const location = `${MANIFEST_PATH}.sites[${index}]`;
+      if (!isObject(site)) {
+        addError(location, 'must be an object');
+        return;
+      }
+      validateText(site.title, `${location}.title`, 'title');
+      validateText(site.note, `${location}.note`, 'note');
+      validateLinkHref(site.href, `${location}.href`);
+    });
+  }
+}
+
+function validateCuration(curation) {
+  if (!isObject(curation)) {
+    addError(`${MANIFEST_PATH}.curation`, 'must be an object');
+    return;
+  }
+  if (!validateStringArray(curation.featuredWorkIds, `${MANIFEST_PATH}.curation.featuredWorkIds`)) return;
+  const featured = new Set();
+  curation.featuredWorkIds.forEach((id, index) => {
+    if (featured.has(id)) addError(`${MANIFEST_PATH}.curation.featuredWorkIds[${index}]`, `duplicate work id "${id}"`);
+    featured.add(id);
+    if (!seenWorkIds.has(id)) addError(`${MANIFEST_PATH}.curation.featuredWorkIds[${index}]`, `unknown work id "${id}"`);
+  });
+}
+
 async function validateLocalAssets() {
   await Promise.all([...localAssets.entries()].map(async ([relativePath, asset]) => {
     try {
@@ -462,8 +515,13 @@ async function main() {
     } else {
       validateText(manifest.siteHeader.title, `${MANIFEST_PATH}.siteHeader.title`, 'title');
       validateText(manifest.siteHeader.subtitle, `${MANIFEST_PATH}.siteHeader.subtitle`, 'subtitle');
+      validateText(manifest.siteHeader.kicker, `${MANIFEST_PATH}.siteHeader.kicker`, 'kicker');
+      validateText(manifest.siteHeader.thesis, `${MANIFEST_PATH}.siteHeader.thesis`, 'thesis');
+      validateText(manifest.siteHeader.manifesto, `${MANIFEST_PATH}.siteHeader.manifesto`, 'manifesto');
       registerAsset(manifest.siteHeader.bannerImage, `${MANIFEST_PATH}.siteHeader.bannerImage`);
     }
+
+    validateHomepageIdentity(manifest);
 
     if (!isObject(manifest.catalog)) {
       addError(`${MANIFEST_PATH}.catalog`, 'must be an object');
@@ -501,6 +559,7 @@ async function main() {
           }
         });
         await Promise.all(feedTasks);
+        validateCuration(manifest.curation);
       }
     }
   }

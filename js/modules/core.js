@@ -1,25 +1,30 @@
-gsap.registerPlugin(InertiaPlugin);
-
 // -------- Global performance tuning --------
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const coarsePointerQuery = window.matchMedia('(hover: none), (pointer: coarse)');
+const compactViewportQuery = window.matchMedia('(max-width: 900px)');
+const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const PERF = {
-  isLowEnd: (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || /mobile|android|iphone|ipad/i.test(navigator.userAgent),
-  isMobile: /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent),
-  isTouch: ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+  isLowEnd: (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+    || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+    || Boolean(connection?.saveData),
+  isMobile: compactViewportQuery.matches || coarsePointerQuery.matches,
+  isTouch: coarsePointerQuery.matches || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0),
+  prefersReducedMotion: reducedMotionQuery.matches,
+  saveData: Boolean(connection?.saveData)
 };
 
 PERF.tier = PERF.isLowEnd ? 'low' : (PERF.isMobile ? 'medium' : 'high');
-PERF.maxDots = PERF.tier === 'low' ? 240 : (PERF.tier === 'medium' ? 420 : 620);
+PERF.maxDots = PERF.tier === 'low' ? 220 : (PERF.tier === 'medium' ? 360 : 560);
 PERF.asciiFps = PERF.tier === 'low' ? 8 : 12;
 PERF.moodFps = PERF.tier === 'low' ? 10 : 14;
 PERF.asciiMaxCols = PERF.tier === 'low' ? 72 : (PERF.tier === 'medium' ? 96 : 118);
 PERF.asciiMaxRows = PERF.tier === 'low' ? 40 : (PERF.tier === 'medium' ? 54 : 68);
 
 try {
-  gsap.config({ autoSleep: 60, nullTargetWarn: false });
-  if (gsap.ticker && gsap.ticker.lagSmoothing) {
+  if (typeof gsap !== 'undefined') gsap.config({ autoSleep: 60, nullTargetWarn: false });
+  if (typeof gsap !== 'undefined' && gsap.ticker && gsap.ticker.lagSmoothing) {
     gsap.ticker.lagSmoothing(500, 16);
   }
-  gsap.defaults({ force3D: true });
 } catch (_) { /* noop */ }
 
 const DOT_PIXEL_MAPS = {
@@ -278,7 +283,8 @@ function renderDotField(field) {
     );
   }
 
-  if (field.pointer.active || field.clickRipples.length || field.scrollInfluence > 0 || field.disperse > 0 || field.revealBoost > 0 || field.introOpacity < 1 || field.introProgress < 1) {
+  const hasActivePulse = field.cells.some(cell => cell._pulseUntil && cell._pulseUntil > now);
+  if (field.clickRipples.length || hasActivePulse) {
     queueDotFieldRender(field);
   }
 }
@@ -328,7 +334,8 @@ function createDotField(container) {
   };
 
   function buildGrid() {
-    const dpr = window.devicePixelRatio || 1;
+    const dprCap = PERF.tier === 'high' ? 1.75 : 1.35;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
     const width = Math.max(1, container.clientWidth || window.innerWidth);
     const height = Math.max(1, container.clientHeight || window.innerHeight);
     const prevCounts = new Map(field.cells.map(cell => [cell.key, {
@@ -346,15 +353,17 @@ function createDotField(container) {
     ctx.imageSmoothingEnabled = false;
 
     const idealGap = PERF.isMobile ? 22 : 18;
-    let cols = Math.max(18, Math.floor(width / idealGap));
-    let rows = Math.max(12, Math.floor(height / idealGap));
-    let total = cols * rows;
+    const idealCols = Math.max(10, Math.floor(width / idealGap));
+    const idealRows = Math.max(8, Math.floor(height / idealGap));
+    const targetDots = Math.min(PERF.maxDots, idealCols * idealRows);
+    const aspect = width / height;
+    let cols = Math.max(10, Math.round(Math.sqrt(targetDots * aspect)));
+    let rows = Math.max(8, Math.floor(targetDots / cols));
 
-    if (total > PERF.maxDots) {
-      const scale = Math.sqrt(total / PERF.maxDots);
-      cols = Math.max(18, Math.floor(cols / scale));
-      rows = Math.max(12, Math.floor(rows / scale));
-      total = cols * rows;
+    while (cols * rows > PERF.maxDots) {
+      if (rows >= cols && rows > 8) rows--;
+      else if (cols > 10) cols--;
+      else break;
     }
 
     const holeCols = cols % 2 === 0 ? 4 : 5;
@@ -485,8 +494,6 @@ function createDotField(container) {
     resizeTimeout = setTimeout(buildGrid, 120);
   });
 
-  window.addEventListener('load', buildGrid, { once: true });
-
   container.addEventListener('pointerenter', event => {
     if (field.asciiMode) return;
 
@@ -516,7 +523,7 @@ function createDotField(container) {
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      if (typeof gsap !== 'undefined') {
+      if (typeof gsap !== 'undefined' && !PERF.prefersReducedMotion) {
         gsap.to(field, {
           introOpacity: 1,
           introProgress: 1,
@@ -545,14 +552,9 @@ function initGlowingInteractiveDotsGrid() {
 document.addEventListener('DOMContentLoaded', function() {
   initGlowingInteractiveDotsGrid();
   loadProjects().then(() => {
-    // Once projects are loaded, set up drag events
-    // Disable drag only for small viewports or explicit mobile UAs
-    const isSmallViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches;
-    const shouldDisableDrag = PERF.isMobile || isSmallViewport;
+    const shouldDisableDrag = PERF.isTouch || window.matchMedia('(max-width: 900px)').matches || PERF.prefersReducedMotion;
     if (!shouldDisableDrag) {
       initCardDragSystem();
-    } else {
-      try { console.log('[mobile/small] skipping draggable cards'); } catch (_) {}
     }
   });
   loadProfileData();
@@ -567,6 +569,7 @@ function initThemeToggle() {
   const titleLine1 = document.querySelector('.cloneable-title__nr');
   const titleLine2 = document.querySelector('.cloneable-title__h1');
   if (!titleContainer || !titleLine1 || !titleLine2) return;
+  titleContainer.setAttribute('aria-pressed', String(document.body.classList.contains('theme-pink')));
 
   function applyThemeNow(isPink) {
     const field = getPrimaryDotField();
@@ -584,6 +587,8 @@ function initThemeToggle() {
     if (field) {
       field.requestRender();
     }
+
+    titleContainer.setAttribute('aria-pressed', String(isPink));
   }
 
   // Restore persisted preference
@@ -648,46 +653,73 @@ function showThemeSwitchOracle(onFinish) {
 
 // Tab Switching Functionality
 function initTabSwitching() {
-  const navNodes = document.querySelectorAll('.nav-node');
-  const tabContents = document.querySelectorAll('.tab-content');
-  
-  navNodes.forEach(node => {
-    node.addEventListener('click', () => {
-      if (node.classList.contains('active')) return;
+  const navNodes = [...document.querySelectorAll('.nav-node[role="tab"]')];
+  const tabContents = [...document.querySelectorAll('.tab-content[role="tabpanel"]')];
 
-      const targetTab = node.dataset.tab;
+  function activateTab(node, { playSound = true } = {}) {
+    const targetTab = node.dataset.tab;
+    const panel = document.getElementById(`${targetTab}-tab`);
+    if (!targetTab || !panel) return;
+
+    if (playSound && !node.classList.contains('active')) {
       try { playTabSwitchSound(targetTab); } catch (_) {}
-      
-      // Remove active class from all nodes and contents
-      navNodes.forEach(n => n.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-      
-      // Add active class to clicked node and corresponding content
-      node.classList.add('active');
-      document.getElementById(`${targetTab}-tab`).classList.add('active');
-      
-      // Handle card action buttons visibility/functionality
-      updateCardActionsForTab(targetTab);
-      
-      // Enhanced constellation morphing effect
-      morphConstellation(targetTab);
-      
-      // Trigger animations for the newly visible content
-      setTimeout(() => {
-        if (targetTab === 'experience') {
-          animateExperienceCards();
-        } else if (targetTab === 'interests') {
-          animateInterestCards();
-        }
-      }, 100);
+    }
+
+    navNodes.forEach(tab => {
+      const active = tab === node;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+    });
+    tabContents.forEach(content => {
+      const active = content === panel;
+      content.classList.toggle('active', active);
+      content.hidden = !active;
+    });
+
+    updateCardActionsForTab(targetTab);
+    if (!PERF.prefersReducedMotion) morphConstellation(targetTab);
+
+    if (targetTab === 'experience') animateExperienceCards();
+    else if (targetTab === 'interests') animateInterestCards();
+  }
+
+  navNodes.forEach((node, index) => {
+    node.addEventListener('click', () => activateTab(node));
+    node.addEventListener('keydown', event => {
+      let nextIndex = index;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % navNodes.length;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + navNodes.length) % navNodes.length;
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = navNodes.length - 1;
+      else return;
+
+      event.preventDefault();
+      navNodes[nextIndex].focus();
+      activateTab(navNodes[nextIndex]);
     });
   });
+
+  const initiallyActive = navNodes.find(node => node.getAttribute('aria-selected') === 'true') || navNodes[0];
+  if (initiallyActive) activateTab(initiallyActive, { playSound: false });
 }
 
 // Update card actions based on active tab
 function updateCardActionsForTab(activeTab) {
   const cardActions = document.querySelector('.cards-actions');
   const filterDropdown = document.getElementById('filter-dropdown');
+  const filterButton = document.querySelector('.filter-cards-btn');
+  const toolbar = document.getElementById('work-toolbar');
+
+  if (toolbar) toolbar.hidden = activeTab !== 'projects';
+  if (filterDropdown) {
+    filterDropdown.hidden = true;
+    filterDropdown.classList.remove('show');
+  }
+  if (filterButton) {
+    filterButton.classList.remove('active');
+    filterButton.setAttribute('aria-expanded', 'false');
+  }
   
   if (activeTab === 'projects') {
     if (cardActions) {
@@ -695,19 +727,11 @@ function updateCardActionsForTab(activeTab) {
       cardActions.style.pointerEvents = 'auto';
       cardActions.classList.remove('is-collapsed');
     }
-    if (filterDropdown) {
-      filterDropdown.classList.remove('show');
-      document.querySelector('.filter-cards-btn')?.classList.remove('active');
-    }
   } else {
     if (cardActions) {
       cardActions.style.opacity = '0';
       cardActions.style.pointerEvents = 'none';
       cardActions.classList.add('is-collapsed');
-    }
-    if (filterDropdown) {
-      filterDropdown.classList.remove('show');
-      document.querySelector('.filter-cards-btn')?.classList.remove('active');
     }
   }
 }
@@ -1014,6 +1038,12 @@ function loadInterestsData(interests) {
 function animateExperienceCards() {
   const experienceCards = document.querySelectorAll('.experience-card');
   const skillNodes = document.querySelectorAll('.skill-node');
+
+  if (PERF.prefersReducedMotion) {
+    experienceCards.forEach(card => { card.style.animation = 'none'; card.style.opacity = '1'; });
+    skillNodes.forEach(node => { node.style.opacity = '1'; node.style.transform = 'none'; });
+    return;
+  }
   
   // Animate experience cards
   experienceCards.forEach((card, index) => {
@@ -1057,6 +1087,10 @@ function animateSkillCards() {
 
 function animateInterestCards() {
   const interestCards = document.querySelectorAll('.interest-node');
+  if (PERF.prefersReducedMotion) {
+    interestCards.forEach(card => { card.style.animation = 'none'; card.style.opacity = '1'; });
+    return;
+  }
   interestCards.forEach((card, index) => {
     card.style.animation = 'none';
     card.offsetHeight; // Trigger reflow
@@ -1066,7 +1100,12 @@ function animateInterestCards() {
 }
 
 // Card Drag System
+let cardDragSystemInitialized = false;
+
 function initCardDragSystem() {
+  if (cardDragSystemInitialized) return;
+  cardDragSystemInitialized = true;
+
   let isDragging = false;
   let currentCard = null;
   let startX, startY;
@@ -1176,6 +1215,8 @@ function initCardDragSystem() {
     const cards = document.querySelectorAll('.project-card');
     
     cards.forEach((card, index) => {
+      if (card.dataset.dragBound === 'true') return;
+      card.dataset.dragBound = 'true';
       // Extract rotation from CSS transform
       const computedStyle = window.getComputedStyle(card);
       const transform = computedStyle.transform;
@@ -1200,9 +1241,6 @@ function initCardDragSystem() {
       // Mouse events
       card.addEventListener('mousedown', (e) => handleStart(e, card));
       
-      // Touch events
-      card.addEventListener('touchstart', (e) => handleStart(e, card), { passive: false });
-      
       // Prevent text selection while dragging
       card.addEventListener('selectstart', (e) => e.preventDefault());
       
@@ -1214,24 +1252,6 @@ function initCardDragSystem() {
   // Global move and end events
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
-  document.addEventListener('touchmove', handleMove, { passive: false });
-  document.addEventListener('touchend', handleEnd);
-
-  // Setup events when projects are revealed
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        const target = mutation.target;
-        if (target.classList.contains('revealed') && target.id === 'projects-content') {
-          setTimeout(setupCardEvents, 1500); // Wait for cards to appear
-        }
-      }
-    });
-  });
-
-  const projectsContent = document.getElementById('projects-content');
-  if (projectsContent) {
-    observer.observe(projectsContent, { attributes: true });
-  }
+  setupCardEvents();
 }
 

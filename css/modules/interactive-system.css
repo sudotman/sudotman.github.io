@@ -1509,3 +1509,296 @@ body.theme-pink .osmo-ui::before {
 }
 
 /* ================================================================ */
+
+/* === Deck polish and performance guardrails ====================== */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: clamp(1.1rem, 2.2vw, 2rem);
+  align-items: stretch;
+  padding: 0.5rem 0 2rem;
+}
+
+.work-toolbar .cards-actions {
+  position: static;
+  inset: auto;
+  width: auto;
+  margin: 0;
+  transform: none;
+}
+
+.work-toolbar .filter-dropdown-container {
+  position: relative;
+}
+
+.work-toolbar .cards-action-btn {
+  min-height: 2.65rem;
+  padding: 0.62rem 0.82rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.45rem 0.12rem 0.45rem 0.12rem;
+  background: rgba(5, 13, 12, 0.66);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.work-toolbar .cards-action-btn:hover,
+.work-toolbar .cards-action-btn.active {
+  border-color: rgba(var(--signal-rgb), 0.42);
+  color: var(--signal);
+}
+
+.work-toolbar .filter-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  left: auto;
+  min-width: 14rem;
+  padding: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem 0.2rem 0.6rem 0.2rem;
+  background: rgba(5, 13, 12, 0.98);
+  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.45);
+  transform: none;
+}
+
+.work-toolbar .filter-option {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-align: left;
+}
+
+.work-toolbar .filter-option:hover,
+.work-toolbar .filter-option.active {
+  background: rgba(var(--signal-rgb), 0.08);
+  color: var(--ink);
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  min-height: 23rem;
+  height: auto;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, rgba(255, 255, 255, 0.06));
+  border-radius: 0.9rem 0.22rem 0.9rem 0.22rem;
+  background:
+    linear-gradient(155deg, rgba(10, 17, 17, 0.97), rgba(13, 22, 21, 0.94)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 10%, transparent), transparent 38%);
+  box-shadow: 0 1.1rem 2.8rem rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+  transform: rotate(var(--card-tilt, 0deg));
+  will-change: auto;
+  contain: layout paint;
+  transition: transform 200ms var(--ease-out), border-color 180ms ease, box-shadow 200ms ease;
+}
+
+.project-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 72%, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 1.6rem 3.8rem rgba(0, 0, 0, 0.3), 0 0 1.4rem color-mix(in srgb, var(--accent) 10%, transparent);
+  filter: none;
+  transform: translateY(-0.35rem) rotate(0deg);
+}
+
+.project-card[hidden] {
+  display: none !important;
+}
+
+.project-card.filter-arrival {
+  animation: filterArrival 360ms var(--ease-out) backwards;
+}
+
+@keyframes filterArrival {
+  from { opacity: 0; transform: translateY(0.75rem) rotate(0deg); }
+  to { opacity: 1; transform: translateY(0) rotate(var(--card-tilt, 0deg)); }
+}
+
+.project-card-header {
+  gap: 0.85rem;
+  padding: 1.05rem 1.05rem 0.9rem;
+}
+
+.project-icon {
+  width: 2.55rem;
+  height: 2.55rem;
+  flex: 0 0 2.55rem;
+  border-radius: 0.6rem 0.15rem 0.6rem 0.15rem;
+}
+
+.project-header-text h3 {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.4vw, 1.22rem);
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.project-type {
+  margin-top: 0.24rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.11em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.project-card-body {
+  flex: 1 1 auto;
+  padding: 1rem 1.05rem 0.8rem;
+}
+
+.project-description {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.62;
+}
+
+.project-tags {
+  margin-top: 1rem;
+}
+
+.tag {
+  min-height: 1.65rem;
+  padding: 0.28rem 0.48rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+}
+
+.project-card-footer {
+  margin-top: auto;
+  padding: 0.75rem 1.05rem 1.05rem;
+}
+
+.project-expand-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 0.45rem 0.12rem 0.45rem 0.12rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.project-card-cover {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.project-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+  transition: transform 600ms var(--ease-out), filter 250ms ease;
+}
+
+.project-card--visual {
+  min-height: 34rem;
+}
+
+.project-card--visual:hover .project-card-cover img {
+  transform: scale(1.025);
+}
+
+.osmo-icon__link {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(8rem, 11vw, 10rem);
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+}
+
+.osmo-icon__link::after {
+  content: "draw / enter archive";
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 50%;
+  width: max-content;
+  color: rgba(218, 255, 181, 0.68);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: color 180ms ease, letter-spacing 180ms ease;
+}
+
+.osmo-icon__link:hover::after,
+.osmo-icon__link:focus-visible::after {
+  color: var(--signal);
+  letter-spacing: 0.2em;
+}
+
+.osmo-icon-svg {
+  object-fit: contain;
+}
+
+body::before {
+  opacity: 0.17;
+  animation-duration: 11s;
+}
+
+body::after {
+  opacity: 0.68;
+  animation-duration: 12s;
+}
+
+body.deck-open::before {
+  opacity: 0.1;
+}
+
+body.deck-open::after {
+  opacity: 0.46;
+}
+
+.color-sampler-btn,
+.ascii-sampler-btn {
+  border-radius: 0.6rem 0.15rem 0.6rem 0.15rem;
+  font-family: var(--font-mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  .osmo-ui::before,
+  .osmo-ui::after {
+    animation: none !important;
+  }
+
+  .project-card,
+  .project-card:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "id": "film-art",
+    "defaultTracks": ["arts"]
+  },
+  "works": []
+}

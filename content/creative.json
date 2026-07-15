@@ -2,55 +2,44 @@
   "profile": {
     "name": "Satyam Kashyap",
     "role": "Filmmaker & creative technologist",
-    "statement": "I make worlds, interfaces, and small internet worlds.",
+    "statement": "i make stories, interfaces, and small internet worlds.",
     "location": "mumbai / working everywhere",
     "email": "hello@satyam.lol",
     "coreTechUrl": "/tech.html"
   },
   "projects": [
     {
-      "slug": "field-notes-for-tomorrow",
-      "title": "chhoti gold",
-      "year": "2026",
-      "discipline": "film",
-      "note": "A visual language written in the future tense.",
-      "link": "#field-notes-for-tomorrow",
+      "slug": "carcinization-internet",
+      "title": "carcinization on the internet",
+      "year": "2024",
+      "discipline": "writing",
+      "note": "We all tend to become crabs.",
+      "link": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html",
       "image": "",
-      "color": "#f33b2f",
-      "accent": "#e5a0aa"
+      "color": "#ffb427",
+      "accent": "#6b2c59"
     },
     {
-      "slug": "the-listening-room",
-      "title": "The Listening Room",
-      "year": "2025",
+      "slug": "the-closet",
+      "title": "the closet",
+      "year": "2024",
       "discipline": "Interactive archive",
-      "note": "What the walls remembered after everyone left.",
-      "link": "#the-listening-room",
-      "image": "",
+      "note": "everything that is close",
+      "link": "https://closet.satyam.lol/",
+      "image": "https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg",
       "color": "#99c4e7",
       "accent": "#3658d8"
     },
     {
-      "slug": "monsoon-index",
-      "title": "Monsoon Index",
+      "slug": "blue-dogs",
+      "title": "Blue Dogs",
       "year": "2025",
-      "discipline": "Editorial system",
-      "note": "Weather behaving badly inside a publication.",
-      "link": "#monsoon-index",
-      "image": "",
+      "discipline": "film",
+      "note": "Short about bigotry affecting the forsaken.",
+      "link": "https://letterboxd.com/film/blue-dogs/",
+      "image": "https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg",
       "color": "#536a50",
       "accent": "#c9ed2f"
-    },
-    {
-      "slug": "soft-machine",
-      "title": "Soft Machine",
-      "year": "2024",
-      "discipline": "Campaign",
-      "note": "The mechanism was tender, mostly.",
-      "link": "#soft-machine",
-      "image": "",
-      "color": "#ffb427",
-      "accent": "#6b2c59"
     },
     {
       "slug": "public-memory-club",
@@ -62,6 +51,17 @@
       "image": "",
       "color": "#3559d8",
       "accent": "#a7cbe7"
+    },
+    {
+      "slug": "chhoti-gold",
+      "title": "Chhoti Gold",
+      "year": "2026",
+      "discipline": "film",
+      "note": "Narrative short that ebbs and flows in the past tense.",
+      "link": "https://letterboxd.com/film/chhoti-gold/",
+      "image": "https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg",
+      "color": "#f33b2f",
+      "accent": "#e5a0aa"
     },
     {
       "slug": "borrowed-light",

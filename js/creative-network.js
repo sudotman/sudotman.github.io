@@ -112,7 +112,21 @@
 
   function projectArt(project) {
     const image = safeHref(project.image, "");
-    if (image) return `<img src="${escapeHtml(image)}" alt="" loading="lazy">`;
+    if (image) {
+      const source = escapeHtml(image);
+      return `
+        <span class="living-image-stack">
+          <span class="living-shape living-shape--one"></span>
+          <span class="living-shape living-shape--two"></span>
+          <span class="living-shape living-shape--three"></span>
+          <img class="living-image-plate living-image-plate--under" src="${source}" alt="" loading="lazy" decoding="async">
+          <img class="living-image-plate living-image-plate--upper" src="${source}" alt="" loading="lazy" decoding="async">
+          <img class="living-image-plate living-image-plate--lower" src="${source}" alt="" loading="lazy" decoding="async">
+          <img class="living-image-plate living-image-plate--exposure" src="${source}" alt="" loading="lazy" decoding="async">
+          <span class="living-image-rift living-image-rift--one"></span>
+          <span class="living-image-grain"></span>
+        </span>`;
+    }
     return `
       <span class="living-shape living-shape--one"></span>
       <span class="living-shape living-shape--two"></span>
@@ -122,9 +136,10 @@
   function renderLiving(content) {
     const projects = content.projects.map((project, index) => {
       const href = projectHref(project);
+      const hasImage = Boolean(safeHref(project.image, ""));
       return `
         <a id="${escapeHtml(project.slug)}" href="${escapeHtml(href)}"${linkExtras(href)}
-          class="living-tile living-tile--${index % 8}"
+          class="living-tile living-tile--${index % 8} ${hasImage ? "living-tile--image" : "living-tile--shapes"}"
           style="--project-color:${safeColor(project.color, "#ef5a47")};--project-accent:${safeColor(project.accent, "#b7d73b")};"
           aria-label="${escapeHtml(`${project.title}, ${project.year}, ${project.discipline}`)}">
           <span class="living-art" aria-hidden="true">${projectArt(project)}</span>
@@ -147,6 +162,31 @@
           <p>Content lives in content/creative.json.</p>
         </footer>
       </main>`;
+
+    app.querySelectorAll(".living-tile--image").forEach((tile) => {
+      const activateImageRegistration = () => tile.classList.add("is-image-alive");
+      const resetImageRegistration = () => {
+        tile.classList.remove("is-image-alive");
+        tile.style.setProperty("--living-pointer-x", "50%");
+        tile.style.setProperty("--living-pointer-y", "50%");
+        tile.style.setProperty("--living-drift-x", "0px");
+        tile.style.setProperty("--living-drift-y", "0px");
+      };
+      tile.addEventListener("pointermove", (event) => {
+        if (event.pointerType && !["mouse", "pen"].includes(event.pointerType)) return;
+        activateImageRegistration();
+        const bounds = tile.getBoundingClientRect();
+        const x = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+        const y = Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height));
+        tile.style.setProperty("--living-pointer-x", `${(x * 100).toFixed(2)}%`);
+        tile.style.setProperty("--living-pointer-y", `${(y * 100).toFixed(2)}%`);
+        tile.style.setProperty("--living-drift-x", `${((x - 0.5) * 15).toFixed(2)}px`);
+        tile.style.setProperty("--living-drift-y", `${((y - 0.5) * 11).toFixed(2)}px`);
+      }, { passive: true });
+      tile.addEventListener("pointerleave", resetImageRegistration);
+      tile.addEventListener("focus", activateImageRegistration);
+      tile.addEventListener("blur", resetImageRegistration);
+    });
   }
 
   function renderRiver(content) {

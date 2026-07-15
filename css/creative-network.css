@@ -693,8 +693,126 @@ a {
   height: 100%;
 }
 
+.living-art {
+  z-index: 0;
+}
+
 .living-art img {
   object-fit: cover;
+}
+
+.living-tile--image {
+  --living-pointer-x: 50%;
+  --living-pointer-y: 50%;
+  --living-drift-x: 0px;
+  --living-drift-y: 0px;
+}
+
+.living-image-stack {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background: var(--project-color);
+  isolation: isolate;
+  contain: paint;
+}
+
+.living-image-plate {
+  will-change: transform, filter, clip-path, opacity;
+  backface-visibility: hidden;
+}
+
+.living-image-plate--under {
+  z-index: 1;
+  transform: scale(1.02);
+  transition: filter 520ms ease, transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.living-image-plate--upper,
+.living-image-plate--lower {
+  z-index: 2;
+  transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1), filter 360ms ease;
+}
+
+.living-image-plate--upper {
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 84% 49%, 70% 43%, 55% 58%, 39% 50%, 23% 61%, 0 52%);
+}
+
+.living-image-plate--lower {
+  clip-path: polygon(0 52%, 23% 61%, 39% 50%, 55% 58%, 70% 43%, 84% 49%, 100% 45%, 100% 100%, 0 100%);
+}
+
+.living-image-plate--exposure {
+  z-index: 4;
+  opacity: 0;
+  clip-path: circle(0 at var(--living-pointer-x) var(--living-pointer-y));
+  filter: saturate(2.4) contrast(1.28) hue-rotate(24deg);
+  transform: translate(var(--living-drift-x), var(--living-drift-y)) scale(1.035);
+  transition: clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms linear, transform 160ms linear;
+}
+
+.living-image-rift,
+.living-image-grain {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.living-image-rift {
+  z-index: 3;
+  opacity: 0;
+  will-change: transform, opacity, clip-path;
+}
+
+.living-image-rift--one {
+  background: var(--project-accent);
+  clip-path: polygon(0 49%, 23% 57%, 39% 47%, 55% 55%, 71% 42%, 85% 48%, 100% 43%, 100% 49%, 85% 54%, 71% 49%, 55% 61%, 39% 53%, 23% 63%, 0 55%);
+  mix-blend-mode: normal;
+  transform: translate(calc(-4px - var(--living-drift-x)), calc(-2px - var(--living-drift-y)));
+  transition: opacity 150ms linear, transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.living-image-grain {
+  z-index: 5;
+  opacity: 0.08;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(240, 237, 228, 0.18) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 20% 30%, rgba(20, 20, 17, 0.36) 0 0.7px, transparent 0.9px);
+  background-size: auto, 5px 5px;
+  mix-blend-mode: normal;
+  transition: opacity 240ms linear, transform 700ms steps(2, end);
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-plate--under {
+  filter: blur(9px) saturate(2.1) contrast(1.18) brightness(0.78);
+  transform: scale(1.12) rotate(1deg);
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-plate--upper {
+  filter: contrast(1.07) saturate(0.82);
+  transform: translate(calc(-7px - var(--living-drift-x)), calc(-5px - var(--living-drift-y))) rotate(-0.8deg) scale(1.015);
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-plate--lower {
+  filter: contrast(1.12) saturate(1.18);
+  transform: translate(calc(7px + var(--living-drift-x)), calc(5px + var(--living-drift-y))) rotate(0.8deg) scale(1.015);
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-plate--exposure {
+  opacity: 0.66;
+  clip-path: circle(19% at var(--living-pointer-x) var(--living-pointer-y));
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-rift--one {
+  opacity: 0.68;
+  transform: translate(calc(-8px - var(--living-drift-x)), calc(-3px - var(--living-drift-y)));
+}
+
+.living-tile--image:is(:focus-visible, .is-image-alive) .living-image-grain {
+  opacity: 0.22;
+  transform: translate(2px, -1px);
 }
 
 .living-shape {

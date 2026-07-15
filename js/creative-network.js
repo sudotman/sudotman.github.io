@@ -37,9 +37,9 @@
 
   function renderMaster(content) {
     const branches = [
-      ["living", "Living", "/living/", "work as atmosphere"],
-      ["river", "River", "/river/", "work carried by a current"],
-      ["doors", "Doors", "/doors/", "work as rooms to enter"],
+      ["living", "Living", "/living/", ""],
+      ["river", "River", "/river/", ""],
+      ["doors", "Doors", "/doors/", ""],
     ];
     const creativeLinks = branches.map(([key, label, href, note], index) => `
       <a href="${href}" class="master-branch master-branch--${key}" data-master-branch="${key}">
@@ -65,7 +65,8 @@
         <header class="master-header">
           <p>${escapeHtml(content.profile.name)}</p>
           <p>${escapeHtml(content.profile.role)}</p>
-          <p>${pad(content.projects.length)} works / one source</p>
+          <p>human</p>
+          <!-- <p>${pad(content.projects.length)} existing / project number</p> -->
         </header>
         <p class="master-instruction">Choose how to enter.</p>
         <nav class="master-branches" aria-label="Portfolio entrances">
@@ -80,13 +81,13 @@
           <div class="master-severance" aria-hidden="true"><span></span></div>
           <section class="master-tech-system" aria-labelledby="tech-practice-label">
             <div class="master-tech-key" id="tech-practice-label">
-              <span>02 / separate practice</span>
+              <span>02 / stem</span>
               <span>another room in this house ↗</span>
             </div>
             <a href="${escapeHtml(techHref)}" class="master-branch master-branch--tech" data-master-branch="tech">
               <span class="master-branch-number">02 ↗</span>
               <span class="master-branch-name">Core<sup class="master-branch-arrow" aria-hidden="true">↗</sup><br>Tech</span>
-              <span class="master-branch-note">the parallel machine</span>
+              <span class="master-branch-note"></span>
             </a>
           </section>
         </nav>

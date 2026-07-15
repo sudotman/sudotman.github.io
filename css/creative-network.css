@@ -350,7 +350,7 @@ a {
 }
 
 .master-tech-system::after {
-  content: "02";
+  content: "";
   position: absolute;
   z-index: -1;
   right: -0.05em;

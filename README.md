@@ -1,12 +1,16 @@
 # sudotman.github.io
 
-Static personal website and portfolio repo.
+Single-domain personal website and portfolio network for `satyam.lol`.
 
-This repo contains one main editorial portfolio plus a few standalone side pages and experiments. The homepage is a data-driven “field manual of impossible machines” and runs with plain HTML, CSS, and JavaScript loaded directly by `index.html`.
+The repository now owns the entire public crossing: a master landing page, three arrangements of one creative archive, and the existing data-driven “field manual of impossible machines” for technical work. Everything runs as static HTML, CSS, JavaScript, and JSON through one GitHub Pages deployment.
 
 ## What Is Live
 
-- `index.html`: main homepage and primary surface
+- `index.html`: parent landing and primary surface at `satyam.lol`
+- `living/`, `river/`, `doors/`: three views of `content/creative.json`
+- `tech.html`: the complete Core Tech portfolio formerly served at the root
+- `css/creative-network.css` and `js/creative-network.js`: shared creative/master presentation
+- `content/creative.json`: source of truth for the creative archive and master identity
 - `content.json`: portfolio manifest, taxonomy, and publishing-feed registry
 - `content/programming.json`: programming and technical work
 - `content/film-art.json`: film and art work
@@ -14,7 +18,17 @@ This repo contains one main editorial portfolio plus a few standalone side pages
 - `css/modules/`: shared homepage styling
 - `js/modules/`: shared homepage behavior
 
-## What Is Standalone
+## Route Map
+
+- `/`: master crossing
+- `/living/`: living contact sheet
+- `/river/`: horizontal project current
+- `/doors/`: spatial rooms
+- `/tech.html`: Core Tech field manual
+
+The first three creative routes always read from the same JSON. Core Tech retains its own richer project feeds and interface system, but is deployed by the same repository under the same domain.
+
+## What Remains Standalone
 
 - `minimalist.html`: separate text-first profile page
 - `outer_siraji_project.html`: standalone concept/prototype page
@@ -25,6 +39,7 @@ This repo contains one main editorial portfolio plus a few standalone side pages
 
 ### CSS
 
+- `css/creative-network.css`: master crossing plus Living, River, and Doors
 - `css/modules/base.css`: shared foundations and generic UI
 - `css/modules/sections.css`: main content sections and layouts
 - `css/modules/project-ui.css`: project modal and lightbox UI
@@ -33,6 +48,7 @@ This repo contains one main editorial portfolio plus a few standalone side pages
 
 ### JavaScript
 
+- `js/creative-network.js`: creative JSON rendering and route-specific interactions
 - `js/modules/core.js`: shared state, scroll progress, section tracking, reveal wiring, and the canvas instrument engraving
 - `js/modules/interface.js`: navigation, hash-addressable project folios, safe legacy body rendering, and the image lightbox
 - `js/modules/content.js`: manifest/feed normalization plus rendering for work, experience, education, interests, and satellite sites

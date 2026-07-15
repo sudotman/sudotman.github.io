@@ -2,15 +2,18 @@
 
 ## Repo Purpose
 
-This repository powers a static personal portfolio site. The main experience is `index.html`, with shared assets in `css/modules/` and `js/modules/`.
+This repository powers the complete static portfolio network at `satyam.lol`. The parent experience is `index.html`; creative routes and the Core Tech field manual are hosted by the same repository.
 
 ## Working Boundaries
 
-- Treat `index.html` as the only shared homepage shell.
+- Treat `index.html` as the parent crossing.
+- Treat `living/`, `river/`, and `doors/` as three renderings of `content/creative.json` through `js/creative-network.js`.
+- Treat `tech.html` as the Core Tech homepage shell, with shared assets in `css/modules/` and `js/modules/`.
 - Treat `content.json` and `profile.json` as the source of truth for homepage content.
+- Treat `content/creative.json` as the source of truth for the parent identity and creative archive.
 - Treat `minimalist.html`, `outer_siraji_project.html`, `test.html`, and `terminal/` as standalone surfaces unless explicitly asked to merge them into the main architecture.
 
-## Homepage Module Map
+## Core Tech Module Map
 
 ### CSS
 

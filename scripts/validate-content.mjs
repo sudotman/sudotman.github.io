@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
 const PROFILE_PATH = 'profile.json';
+const CREATIVE_PATH = 'content/creative.json';
 
 const errors = [];
 const warnings = [];
@@ -15,6 +16,7 @@ const seenWorkIds = new Map();
 let workCount = 0;
 let feedCount = 0;
 let remoteAssetCount = 0;
+let creativeWorkCount = 0;
 
 const EMBED_PROVIDER_IDS = new Map([
   ['youtube', /^[A-Za-z0-9_-]{11}$/],
@@ -132,11 +134,65 @@ function validateLinkHref(value, location) {
     return;
   }
   if (/^(mailto:|tel:)/i.test(value) || value.startsWith('#')) return;
+  if (value === '/') return;
+  if (value.startsWith('/')) {
+    resolveInsideRepo(value.slice(1), location);
+    return;
+  }
   if (/^[A-Za-z][A-Za-z\d+.-]*:/.test(value)) {
     addError(location, 'only http(s), mailto, tel, hash, or repository-relative links are allowed');
     return;
   }
   resolveInsideRepo(value, location);
+}
+
+function validateCreativeArchive(archive) {
+  if (!isObject(archive)) {
+    addError(CREATIVE_PATH, 'root must be an object');
+    return;
+  }
+  if (!isObject(archive.profile)) {
+    addError(`${CREATIVE_PATH}.profile`, 'must be an object');
+  } else {
+    for (const field of ['name', 'role', 'statement', 'location', 'email', 'coreTechUrl']) {
+      validateText(archive.profile[field], `${CREATIVE_PATH}.profile.${field}`, field);
+    }
+    if (hasText(archive.profile.coreTechUrl)) {
+      validateLinkHref(archive.profile.coreTechUrl, `${CREATIVE_PATH}.profile.coreTechUrl`);
+    }
+  }
+
+  if (!Array.isArray(archive.projects) || archive.projects.length === 0) {
+    addError(`${CREATIVE_PATH}.projects`, 'must be a non-empty array');
+    return;
+  }
+
+  const slugs = new Set();
+  archive.projects.forEach((project, index) => {
+    const location = `${CREATIVE_PATH}.projects[${index}]`;
+    if (!isObject(project)) {
+      addError(location, 'must be an object');
+      return;
+    }
+    creativeWorkCount += 1;
+    for (const field of ['slug', 'title', 'year', 'discipline', 'note', 'color', 'accent']) {
+      validateText(project[field], `${location}.${field}`, field);
+    }
+    if (hasText(project.slug)) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(project.slug)) {
+        addError(`${location}.slug`, 'must be a lowercase kebab-case slug');
+      }
+      if (slugs.has(project.slug)) addError(`${location}.slug`, `duplicate slug "${project.slug}"`);
+      slugs.add(project.slug);
+    }
+    for (const field of ['color', 'accent']) {
+      if (hasText(project[field]) && !/^#[0-9A-Fa-f]{6}$/.test(project[field])) {
+        addError(`${location}.${field}`, 'must be a six-digit hexadecimal color');
+      }
+    }
+    if (hasText(project.link)) validateLinkHref(project.link, `${location}.link`);
+    if (hasText(project.image)) registerAsset(project.image, `${location}.image`);
+  });
 }
 
 async function readJson(relativePath, location = relativePath) {
@@ -504,7 +560,9 @@ async function validateLocalAssets() {
 async function main() {
   const manifest = await readJson(MANIFEST_PATH);
   const profile = await readJson(PROFILE_PATH);
+  const creativeArchive = await readJson(CREATIVE_PATH);
   if (profile) validateProfile(profile);
+  if (creativeArchive) validateCreativeArchive(creativeArchive);
 
   if (!isObject(manifest)) {
     if (manifest !== null) addError(MANIFEST_PATH, 'root must be an object');
@@ -579,7 +637,8 @@ async function main() {
 
   console.log(
     `Content validation passed: ${workCount} works across ${feedCount} feeds; `
-    + `${localAssets.size} local assets checked; ${remoteAssetCount} remote asset references checked.`
+    + `${creativeWorkCount} creative works; ${localAssets.size} local assets checked; `
+    + `${remoteAssetCount} remote asset references checked.`
   );
 }
 

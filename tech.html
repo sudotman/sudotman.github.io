@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Satyam Kashyap — impossible rooms</title>
+  <meta name="description" content="Satyam Kashyap builds immersive systems, simulations, peculiar tools, and games from Mumbai, India.">
+  <meta name="theme-color" content="#0b1216">
+  <meta name="color-scheme" content="dark light">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Satyam Kashyap — impossible rooms">
+  <meta property="og:description" content="An illuminated field manual of XR systems, simulations, peculiar tools, and games.">
+  <meta property="og:url" content="https://satyam.lol/tech.html">
+  <meta property="og:image" content="https://satyam.lol/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Satyam Kashyap — impossible rooms">
+  <meta name="twitter:description" content="An illuminated field manual of XR systems, simulations, peculiar tools, and games.">
+  <meta name="twitter:image" content="https://satyam.lol/og.png">
+  <link rel="canonical" href="https://satyam.lol/tech.html">
+  <link rel="icon" href="cardIcon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/modules/base.css?v=20260713m">
+  <link rel="stylesheet" href="css/modules/sections.css?v=20260713m">
+  <link rel="stylesheet" href="css/modules/project-ui.css?v=20260713m">
+  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260713m">
+  <link rel="stylesheet" href="css/modules/mobile.css?v=20260713m">
+  <script src="js/modules/core.js?v=20260713m" defer></script>
+  <script src="js/modules/content.js?v=20260713m" defer></script>
+  <script src="js/modules/interface.js?v=20260713m" defer></script>
+  <script src="js/modules/heatmap.js?v=20260713m" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to the field manual</a>
+
+  <div class="scroll-sutra" aria-hidden="true"><span></span></div>
+  <div class="cursor-register" aria-hidden="true"><i></i></div>
+
+  <aside class="site-rail" aria-label="Section index">
+    <a class="rail-mark" href="#top" aria-label="Back to the title plate">
+      <span>SK</span>
+      <small>MMXXVI</small>
+    </a>
+    <nav class="rail-nav">
+      <a href="#manifesto" data-section-link="manifesto"><span>01</span><b>Thesis</b></a>
+      <a href="#work" data-section-link="work"><span>02</span><b>Works</b></a>
+      <a href="#practice" data-section-link="practice"><span>03</span><b>Practice</b></a>
+      <a href="#human-index" data-section-link="human-index"><span>04</span><b>Human index</b></a>
+      <a href="#contact" data-section-link="contact"><span>05</span><b>Contact</b></a>
+    </nav>
+    <div class="rail-coordinate">
+      <span>19.0760° N</span>
+      <span>72.8777° E</span>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <a class="topbar-name" href="#top">Satyam Kashyap</a>
+    <p>XR systems · games · peculiar tools</p>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+      <span>Index</span><i aria-hidden="true"></i>
+    </button>
+    <nav class="topbar-links" aria-label="Primary navigation">
+      <a href="/">Crossing</a>
+      <a href="#work">Work</a>
+      <a href="#practice">Practice</a>
+      <a href="#human-index">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden>
+    <a href="/"><span>00</span>Crossing</a>
+    <a href="#manifesto"><span>01</span>Thesis</a>
+    <a href="#work"><span>02</span>Works</a>
+    <a href="#practice"><span>03</span>Practice</a>
+    <a href="#human-index"><span>04</span>Human index</a>
+    <a href="#contact"><span>05</span>Contact</a>
+  </nav>
+
+  <main id="main-content">
+    <section class="hero" id="top" data-theme="night" aria-labelledby="hero-title">
+      <canvas id="instrument-canvas" aria-hidden="true"></canvas>
+      <div class="hero-noise" aria-hidden="true"></div>
+      <div class="hero-meta microcopy reveal">
+        <span data-site-kicker>An illuminated field manual</span>
+        <span>Mumbai, India</span>
+        <span>Edition 2026</span>
+      </div>
+
+      <figure class="hero-lens reveal" aria-label="A view inside the Gaganyaan virtual reality simulator">
+        <div class="hero-lens__orbit hero-lens__orbit--one" aria-hidden="true"></div>
+        <div class="hero-lens__orbit hero-lens__orbit--two" aria-hidden="true"></div>
+        <div class="hero-lens__image">
+          <img src="images/isro1.jpg" alt="Astronaut inside the Gaganyaan virtual reality simulator" width="1440" height="810" fetchpriority="high">
+        </div>
+        <figcaption><span>PLATE 06</span> A room imagined before it can be entered.</figcaption>
+      </figure>
+
+      <h1 class="hero-title reveal" id="hero-title">
+        <span>I build</span>
+        <span><em>impossible</em> rooms.</span>
+      </h1>
+
+      <div class="hero-bottom reveal">
+        <p class="hero-thesis" data-site-thesis>I build systems for realities that refuse to stay imaginary.</p>
+        <p class="hero-manifesto" data-site-manifesto>Mission simulators, stubborn tools, games that misbehave, and images still learning their names.</p>
+        <div class="hero-actions">
+          <a class="text-link" href="#work">Enter the works <span>↘</span></a>
+          <a class="text-link" href="mailto:satyamsudo@gmail.com">Write to me <span>↗</span></a>
+        </div>
+      </div>
+
+      <div class="hero-scroll microcopy" aria-hidden="true">
+        <span>Unspool the manual</span>
+        <i></i>
+      </div>
+    </section>
+
+    <section class="manifesto paper-section" id="manifesto" data-theme="paper" aria-labelledby="manifesto-title">
+      <div class="section-index reveal">
+        <span>01</span>
+        <p>The operating principle</p>
+      </div>
+      <div class="manifesto-copy">
+        <p class="manifesto-eyebrow microcopy reveal">Between instruction &amp; hallucination</p>
+        <h2 id="manifesto-title" class="reveal">Engineer of simulated worlds;<br><em>student of real ones.</em></h2>
+        <div class="manifesto-body reveal">
+          <p data-profile-bio>A programmer specialising in immersive technology, moving between simulation, open tools, games, and an enduring obsession with cinema.</p>
+          <p>I care about the invisible grammar of things: the way a control teaches the hand, the way a room changes a decision, the way a machine can carry a little poetry without becoming less useful.</p>
+        </div>
+      </div>
+      <div class="manifesto-facts reveal" aria-label="Practice at a glance">
+        <div><strong id="work-count">18</strong><span>published works</span></div>
+        <div><strong>07+</strong><span>years making</span></div>
+        <div><strong>02</strong><span>game engines</span></div>
+        <div><strong>∞</strong><span>unreasonable curiosities</span></div>
+      </div>
+      <p class="margin-note margin-note--manifesto" aria-hidden="true">The useful and the uncanny are not opposites.</p>
+    </section>
+
+    <section class="featured night-section" id="work" data-theme="night" aria-labelledby="featured-title">
+      <div class="section-heading reveal">
+        <div class="section-index section-index--light">
+          <span>02</span>
+          <p>Selected portals</p>
+        </div>
+        <h2 id="featured-title">A few machines<br><em>with their doors open.</em></h2>
+        <p>Selected work across aerospace training, open-source tools, games, and experiments in productive strangeness.</p>
+      </div>
+
+      <div class="featured-works" id="featured-works" aria-live="polite">
+        <article class="work-plate work-plate--loading" aria-hidden="true"></article>
+        <article class="work-plate work-plate--loading" aria-hidden="true"></article>
+        <article class="work-plate work-plate--loading" aria-hidden="true"></article>
+      </div>
+    </section>
+
+    <section class="catalogue paper-section" id="catalogue" data-theme="paper" aria-labelledby="catalogue-title">
+      <div class="catalogue-heading reveal">
+        <div class="section-index">
+          <span>02.B</span>
+          <p>The complete cabinet</p>
+        </div>
+        <h2 id="catalogue-title">Index of<br><em>working worlds.</em></h2>
+        <p>Every released project in the cabinet. Focus a row to bring its plate into view; open it for the full folio.</p>
+      </div>
+
+      <div class="catalogue-filters reveal" id="catalogue-filters" role="group" aria-label="Filter projects by medium"></div>
+
+      <div class="catalogue-layout">
+        <div class="archive-list reveal" id="archive-list" aria-live="polite"></div>
+        <aside class="archive-preview reveal" id="archive-preview" aria-label="Focused project preview">
+          <div class="archive-preview__frame">
+            <img src="images/isro1.jpg" alt="" width="1440" height="810">
+            <span class="archive-preview__code">SK/RD/01</span>
+          </div>
+          <div class="archive-preview__caption">
+            <span>Focus a project</span>
+            <span>Plate awaiting signal</span>
+          </div>
+        </aside>
+      </div>
+
+      <div class="undeveloped-track reveal" id="undeveloped-track">
+        <span class="specimen-glyph specimen-glyph--aperture" aria-hidden="true"></span>
+        <p>Consulting the darkroom…</p>
+      </div>
+    </section>
+
+    <section class="practice night-section" id="practice" data-theme="night" aria-labelledby="practice-title">
+      <div class="section-heading section-heading--practice reveal">
+        <div class="section-index section-index--light">
+          <span>03</span>
+          <p>Professional chronology</p>
+        </div>
+        <h2 id="practice-title">The practice,<br><em>measured in time.</em></h2>
+        <p>Building and shipping immersive systems across defence, pharma, manufacturing, games, and independent work.</p>
+      </div>
+
+      <div class="chronology" id="experience-list" aria-live="polite"></div>
+
+      <div class="practice-legend reveal">
+        <div>
+          <p class="microcopy">Instrument legend / engines</p>
+          <div class="skill-list" id="engine-skills"></div>
+        </div>
+        <div>
+          <p class="microcopy">Instrument legend / languages</p>
+          <div class="skill-list" id="language-skills"></div>
+        </div>
+      </div>
+
+      <div class="education reveal">
+        <div class="section-index section-index--light"><span>03.B</span><p>Formation</p></div>
+        <div id="education-list"></div>
+      </div>
+    </section>
+
+    <section class="human-index paper-section" id="human-index" data-theme="paper" aria-labelledby="human-title">
+      <div class="human-heading reveal">
+        <div class="section-index"><span>04</span><p>Marginalia / evidence of life</p></div>
+        <h2 id="human-title">The interior<br><em>world.</em></h2>
+        <p>Code is one appetite among many. The rest of the shelf is crowded with cinema, music, books, games, two cats, and the languages of home.</p>
+      </div>
+      <div class="interest-spreads" id="interest-spreads" aria-live="polite"></div>
+    </section>
+
+    <section class="satellites night-section" id="satellites" data-theme="night" aria-labelledby="satellites-title">
+      <div class="section-heading reveal">
+        <div class="section-index section-index--light"><span>04.B</span><p>Satellite works</p></div>
+        <h2 id="satellites-title">Other branches<br><em>of the same tree.</em></h2>
+        <p>Language, longing, visual research, and notes from elsewhere.</p>
+      </div>
+      <div class="satellite-list" id="satellite-list" aria-live="polite"></div>
+    </section>
+
+    <section class="contact paper-section" id="contact" data-theme="paper" aria-labelledby="contact-title">
+      <div class="contact-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="section-index reveal"><span>05</span><p>An open channel</p></div>
+      <div class="contact-copy reveal">
+        <p class="microcopy">For strange, useful, or beautifully difficult things</p>
+        <h2 id="contact-title">Let us make<br><em>the unreal useful.</em></h2>
+        <a class="contact-email" href="mailto:satyamsudo@gmail.com" data-contact-email>satyamsudo@gmail.com <span>↗</span></a>
+      </div>
+      <div class="contact-footer reveal">
+        <p>Satyam Kashyap · Mumbai, India</p>
+        <div id="social-links"></div>
+        <a href="#top">Return to title plate ↑</a>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="folio-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+    <div class="folio-shell">
+      <header class="folio-header">
+        <div><span class="folio-code">SK/00/00</span><span>Project folio</span></div>
+        <button class="folio-close" type="button" aria-label="Close project folio"><span>Close</span><i aria-hidden="true"></i></button>
+      </header>
+      <div class="folio-body" id="project-dialog-body"></div>
+    </div>
+  </dialog>
+
+  <dialog class="lightbox" id="image-lightbox" aria-label="Expanded project image">
+    <button class="lightbox-close" type="button" aria-label="Close expanded image">Close ×</button>
+    <figure>
+      <img src="images/banner.jpg" alt="">
+      <figcaption></figcaption>
+    </figure>
+  </dialog>
+
+  <div class="site-error" id="site-error" role="status" hidden>
+    <p>The archive did not answer. Please refresh the page or visit <a href="https://github.com/sudotman">GitHub</a>.</p>
+  </div>
+
+  <noscript>
+    <div class="noscript-note">This field manual needs JavaScript to assemble its project archive. You can still find the work on <a href="https://github.com/sudotman">GitHub</a>.</div>
+  </noscript>
+</body>
+</html>

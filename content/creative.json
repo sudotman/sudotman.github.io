@@ -1,0 +1,124 @@
+{
+  "profile": {
+    "name": "Satyam Kashyap",
+    "role": "Filmmaker & creative technologist",
+    "statement": "I make worlds, interfaces, and small internet worlds.",
+    "location": "mumbai / working everywhere",
+    "email": "hello@satyam.lol",
+    "coreTechUrl": "/tech.html"
+  },
+  "projects": [
+    {
+      "slug": "field-notes-for-tomorrow",
+      "title": "chhoti gold",
+      "year": "2026",
+      "discipline": "film",
+      "note": "A visual language written in the future tense.",
+      "link": "#field-notes-for-tomorrow",
+      "image": "",
+      "color": "#f33b2f",
+      "accent": "#e5a0aa"
+    },
+    {
+      "slug": "the-listening-room",
+      "title": "The Listening Room",
+      "year": "2025",
+      "discipline": "Interactive archive",
+      "note": "What the walls remembered after everyone left.",
+      "link": "#the-listening-room",
+      "image": "",
+      "color": "#99c4e7",
+      "accent": "#3658d8"
+    },
+    {
+      "slug": "monsoon-index",
+      "title": "Monsoon Index",
+      "year": "2025",
+      "discipline": "Editorial system",
+      "note": "Weather behaving badly inside a publication.",
+      "link": "#monsoon-index",
+      "image": "",
+      "color": "#536a50",
+      "accent": "#c9ed2f"
+    },
+    {
+      "slug": "soft-machine",
+      "title": "Soft Machine",
+      "year": "2024",
+      "discipline": "Campaign",
+      "note": "The mechanism was tender, mostly.",
+      "link": "#soft-machine",
+      "image": "",
+      "color": "#ffb427",
+      "accent": "#6b2c59"
+    },
+    {
+      "slug": "public-memory-club",
+      "title": "Public Memory Club",
+      "year": "2024",
+      "discipline": "Research platform",
+      "note": "Membership pending since somebody forgot.",
+      "link": "#public-memory-club",
+      "image": "",
+      "color": "#3559d8",
+      "accent": "#a7cbe7"
+    },
+    {
+      "slug": "borrowed-light",
+      "title": "Borrowed Light",
+      "year": "2023",
+      "discipline": "Exhibition",
+      "note": "Keep this one near the rain.",
+      "link": "#borrowed-light",
+      "image": "",
+      "color": "#e6a4ac",
+      "accent": "#ffbf3e"
+    },
+    {
+      "slug": "night-school-radio",
+      "title": "Night School Radio",
+      "year": "2023",
+      "discipline": "Sound identity",
+      "note": "Lessons transmitted after the building closed.",
+      "link": "#night-school-radio",
+      "image": "",
+      "color": "#d7fb34",
+      "accent": "#203a8c"
+    },
+    {
+      "slug": "common-ground",
+      "title": "Common Ground",
+      "year": "2022",
+      "discipline": "Public installation",
+      "note": "A place made by standing there together.",
+      "link": "#common-ground",
+      "image": "",
+      "color": "#8ca58e",
+      "accent": "#f05a47"
+    },
+    {
+      "slug": "manual-for-monsoon-days",
+      "title": "A Manual for Monsoon Days",
+      "year": "2022",
+      "discipline": "Publication",
+      "note": "Instructions for weather that refuses instructions.",
+      "link": "#manual-for-monsoon-days",
+      "image": "",
+      "color": "#f4e8c6",
+      "accent": "#ef5d52"
+    },
+    {
+      "slug": "unfinished-internet",
+      "title": "Unfinished Internet",
+      "year": "2021",
+      "discipline": "Web experiment",
+      "note": "Five things, still becoming.",
+      "link": "#unfinished-internet",
+      "image": "",
+      "color": "#6a2e59",
+      "accent": "#d8fb34"
+    }
+  ]
+}
+
+

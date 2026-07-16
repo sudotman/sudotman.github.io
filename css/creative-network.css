@@ -256,7 +256,7 @@ a {
 .master-footer p:first-child {
   max-width: 340px;
   text-transform: none;
-  font: italic 17px/1.1 var(--serif);
+  font: 17px/1.1 var(--serif);
   letter-spacing: 0;
 }
 
@@ -266,7 +266,7 @@ a {
   left: 50%;
   margin: 0;
   transform: translateX(-50%);
-  font: italic clamp(18px, 2vw, 30px)/1 var(--serif);
+  font: clamp(18px, 2vw, 30px)/1 var(--serif);
   z-index: 2;
 }
 
@@ -307,7 +307,7 @@ a {
   position: absolute;
   left: 10px;
   bottom: 9px;
-  font: 8px/1 var(--mono);
+  font: 9px/1.15 var(--mono);
   letter-spacing: 0.05em;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -404,7 +404,7 @@ a {
   display: grid;
   gap: 3px;
   padding-left: 14px;
-  font: 9px/1.15 var(--mono);
+  font: 11px/1.15 var(--mono);
   letter-spacing: 0.05em;
 }
 
@@ -1107,7 +1107,7 @@ a {
   position: absolute;
   color: #eee8da;
   text-decoration: none;
-  font: 9px/1.2 var(--mono);
+  font: 11.5px/1.2 var(--mono);
   transition: color 150ms linear;
 }
 

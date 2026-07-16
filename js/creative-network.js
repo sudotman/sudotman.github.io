@@ -68,7 +68,7 @@
           <p>human</p>
           <!-- <p>${pad(content.projects.length)} existing / project number</p> -->
         </header>
-        <p class="master-instruction">choose a path.</p>
+        <p class="master-instruction">choose a path</p>
         <nav class="master-branches" aria-label="Portfolio entrances">
           <section class="master-creative-system" aria-labelledby="creative-archive-label">
             <div class="master-creative-key" id="creative-archive-label">
@@ -296,7 +296,7 @@
         <footer class="doors-footer">
           <a href="mailto:${escapeHtml(content.profile.email)}">${escapeHtml(content.profile.email)}</a>
           <p>${escapeHtml(content.profile.location)}</p>
-          <p>source: content/creative.json</p>
+          <p>when a door closes...</p>
         </footer>
       </main>`;
 

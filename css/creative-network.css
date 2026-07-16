@@ -235,7 +235,6 @@ a {
   left: 22px;
   right: 22px;
   font: 11px/1.2 var(--mono);
-  text-transform: uppercase;
   letter-spacing: 0.04em;
   z-index: 2;
 }
@@ -304,12 +303,11 @@ a {
 }
 
 .master-creative-system::after {
-  content: "same matter / different weather";
+  content: "the roads lead to the same place";
   position: absolute;
   left: 10px;
   bottom: 9px;
   font: 8px/1 var(--mono);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -407,7 +405,6 @@ a {
   gap: 3px;
   padding-left: 14px;
   font: 9px/1.15 var(--mono);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 

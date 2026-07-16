@@ -68,7 +68,7 @@
           <p>human</p>
           <!-- <p>${pad(content.projects.length)} existing / project number</p> -->
         </header>
-        <p class="master-instruction">Choose how to enter.</p>
+        <p class="master-instruction">choose a path.</p>
         <nav class="master-branches" aria-label="Portfolio entrances">
           <section class="master-creative-system" aria-labelledby="creative-archive-label">
             <div class="master-creative-key" id="creative-archive-label">

@@ -755,13 +755,13 @@ body.theme-pink .cloneable-title:hover .cloneable-title__h1 {
 
 /* === CRT / Pixel HUD Overlay === */
 :root {
-  --crt-edge-tint: rgba(70, 230, 255, 0.12);
-  --crt-bloom: rgba(168, 255, 81, 0.055);
+  --crt-edge-tint: rgba(70, 230, 255, 0.14);
+  --crt-bloom: rgba(168, 255, 81, 0.065);
 }
 
 body.theme-pink {
-  --crt-edge-tint: rgba(240, 92, 235, 0.14);
-  --crt-bloom: rgba(240, 92, 235, 0.065);
+  --crt-edge-tint: rgba(240, 92, 235, 0.15);
+  --crt-bloom: rgba(240, 92, 235, 0.07);
 }
 
 body::before {
@@ -773,30 +773,32 @@ body::before {
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.025) 0 1px,
-      rgba(0, 0, 0, 0.14) 1px 2px,
+      rgba(255, 255, 255, 0.045) 0 1px,
+      rgba(0, 0, 0, 0.16) 1px 2px,
       transparent 2px 4px
     ),
     repeating-linear-gradient(
       to right,
-      rgba(255, 62, 132, 0.045) 0 1px,
-      rgba(72, 255, 174, 0.032) 1px 2px,
-      rgba(70, 170, 255, 0.04) 2px 3px
+      rgba(255, 62, 132, 0.055) 0 1px,
+      rgba(72, 255, 174, 0.04) 1px 2px,
+      rgba(70, 170, 255, 0.05) 2px 3px
     ),
     linear-gradient(
       to bottom,
       transparent 0%,
       transparent 46%,
-      rgba(255, 255, 255, 0.13) 49%,
-      rgba(168, 255, 81, 0.07) 50%,
+      rgba(255, 255, 255, 0.16) 49%,
+      rgba(168, 255, 81, 0.085) 50%,
       transparent 54%,
       transparent 100%
     );
   mix-blend-mode: soft-light;
-  opacity: 0.42;
+  opacity: 0.48;
   background-size: 100% 4px, 3px 100%, 100% 240%;
   background-position: 0 0, 0 0, 0 -120%;
-  animation: crtRoll 9s linear infinite;
+  animation:
+    crtRasterDrift 9s linear infinite,
+    crtSignalFlicker 8.6s steps(1, end) infinite;
   will-change: background-position;
 }
 
@@ -808,14 +810,14 @@ body::after {
   z-index: 901;
   background:
     radial-gradient(ellipse at center, transparent 58%, var(--crt-edge-tint) 100%),
-    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.1) 76%, rgba(0, 0, 0, 0.58) 100%),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.08) 80%, rgba(0, 0, 0, 0.42) 100%),
     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="1" height="1" x="0" y="1" fill="white" opacity=".12"/><rect width="1" height="1" x="2" y="0" fill="white" opacity=".08"/><rect width="1" height="1" x="3" y="3" fill="white" opacity=".1"/></svg>');
   background-position: center, center, 0 0;
   background-size: cover, cover, 4px 4px;
   background-blend-mode: normal, normal, soft-light;
   mix-blend-mode: normal;
-  opacity: 0.78;
-  animation: crtNoise 1.8s steps(2, end) infinite;
+  opacity: 0.76;
+  animation: crtNoise 1.2s steps(2, end) infinite;
   will-change: background-position;
 }
 
@@ -826,15 +828,15 @@ body::after {
   pointer-events: none;
   z-index: 902;
   background:
-    radial-gradient(ellipse at 50% 46%, var(--crt-bloom) 0%, transparent 58%),
-    radial-gradient(150% 110% at 0% 0%, rgba(0, 0, 0, 0.24) 0%, transparent 44%),
-    radial-gradient(150% 110% at 100% 0%, rgba(0, 0, 0, 0.24) 0%, transparent 44%),
-    radial-gradient(150% 110% at 0% 100%, rgba(0, 0, 0, 0.24) 0%, transparent 44%),
-    radial-gradient(150% 110% at 100% 100%, rgba(0, 0, 0, 0.24) 0%, transparent 44%),
-    radial-gradient(58% 135% at 0% 50%, rgba(255, 255, 255, 0.045) 0%, transparent 62%),
-    radial-gradient(58% 135% at 100% 50%, rgba(255, 255, 255, 0.045) 0%, transparent 62%);
+    radial-gradient(ellipse at 50% 46%, var(--crt-bloom) 0%, transparent 60%),
+    radial-gradient(145% 110% at 0% 0%, rgba(0, 0, 0, 0.23) 0%, transparent 48%),
+    radial-gradient(145% 110% at 100% 0%, rgba(0, 0, 0, 0.23) 0%, transparent 48%),
+    radial-gradient(145% 110% at 0% 100%, rgba(0, 0, 0, 0.23) 0%, transparent 48%),
+    radial-gradient(145% 110% at 100% 100%, rgba(0, 0, 0, 0.23) 0%, transparent 48%),
+    radial-gradient(58% 135% at 0% 50%, rgba(255, 255, 255, 0.045) 0%, transparent 64%),
+    radial-gradient(58% 135% at 100% 50%, rgba(255, 255, 255, 0.045) 0%, transparent 64%);
   background-blend-mode: screen, multiply, multiply, multiply, multiply, screen, screen;
-  opacity: 0.92;
+  opacity: 0.9;
 }
 
 .osmo-ui::after {
@@ -843,25 +845,22 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 903;
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 22px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 62, 132, 0.018),
-    transparent 10%,
-    transparent 90%,
-    rgba(70, 210, 255, 0.018)
-  );
-  box-shadow:
-    inset 2px 0 0 rgba(255, 62, 132, 0.07),
-    inset -2px 0 0 rgba(70, 210, 255, 0.07),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.045),
-    inset 0 0 48px rgba(0, 0, 0, 0.2),
-    inset 0 0 110px rgba(0, 0, 0, 0.16);
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 64%, rgba(0, 0, 0, 0.08) 86%, rgba(0, 0, 0, 0.22) 100%),
+    linear-gradient(
+      90deg,
+      rgba(255, 62, 132, 0.025),
+      transparent 12%,
+      transparent 88%,
+      rgba(70, 210, 255, 0.025)
+    );
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
-  .osmo-ui::before { opacity: 0.7; }
+  .osmo-ui::before { opacity: 0.68; }
 }
 
 @keyframes crtNoise {
@@ -876,9 +875,15 @@ body::after {
   to   { background-position-y: 4px; }
 }
 
-@keyframes crtRoll {
+@keyframes crtRasterDrift {
   0%   { background-position: 0 0, 0 0, 0 -120%; }
   100% { background-position: 0 0, 0 0, 0 120%; }
+}
+
+@keyframes crtSignalFlicker {
+  0%, 84%, 87%, 100% { filter: brightness(1) contrast(1.02); }
+  85% { filter: brightness(0.94) contrast(1.05); }
+  86% { filter: brightness(1.035) contrast(1.02); }
 }
 
 /* Slight flicker on big neon elements (cards header, center icon) */
@@ -898,7 +903,7 @@ body::after {
   text-shadow:
     0.035em 0 rgba(255, 62, 132, 0.2),
     -0.035em 0 rgba(70, 210, 255, 0.16),
-    0 0 0.5em color-mix(in srgb, currentColor 22%, transparent);
+    0 0 0.52em color-mix(in srgb, currentColor 24%, transparent);
 }
 
 @keyframes crtFlicker {
@@ -1807,21 +1812,21 @@ body::after {
 }
 
 body::before {
-  opacity: 0.42;
-  animation-duration: 9s;
+  opacity: 0.48;
+  animation-duration: 9s, 8.6s;
 }
 
 body::after {
-  opacity: 0.78;
-  animation-duration: 1.8s;
+  opacity: 0.76;
+  animation-duration: 1.2s;
 }
 
 body.deck-open::before {
-  opacity: 0.38;
+  opacity: 0.44;
 }
 
 body.deck-open::after {
-  opacity: 0.74;
+  opacity: 0.72;
 }
 
 .color-sampler-btn,

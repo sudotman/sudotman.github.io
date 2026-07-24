@@ -1750,7 +1750,6 @@ body.theme-pink .osmo-ui::before {
   font-family: var(--font-mono);
   font-size: 0.64rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   transform: translateX(-50%);
   transition: color 180ms ease, letter-spacing 180ms ease;
 }

@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "siteHeader": {
     "title": "satyam.lol",
-    "subtitle": "software, games, immersive systems, and—soon—the films and art made beside them.",
-    "kicker": "archive // systems, images, peculiar signals",
+    "subtitle": "software, games, immersive systems and the likes",
+    "kicker": " ",
     "bannerImage": "images/banner.jpg"
   },
   "catalog": {
@@ -16,7 +16,7 @@
       },
       {
         "id": "arts",
-        "label": "film & art",
+        "label": "misc",
         "displayLabel": "visions",
         "accent": "#F05CEB"
       }

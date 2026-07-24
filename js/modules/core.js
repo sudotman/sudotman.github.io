@@ -1,6 +1,7 @@
 // -------- Global performance tuning --------
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const coarsePointerQuery = window.matchMedia('(hover: none), (pointer: coarse)');
+const finePointerQuery = window.matchMedia('(any-hover: hover) and (any-pointer: fine)');
 const compactViewportQuery = window.matchMedia('(max-width: 900px)');
 const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const PERF = {
@@ -552,7 +553,7 @@ function initGlowingInteractiveDotsGrid() {
 document.addEventListener('DOMContentLoaded', function() {
   initGlowingInteractiveDotsGrid();
   loadProjects().then(() => {
-    const shouldDisableDrag = PERF.isTouch || window.matchMedia('(max-width: 900px)').matches || PERF.prefersReducedMotion;
+    const shouldDisableDrag = compactViewportQuery.matches || !finePointerQuery.matches;
     if (!shouldDisableDrag) {
       initCardDragSystem();
     }
@@ -937,8 +938,8 @@ function loadInterestsData(interests) {
       title: 'cinema',
       tone: 'cinema',
       code: '01',
-      kicker: 'shot / memory / fever',
-      tag: 'screening ritual',
+      kicker: 'humanity #1',
+      tag: ' ',
       essence: 'kinos and more',
       description: interests.cinema.description,
       links: [{ label: 'letterboxd', url: interests.cinema.letterboxd }]
@@ -947,8 +948,8 @@ function loadInterestsData(interests) {
       title: 'music',
       tone: 'music',
       code: '02',
-      kicker: 'noise / devotion / loop',
-      tag: 'headphones required',
+      kicker: 'humanity #2',
+      tag: ' ',
       essence: 'grails and more',
       description: interests.music.description,
       links: [
@@ -960,8 +961,8 @@ function loadInterestsData(interests) {
       title: 'books',
       tone: 'books',
       code: '03',
-      kicker: 'margin / spine / confession',
-      tag: 'paper cuts welcome',
+      kicker: 'humanity #3',
+      tag: ' ',
       essence: 'performativeness and more',
       description: interests.books.description,
       links: []
@@ -970,8 +971,8 @@ function loadInterestsData(interests) {
       title: 'games',
       tone: 'games',
       code: '04',
-      kicker: 'systems / wonder / punishment',
-      tag: 'controller drift',
+      kicker: 'humanity #4',
+      tag: ' ',
       essence: 'vidya and more',
       description: interests.games.description,
       links: []
@@ -1103,155 +1104,123 @@ function animateInterestCards() {
 let cardDragSystemInitialized = false;
 
 function initCardDragSystem() {
-  if (cardDragSystemInitialized) return;
+  if (cardDragSystemInitialized || typeof gsap === 'undefined') return;
   cardDragSystemInitialized = true;
 
-  let isDragging = false;
   let currentCard = null;
-  let startX, startY;
-  let highestZIndex = 100;
-  let cardData = new Map();
-  let pendingMove = null;
+  let activePointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let originX = 0;
+  let originY = 0;
+  let highestZIndex = 200;
+  let pendingPoint = null;
   let moveRAF = null;
 
   function handleStart(e, card) {
-    // Ignore drag initiation if the user clicked on an interactive child such as the view-more button
-    if (e.target.closest('.project-expand-btn')) {
-      return; // let the regular click event propagate
-    }
+    if (compactViewportQuery.matches || !finePointerQuery.matches) return;
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    if (e.target.closest('a, button, input, select, textarea, [role="button"]')) return;
+    if (typeof cardActionInProgress !== 'undefined' && cardActionInProgress) return;
 
-    isDragging = true;
     currentCard = card;
-    
-    // Add dragging class to prevent hover interference
+    activePointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    originX = Number(gsap.getProperty(card, 'x')) || 0;
+    originY = Number(gsap.getProperty(card, 'y')) || 0;
+
+    gsap.killTweensOf(card);
     card.classList.add('dragging');
-    
-    // Get current GSAP transform values
-    const currentX = gsap.getProperty(card, "x");
-    const currentY = gsap.getProperty(card, "y");
-    const currentRotation = gsap.getProperty(card, "rotation");
-    
-    // Store card data
-    cardData.set(card, {
-      startX: currentX,
-      startY: currentY,
-      originalRotation: currentRotation,
-      originalZIndex: card.style.zIndex || 'auto'
-    });
-    
-    // Bring card to front
+    card.setAttribute('aria-grabbed', 'true');
     card.style.zIndex = ++highestZIndex;
-    
-    // Get pointer position
-    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    
-    startX = clientX;
-    startY = clientY;
-    
-    // Add visual feedback using GSAP - gradual rotation to zero
+    card.setPointerCapture?.(e.pointerId);
+
     gsap.to(card, {
-      scale: 1.05,
-      rotation: 0, // Gradually straighten card while dragging
-      boxShadow: '0 25px 50px rgba(255, 76, 36, 0.4)',
-      duration: 0.4,
-      ease: "power2.out"
+      scale: 1.035,
+      rotation: 0,
+      duration: PERF.prefersReducedMotion ? 0 : 0.16,
+      ease: 'power2.out'
     });
-    
+
     e.preventDefault();
   }
 
   function handleMove(e) {
-    if (!isDragging || !currentCard) return;
-    pendingMove = e;
+    if (!currentCard || e.pointerId !== activePointerId) return;
+    pendingPoint = { x: e.clientX, y: e.clientY };
     if (moveRAF) return;
+
     moveRAF = requestAnimationFrame(() => {
-      const ev = pendingMove;
       moveRAF = null;
-      if (!ev || !currentCard) return;
-      const clientX = ev.type.includes('touch') ? (ev.touches?.[0]?.clientX || ev.clientX) : ev.clientX;
-      const clientY = ev.type.includes('touch') ? (ev.touches?.[0]?.clientY || ev.clientY) : ev.clientY;
-      const deltaX = clientX - startX;
-      const deltaY = clientY - startY;
-      const data = cardData.get(currentCard);
-      const newX = data.startX + deltaX;
-      const newY = data.startY + deltaY;
-      gsap.set(currentCard, { x: newX, y: newY });
+      if (!pendingPoint || !currentCard) return;
+      gsap.set(currentCard, {
+        x: originX + pendingPoint.x - startX,
+        y: originY + pendingPoint.y - startY
+      });
     });
+
     e.preventDefault();
   }
 
   function handleEnd(e) {
-    if (!isDragging || !currentCard) return;
-    
-    const data = cardData.get(currentCard);
-    
-    // Remove dragging class
-    currentCard.classList.remove('dragging');
-    
-    isDragging = false;
-    
-    // Reset visual feedback using GSAP, but keep current position
-    gsap.to(currentCard, {
-      scale: 1,
-      // Don't reset rotation - let the card stay at 0 degrees if dragged
-      boxShadow: '0 15px 35px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(255, 76, 36, 0.1)',
-      duration: 0.3,
-      ease: "power2.out"
-    });
-    
-    // Update the stored rotation to 0 so it doesn't revert
-    if (cardData.has(currentCard)) {
-      const updatedData = cardData.get(currentCard);
-      updatedData.originalRotation = 0;
-      cardData.set(currentCard, updatedData);
+    if (!currentCard || e.pointerId !== activePointerId) return;
+    const releasedCard = currentCard;
+
+    if (moveRAF) {
+      cancelAnimationFrame(moveRAF);
+      moveRAF = null;
     }
-    
+    if (pendingPoint) {
+      gsap.set(releasedCard, {
+        x: originX + pendingPoint.x - startX,
+        y: originY + pendingPoint.y - startY
+      });
+    }
+
+    releasedCard.classList.remove('dragging');
+    releasedCard.setAttribute('aria-grabbed', 'false');
+    if (releasedCard.hasPointerCapture?.(e.pointerId)) {
+      releasedCard.releasePointerCapture(e.pointerId);
+    }
+
+    gsap.to(releasedCard, {
+      scale: 1,
+      duration: PERF.prefersReducedMotion ? 0 : 0.18,
+      ease: 'power2.out'
+    });
+
     currentCard = null;
+    activePointerId = null;
+    pendingPoint = null;
   }
 
-  // Initialize drag events for all project cards
   function setupCardEvents() {
     const cards = document.querySelectorAll('.project-card');
-    
-    cards.forEach((card, index) => {
+
+    cards.forEach(card => {
       if (card.dataset.dragBound === 'true') return;
       card.dataset.dragBound = 'true';
-      // Extract rotation from CSS transform
-      const computedStyle = window.getComputedStyle(card);
-      const transform = computedStyle.transform;
-      let rotation = 0;
-      
-      if (transform && transform !== 'none') {
-        const matrix = transform.split('(')[1].split(')')[0].split(',');
-        if (matrix.length >= 4) {
-          const a = parseFloat(matrix[0]);
-          const b = parseFloat(matrix[1]);
-          rotation = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-        }
-      }
-      
-      // Set initial GSAP properties to match CSS positioning
+      card.setAttribute('aria-grabbed', 'false');
+
+      const tilt = Number.parseFloat(
+        window.getComputedStyle(card).getPropertyValue('--card-tilt')
+      ) || 0;
+
       gsap.set(card, {
         x: 0,
         y: 0,
-        rotation: rotation
+        rotation: tilt,
+        transformOrigin: '50% 50%'
       });
-      
-      // Mouse events
-      card.addEventListener('mousedown', (e) => handleStart(e, card));
-      
-      // Prevent text selection while dragging
-      card.addEventListener('selectstart', (e) => e.preventDefault());
-      
-      // Prevent context menu on long press
-      card.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      card.addEventListener('pointerdown', e => handleStart(e, card));
     });
   }
 
-  // Global move and end events
-  document.addEventListener('mousemove', handleMove);
-  document.addEventListener('mouseup', handleEnd);
+  document.addEventListener('pointermove', handleMove, { passive: false });
+  document.addEventListener('pointerup', handleEnd);
+  document.addEventListener('pointercancel', handleEnd);
   setupCardEvents();
 }
 

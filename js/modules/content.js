@@ -745,12 +745,11 @@ function stackProjectCards() {
   }
 
   const gridRect = grid.getBoundingClientRect();
-  const header = document.querySelector('.projects-header');
-  const headerRect = header ? header.getBoundingClientRect() : null;
-
   const centerX = gridRect.left + gridRect.width / 2;
-  // place stack ~200px below divider line to ensure full stack sits beneath
-  const centerY = headerRect ? (headerRect.bottom + 300) : (gridRect.top + 300);
+  const tallestCard = Math.max(...cards.map(card => card.offsetHeight));
+  const stackClearance = Math.max(18, Math.min(40, gridRect.width * 0.025));
+  const centerY = gridRect.top + (tallestCard / 2) + stackClearance;
+  const stackSpread = Math.min(10, 3 + (cards.length * 0.35));
 
   // Create satisfying stacking animation with momentum
   const tl = gsap.timeline({
@@ -764,8 +763,8 @@ function stackProjectCards() {
   const eased = gsap.parseEase('steps(6)');
   cards.forEach((card, idx) => {
     // Reset any drag offsets gradually
-    const currentX = gsap.getProperty(card, 'x');
-    const currentY = gsap.getProperty(card, 'y');
+    const currentX = Number(gsap.getProperty(card, 'x')) || 0;
+    const currentY = Number(gsap.getProperty(card, 'y')) || 0;
 
     const rect = card.getBoundingClientRect();
     const cardCenterX = rect.left + rect.width / 2;
@@ -773,6 +772,9 @@ function stackProjectCards() {
 
     const deltaX = centerX - cardCenterX;
     const deltaY = centerY - cardCenterY;
+    const stackPosition = cards.length > 1 ? (idx / (cards.length - 1)) - 0.5 : 0;
+    const restingRotation = (stackPosition * stackSpread)
+      + ((Math.random() - 0.5) * (PERF.isLowEnd ? 0.4 : 0.7));
 
     // Calculate distance for speed variation
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -790,7 +792,7 @@ function stackProjectCards() {
       x: currentX + deltaX,
       y: currentY + deltaY,
       scale: 1,
-      rotation: -8 + idx * 1.5 + (Math.random() - 0.5) * (PERF.isLowEnd ? 2 : 3),
+      rotation: restingRotation,
       duration: duration,
       ease: eased,
       onStart: () => {
@@ -835,7 +837,10 @@ function shuffleProjectCards() {
 
   // Reset any transforms so layout is authoritative
   cards.forEach(card => {
-    gsap.set(card, { x: 0, y: 0, rotation: 0, scale: 1 });
+    const tilt = Number.parseFloat(
+      window.getComputedStyle(card).getPropertyValue('--card-tilt')
+    ) || 0;
+    gsap.set(card, { x: 0, y: 0, rotation: tilt, scale: 1 });
   });
 
   const fadeOutDuration = PERF && PERF.isLowEnd ? 0.08 : 0.12;

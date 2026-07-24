@@ -67,7 +67,7 @@ a {
   position: fixed;
   top: 0.75rem;
   left: 50%;
-  z-index: 1000002;
+  z-index: 1000010;
   padding: 0.65rem 0.9rem;
   border: 1px solid var(--signal);
   background: var(--void);

@@ -27,6 +27,7 @@
 @media (max-width: 900px) {
   :root {
     --page-gutter: clamp(0.85rem, 3.5vw, 1.5rem);
+    --crt-shell-radius: 1.15rem;
   }
 
   body.is--cursor,
@@ -35,22 +36,41 @@
   }
 
   body::before {
-    opacity: 0.08;
+    opacity: 0.42;
     animation: none;
   }
 
   body::after {
-    opacity: 0.34;
-    animation: none;
+    opacity: 0.28;
+    animation-duration: 44s;
   }
 
   .osmo-ui::before {
-    opacity: 0.38;
+    opacity: 0.8;
     backdrop-filter: none;
   }
 
   .osmo-ui::after {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 0 2.5rem rgba(0, 0, 0, 0.28);
+    inset: 0.34rem;
+    box-shadow:
+      inset 0 0 0 1px var(--crt-rim),
+      inset 0 0 2.4rem rgba(0, 0, 0, 0.7);
+  }
+
+  .crt-chassis {
+    border-width: 0.34rem;
+    border-radius: var(--crt-shell-radius);
+    box-shadow:
+      inset 0 0 0 1px rgba(232, 255, 238, 0.1),
+      inset 0 0 0 2px var(--crt-rim),
+      inset 0 0 1.65rem 0.3rem rgba(0, 0, 0, 0.8);
+  }
+
+  .crt-chassis__power {
+    right: 0.85rem;
+    bottom: 0.12rem;
+    width: 0.22rem;
+    height: 0.22rem;
   }
 
   .header {
@@ -134,8 +154,10 @@
   }
 
   .projects-content {
-    height: 100vh;
-    height: 100dvh;
+    inset: var(--crt-screen-inset);
+    width: auto;
+    height: calc(100vh - var(--crt-screen-inset) - var(--crt-screen-inset));
+    height: calc(100dvh - var(--crt-screen-inset) - var(--crt-screen-inset));
     padding:
       calc(5.1rem + env(safe-area-inset-top, 0px))
       var(--page-gutter)
@@ -381,7 +403,7 @@
   .ascii-sampler-btn {
     min-height: 3rem;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 0.9rem);
-    z-index: 60;
+    z-index: 1000004;
     padding: 0.65rem 0.85rem;
     background: rgba(5, 15, 13, 0.94);
     box-shadow: 0 0.9rem 2rem rgba(0, 0, 0, 0.28);

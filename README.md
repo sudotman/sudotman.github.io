@@ -44,8 +44,11 @@ The front page source is intentionally compact:
 - `now`: the film and applied-R&D notes currently in progress
 - `featured`: stable ids for the selected-project list
 - `branches`: the four existing ways to go deeper — Living, River, Doors, and Core Tech
-- `writing`, `viewing`, and `works`: writing links, one viewing note, and concise homepage-only records
+- `externalFeeds`: the Blogger and Letterboxd feed URLs, generated cache path, and long-review threshold
+- `works`: concise homepage-only records
 - `sources`: the existing technical feed used to complete the 27-project index
+
+`content/external-feeds.json` is generated from those public feeds. It contains every Blogger post in the current blog feed and Letterboxd film reviews whose text is longer than the configured threshold. The sync merges older qualifying reviews into the cache as the rolling RSS feed advances, so the local index can grow over time. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
 
 Links inside homepage work records use a small object (`live`, `source`, `read`, `record`, or `contact`) so the interface can derive its own wording instead of storing presentation labels in the data.
 
@@ -72,7 +75,9 @@ This controls the detailed Core Tech profile:
 - `css/landing.css`: the responsive Hypertext visual system and project dialog
 - `js/landing.js`: compact data loading, visible indexes, branch register, and native project records
 
-The front page exposes identity, current work, selected projects, the complete project index, writing, and all four deeper branches. Project summaries stay visible; opening a title reveals its longer note, images, and outward links in a native lightweight dialog.
+The front page exposes identity, current work, selected projects, the complete project index, Blogger writing, long-form Letterboxd reviews, and all four deeper branches. Project summaries stay visible; opening a project or review reveals its full record in a dedicated native dialog.
+
+The Pages workflow refreshes both external feeds on every deployment and every six hours. A checked-in cache keeps local development and deployments resilient when a source is briefly unavailable.
 
 ### Creative archive
 
@@ -130,6 +135,7 @@ Published public code without an explicit license should be described as public 
 ## Validation
 
 ```sh
+node scripts/sync-external-feeds.mjs
 node scripts/validate-content.mjs
 ```
 

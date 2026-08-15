@@ -3,6 +3,8 @@ name: Deploy static site to Pages
 on:
   push:
     branches: ["master"]
+  schedule:
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +25,17 @@ jobs:
     steps:
       - name: Check out the site
         uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Refresh Blogger and Letterboxd feeds
+        run: node scripts/sync-external-feeds.mjs
+
+      - name: Validate site content
+        run: node scripts/validate-content.mjs
 
       - name: Prepare the static artifact
         shell: bash

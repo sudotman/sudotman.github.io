@@ -57,27 +57,11 @@
       "description": "The original technical field manual and complete engineering archive."
     }
   },
-  "writing": [
-    {
-      "title": "carcinization on the internet",
-      "year": "2025",
-      "href": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
-    },
-    {
-      "title": "killers of the flower moon defines what cinema is for scorsese",
-      "year": "2023",
-      "href": "https://blog.satyam.lol/2023/10/killers-of-flower-moon-defines-what.html"
-    },
-    {
-      "title": "the corrupting nature of power: a Dark Souls III study",
-      "year": "2021",
-      "href": "https://blog.satyam.lol/2021/08/the-juxtaposition-of-societal.html"
-    }
-  ],
-  "viewing": {
-    "quote": "mesmerising — machine and flesh are one.",
-    "film": "The March of the Machines",
-    "href": "https://letterboxd.com/satyamkashyap/film/the-march-of-the-machines/"
+  "externalFeeds": {
+    "cache": "content/external-feeds.json",
+    "blogger": "https://blog.satyam.lol/feeds/posts/default?alt=json&max-results=500",
+    "letterboxd": "https://letterboxd.com/satyamkashyap/rss/",
+    "reviewMinCharacters": 150
   },
   "sources": ["content/programming.json"],
   "works": [

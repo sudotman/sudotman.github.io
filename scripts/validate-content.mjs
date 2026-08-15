@@ -40,6 +40,10 @@ function hasText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function isValidDate(value) {
+  return hasText(value) && !Number.isNaN(new Date(value).valueOf());
+}
+
 function validateText(value, location, fieldName = 'value') {
   if (!hasText(value)) {
     addError(location, `${fieldName} must be a non-empty string`);
@@ -754,24 +758,109 @@ function validateHome(home, knownSourcePaths) {
     });
   }
 
-  if (!Array.isArray(home.writing) || home.writing.length === 0) {
-    addError(`${HOME_PATH}.writing`, 'must be a non-empty array');
+  if (!isObject(home.externalFeeds)) {
+    addError(`${HOME_PATH}.externalFeeds`, 'must be an object');
   } else {
-    home.writing.forEach((item, index) => {
-      const location = `${HOME_PATH}.writing[${index}]`;
-      validateText(item?.title, `${location}.title`, 'title');
-      validateText(item?.year, `${location}.year`, 'year');
-      validateLinkHref(item?.href, `${location}.href`);
+    const location = `${HOME_PATH}.externalFeeds`;
+    for (const field of ['cache', 'blogger', 'letterboxd']) {
+      validateText(home.externalFeeds[field], `${location}.${field}`, field);
+    }
+    if (hasText(home.externalFeeds.cache)) resolveInsideRepo(home.externalFeeds.cache, `${location}.cache`);
+    for (const field of ['blogger', 'letterboxd']) {
+      if (hasText(home.externalFeeds[field])) validateRemoteUrl(home.externalFeeds[field], `${location}.${field}`);
+    }
+    if (!Number.isInteger(home.externalFeeds.reviewMinCharacters) || home.externalFeeds.reviewMinCharacters < 1) {
+      addError(`${location}.reviewMinCharacters`, 'must be a positive integer');
+    }
+  }
+}
+
+function validateExternalContent(content, config, contentPath) {
+  if (!isObject(content)) {
+    addError(contentPath, 'root must be an object');
+    return;
+  }
+  if (content.schemaVersion !== 1) addError(`${contentPath}.schemaVersion`, 'must equal 1');
+  if (!isValidDate(content.generatedAt)) addError(`${contentPath}.generatedAt`, 'must be a valid date');
+
+  if (!isObject(content.sources)) {
+    addError(`${contentPath}.sources`, 'must be an object');
+  } else {
+    for (const name of ['blogger', 'letterboxd']) {
+      const source = content.sources[name];
+      const location = `${contentPath}.sources.${name}`;
+      if (!isObject(source)) {
+        addError(location, 'must be an object');
+        continue;
+      }
+      if (source.url !== config[name]) addError(`${location}.url`, `must match ${HOME_PATH}.externalFeeds.${name}`);
+      if (!isValidDate(source.fetchedAt)) addError(`${location}.fetchedAt`, 'must be a valid date');
+      if (!['fresh', 'cached'].includes(source.status)) addError(`${location}.status`, 'must be fresh or cached');
+    }
+    if (content.sources.letterboxd?.reviewMinCharacters !== config.reviewMinCharacters) {
+      addError(`${contentPath}.sources.letterboxd.reviewMinCharacters`, `must match ${HOME_PATH}.externalFeeds.reviewMinCharacters`);
+    }
+  }
+
+  if (!Array.isArray(content.writing) || content.writing.length === 0) {
+    addError(`${contentPath}.writing`, 'must be a non-empty array');
+  } else {
+    const ids = new Set();
+    content.writing.forEach((item, index) => {
+      const location = `${contentPath}.writing[${index}]`;
+      if (!isObject(item)) {
+        addError(location, 'must be an object');
+        return;
+      }
+      for (const field of ['id', 'title', 'published', 'year', 'href']) {
+        validateText(item[field], `${location}.${field}`, field);
+      }
+      if (hasText(item.id)) {
+        if (ids.has(item.id)) addError(`${location}.id`, `duplicate id "${item.id}"`);
+        ids.add(item.id);
+      }
+      if (!isValidDate(item.published)) addError(`${location}.published`, 'must be a valid date');
+      if (!/^\d{4}$/.test(item.year || '')) addError(`${location}.year`, 'must use YYYY');
+      validateLinkHref(item.href, `${location}.href`);
     });
   }
 
-  if (!isObject(home.viewing)) {
-    addError(`${HOME_PATH}.viewing`, 'must be an object');
-  } else {
-    validateText(home.viewing.quote, `${HOME_PATH}.viewing.quote`, 'quote');
-    validateText(home.viewing.film, `${HOME_PATH}.viewing.film`, 'film');
-    validateLinkHref(home.viewing.href, `${HOME_PATH}.viewing.href`);
+  if (!Array.isArray(content.reviews)) {
+    addError(`${contentPath}.reviews`, 'must be an array');
+    return;
   }
+
+  const ids = new Set();
+  content.reviews.forEach((review, index) => {
+    const location = `${contentPath}.reviews[${index}]`;
+    if (!isObject(review)) {
+      addError(location, 'must be an object');
+      return;
+    }
+    for (const field of ['id', 'film', 'filmYear', 'watchedDate', 'published', 'review', 'href']) {
+      validateText(review[field], `${location}.${field}`, field);
+    }
+    if (hasText(review.id)) {
+      if (ids.has(review.id)) addError(`${location}.id`, `duplicate id "${review.id}"`);
+      ids.add(review.id);
+    }
+    if (!/^\d{4}$/.test(review.filmYear || '')) addError(`${location}.filmYear`, 'must use YYYY');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(review.watchedDate || '')) addError(`${location}.watchedDate`, 'must use YYYY-MM-DD');
+    if (!isValidDate(review.published)) addError(`${location}.published`, 'must be a valid date');
+    const characterCount = [...String(review.review || '')].length;
+    if (review.reviewCharacters !== characterCount) {
+      addError(`${location}.reviewCharacters`, `must equal the review text length (${characterCount})`);
+    }
+    if (characterCount <= config.reviewMinCharacters) {
+      addError(`${location}.review`, `must exceed ${config.reviewMinCharacters} characters`);
+    }
+    if (review.rating !== null
+        && (!Number.isFinite(review.rating) || review.rating < 0.5 || review.rating > 5 || review.rating * 2 % 1 !== 0)) {
+      addError(`${location}.rating`, 'must be null or a half-star increment between 0.5 and 5');
+    }
+    validateLinkHref(review.href, `${location}.href`);
+    if (review.poster) registerAsset(review.poster, `${location}.poster`);
+  });
 }
 
 async function validateLocalAssets() {
@@ -849,6 +938,10 @@ async function main() {
       if (home) {
         const knownSourcePaths = new Set((manifest.catalog.sources || []).map((source) => source?.src).filter(hasText));
         validateHome(home, knownSourcePaths);
+        if (hasText(home.externalFeeds?.cache)) {
+          const externalContent = await readJson(home.externalFeeds.cache, home.externalFeeds.cache);
+          if (externalContent) validateExternalContent(externalContent, home.externalFeeds, home.externalFeeds.cache);
+        }
       }
     }
   }

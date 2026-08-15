@@ -5,7 +5,10 @@
   const dialog = document.getElementById("project-dialog");
   const detail = dialog?.querySelector("[data-project-detail]");
   const closeButton = dialog?.querySelector("[data-dialog-close]");
-  if (!app || !dialog || !detail || !closeButton) return;
+  const reviewDialog = document.getElementById("review-dialog");
+  const reviewDetail = reviewDialog?.querySelector("[data-review-detail]");
+  const reviewCloseButton = reviewDialog?.querySelector("[data-review-dialog-close]");
+  if (!app || !dialog || !detail || !closeButton || !reviewDialog || !reviewDetail || !reviewCloseButton) return;
 
   const escapeHtml = (value = "") => String(value)
     .replaceAll("&", "&amp;")
@@ -114,6 +117,13 @@
   async function loadPortfolio() {
     const home = await fetchJson("/content/home.json");
     const feeds = await Promise.all((home.sources || []).map((source) => fetchJson(`/${String(source).replace(/^\/+/, "")}`)));
+    let externalContent = { writing: [], reviews: [] };
+    try {
+      const cachePath = String(home.externalFeeds?.cache || "content/external-feeds.json").replace(/^\/+/, "");
+      externalContent = await fetchJson(`/${cachePath}`);
+    } catch (error) {
+      console.warn("External writing feeds did not load", error);
+    }
     const works = [
       ...(home.works || []).map((work) => normalizeWork(work, "home")),
       ...feeds.flatMap((feed) => (feed.works || []).map((work) => normalizeWork(work, feed.source?.id || "archive")))
@@ -124,11 +134,14 @@
       home,
       works: unique,
       workMap: map,
-      featured: (home.featured || []).map((id) => map.get(id)).filter(Boolean)
+      featured: (home.featured || []).map((id) => map.get(id)).filter(Boolean),
+      writing: externalContent.writing || [],
+      reviews: externalContent.reviews || []
     };
   }
 
   const projectHref = (work) => `#project=${encodeURIComponent(work.id)}`;
+  const reviewHref = (review) => `#review=${encodeURIComponent(review.id)}`;
 
   function branchLinks(branches, className = "") {
     return Object.entries(branches || {}).map(([name, branch]) => {
@@ -154,11 +167,47 @@
       </div>`).join("");
   }
 
-  function writingList(writing) {
-    return (writing || []).map((item) => {
+  function writingList(writing, sourceHref) {
+    if (!writing?.length) {
+      return `<li>The feed is temporarily unavailable. <a href="${escapeHtml(safeHref(sourceHref))}"${externalAttributes(sourceHref)}>Read the blog directly.</a></li>`;
+    }
+    return writing.map((item) => {
       const href = safeHref(item.href);
       return `<li><a href="${escapeHtml(href)}"${externalAttributes(href)}>${escapeHtml(item.title)}</a> (${escapeHtml(item.year)})</li>`;
     }).join("");
+  }
+
+  function dateLabel(value) {
+    const [year, month, day] = String(value || "").split("-");
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    return year && months[Number(month) - 1] && day
+      ? `${day} ${months[Number(month) - 1]} ${year}`
+      : String(value || "date unavailable");
+  }
+
+  function ratingMarkup(rating) {
+    if (rating === null || rating === undefined || rating === "") return "";
+    const value = Number(rating);
+    if (!Number.isFinite(value) || value <= 0) return "";
+    const stars = `${"★".repeat(Math.floor(value))}${value % 1 ? "½" : ""}`;
+    return `<span class="review-rating" aria-label="${escapeHtml(`${value} out of 5 stars`)}">${escapeHtml(stars)}</span>`;
+  }
+
+  function reviewExcerpt(value, maximum = 260) {
+    const text = String(value || "").replaceAll(/\s+/g, " ").trim();
+    return text.length > maximum ? `${text.slice(0, maximum).trimEnd()}…` : text;
+  }
+
+  function reviewList(reviews, sourceHref) {
+    if (!reviews?.length) {
+      return `<li class="review-index__empty">No long reviews are available in the current feed. <a href="${escapeHtml(safeHref(sourceHref))}"${externalAttributes(sourceHref)}>Open Letterboxd.</a></li>`;
+    }
+    return reviews.map((review) => `
+      <li class="review-index__entry">
+        <p class="review-index__date">${escapeHtml(dateLabel(review.watchedDate))}</p>
+        <h3><a class="review-link" href="${escapeHtml(reviewHref(review))}" data-review-id="${escapeHtml(review.id)}" aria-haspopup="dialog">${escapeHtml(review.film)}</a></h3>
+        <p class="review-index__excerpt"><small>${escapeHtml(review.filmYear)} ${ratingMarkup(review.rating)}</small><br>${escapeHtml(reviewExcerpt(review.review))}</p>
+      </li>`).join("");
   }
 
   function branchRegister(branches) {
@@ -189,11 +238,13 @@
       </section>`;
   }
 
-  function render({ home, works, workMap, featured }) {
+  function render({ home, works, workMap, featured, writing, reviews }) {
     const identity = home.identity || {};
     const simulation = workMap.get("p_isro");
     const film = workMap.get("film_chhoti_gold");
-    const viewing = home.viewing || {};
+    const blogHref = identity.links?.writing || "https://blog.satyam.lol/";
+    const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
+    const reviewMinCharacters = Number(home.externalFeeds?.reviewMinCharacters) || 150;
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="More portfolio visualizations">
@@ -227,10 +278,16 @@
           <dl class="project-index">${completeIndex(works)}</dl>
         </section>
 
-        <section>
+        <section class="hyper-writing" id="writing">
           <h2>Writing</h2>
-          <ul>${writingList(home.writing)}</ul>
-          <blockquote>“${escapeHtml(viewing.quote)}” — a note on <cite><a href="${escapeHtml(safeHref(viewing.href))}"${externalAttributes(viewing.href)}>${escapeHtml(viewing.film)}</a></cite></blockquote>
+          <p class="section-note">Essays and notes fetched from <a href="${escapeHtml(safeHref(blogHref))}"${externalAttributes(blogHref)}>blog.satyam.lol</a>.</p>
+          <ul>${writingList(writing, blogHref)}</ul>
+        </section>
+
+        <section class="hyper-reviews" id="film-writing">
+          <h2>Film writing</h2>
+          <p class="section-note">${escapeHtml(reviews.length)} reviews longer than ${escapeHtml(reviewMinCharacters)} characters, fetched from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Older qualifying entries stay in the index as the feed rolls forward; open a title to read the full note here.</p>
+          <ol class="review-index">${reviewList(reviews, letterboxdHref)}</ol>
         </section>
 
         <section class="hyper-more" id="more">
@@ -267,6 +324,7 @@
   }
 
   let projectMap = new Map();
+  let reviewMap = new Map();
   let historyIsClosing = false;
 
   function openProject(id) {
@@ -288,50 +346,96 @@
     closeButton.focus({ preventScroll: true });
   }
 
-  function hashProject() {
-    return new URLSearchParams(location.hash.slice(1)).get("project");
+  function openReview(id) {
+    const review = reviewMap.get(id);
+    if (!review) return;
+    const href = safeHref(review.href, "");
+    const poster = safeAsset(review.poster, "");
+    reviewDetail.innerHTML = `
+      <div class="review-dialog__lead">
+        <div>
+          <p class="project-dialog__meta">watched ${escapeHtml(dateLabel(review.watchedDate))}</p>
+          <h2 id="review-dialog-title">${escapeHtml(review.film)}</h2>
+          <p class="project-dialog__summary">${escapeHtml(review.filmYear)} ${ratingMarkup(review.rating)}</p>
+        </div>
+        ${poster ? `<figure class="review-dialog__poster"><img src="${escapeHtml(poster)}" alt="${escapeHtml(`${review.film} poster`)}" loading="lazy" decoding="async"></figure>` : ""}
+      </div>
+      <div class="project-dialog__text review-dialog__text">${String(review.review || "").split(/\n{2,}/).map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`).join("")}</div>
+      ${href ? `<nav class="project-dialog__links" aria-label="Review links"><a href="${escapeHtml(href)}"${externalAttributes(href)}>[read on letterboxd] ↗</a></nav>` : ""}`;
+
+    reviewDetail.querySelectorAll("img").forEach((image) => {
+      image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
+    });
+    if (!reviewDialog.open) reviewDialog.showModal();
+    document.body.classList.add("dialog-open");
+    reviewCloseButton.focus({ preventScroll: true });
+  }
+
+  function hashValue(key) {
+    return new URLSearchParams(location.hash.slice(1)).get(key);
   }
 
   function syncDialogFromUrl() {
-    const id = hashProject();
-    if (id && projectMap.has(id)) {
-      openProject(id);
-    } else if (dialog.open) {
+    const projectId = hashValue("project");
+    const reviewId = hashValue("review");
+    if (projectId && projectMap.has(projectId)) {
+      openProject(projectId);
+    } else if (reviewId && reviewMap.has(reviewId)) {
+      openReview(reviewId);
+    } else if (dialog.open || reviewDialog.open) {
       historyIsClosing = true;
-      dialog.close();
+      if (dialog.open) dialog.close();
+      if (reviewDialog.open) reviewDialog.close();
     }
+  }
+
+  function bindDialog(dialogElement, closeElement, detailElement, hashKey) {
+    closeElement.addEventListener("click", () => dialogElement.close());
+    dialogElement.addEventListener("click", (event) => {
+      if (event.target === dialogElement) dialogElement.close();
+    });
+    dialogElement.addEventListener("close", () => {
+      document.body.classList.remove("dialog-open");
+      detailElement.replaceChildren();
+      if (historyIsClosing) {
+        historyIsClosing = false;
+      } else if (hashValue(hashKey)) {
+        history.replaceState(null, "", `${location.pathname}${location.search}`);
+      }
+    });
   }
 
   function bindInteractions() {
     app.addEventListener("click", (event) => {
-      const link = event.target.closest(".project-link");
-      if (!link) return;
-      event.preventDefault();
-      const id = link.dataset.projectId;
-      if (!projectMap.has(id)) return;
-      history.pushState(null, "", projectHref(projectMap.get(id)));
-      openProject(id);
-    });
+      const projectLink = event.target.closest(".project-link");
+      if (projectLink) {
+        event.preventDefault();
+        const id = projectLink.dataset.projectId;
+        if (!projectMap.has(id)) return;
+        history.pushState(null, "", projectHref(projectMap.get(id)));
+        openProject(id);
+        return;
+      }
 
-    closeButton.addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
-    });
-    dialog.addEventListener("close", () => {
-      document.body.classList.remove("dialog-open");
-      detail.replaceChildren();
-      if (historyIsClosing) {
-        historyIsClosing = false;
-      } else if (hashProject()) {
-        history.replaceState(null, "", `${location.pathname}${location.search}`);
+      const reviewLink = event.target.closest(".review-link");
+      if (reviewLink) {
+        event.preventDefault();
+        const id = reviewLink.dataset.reviewId;
+        if (!reviewMap.has(id)) return;
+        history.pushState(null, "", reviewHref(reviewMap.get(id)));
+        openReview(id);
       }
     });
+
+    bindDialog(dialog, closeButton, detail, "project");
+    bindDialog(reviewDialog, reviewCloseButton, reviewDetail, "review");
     window.addEventListener("popstate", syncDialogFromUrl);
   }
 
   loadPortfolio()
     .then((portfolio) => {
       projectMap = portfolio.workMap;
+      reviewMap = new Map(portfolio.reviews.map((review) => [review.id, review]));
       render(portfolio);
       bindInteractions();
       syncDialogFromUrl();

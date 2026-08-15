@@ -15,8 +15,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://satyam.lol/">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/landing.css?v=20260815c">
-  <script src="/js/landing.js?v=20260815c" defer></script>
+  <link rel="stylesheet" href="/css/landing.css?v=20260815e">
+  <script src="/js/landing.js?v=20260815e" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#selected-work">Skip to selected work</a>
@@ -32,6 +32,15 @@
         <button type="button" data-dialog-close>close [esc]</button>
       </header>
       <div class="project-dialog__body" data-project-detail></div>
+    </div>
+  </dialog>
+  <dialog class="project-dialog review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+    <div class="project-dialog__shell">
+      <header>
+        <span>letterboxd review</span>
+        <button type="button" data-review-dialog-close>close [esc]</button>
+      </header>
+      <div class="project-dialog__body" data-review-detail></div>
     </div>
   </dialog>
   <noscript>

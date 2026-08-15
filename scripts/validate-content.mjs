@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
+const HOME_PATH = 'content/home.json';
 const PROFILE_PATH = 'profile.json';
 const CREATIVE_PATH = 'content/creative.json';
 
@@ -146,21 +147,12 @@ function validateLinkHref(value, location) {
   resolveInsideRepo(value, location);
 }
 
-function validateCreativeArchive(archive) {
+function validateCreativeArchive(archive, knownWorkIds) {
   if (!isObject(archive)) {
     addError(CREATIVE_PATH, 'root must be an object');
     return;
   }
-  if (!isObject(archive.profile)) {
-    addError(`${CREATIVE_PATH}.profile`, 'must be an object');
-  } else {
-    for (const field of ['name', 'role', 'statement', 'location', 'email', 'coreTechUrl']) {
-      validateText(archive.profile[field], `${CREATIVE_PATH}.profile.${field}`, field);
-    }
-    if (hasText(archive.profile.coreTechUrl)) {
-      validateLinkHref(archive.profile.coreTechUrl, `${CREATIVE_PATH}.profile.coreTechUrl`);
-    }
-  }
+  if (archive.schemaVersion !== 2) addError(`${CREATIVE_PATH}.schemaVersion`, 'must equal 2');
 
   if (!Array.isArray(archive.projects) || archive.projects.length === 0) {
     addError(`${CREATIVE_PATH}.projects`, 'must be a non-empty array');
@@ -175,9 +167,13 @@ function validateCreativeArchive(archive) {
       return;
     }
     creativeWorkCount += 1;
-    for (const field of ['slug', 'title', 'year', 'discipline', 'note', 'color', 'accent']) {
+    for (const field of ['workId', 'slug', 'discipline', 'color', 'accent']) {
       validateText(project[field], `${location}.${field}`, field);
     }
+    if (hasText(project.workId) && knownWorkIds && !knownWorkIds.has(project.workId)) {
+      addError(`${location}.workId`, `references unknown work "${project.workId}"`);
+    }
+    if (project.year !== undefined) validateText(project.year, `${location}.year`, 'year');
     if (hasText(project.slug)) {
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(project.slug)) {
         addError(`${location}.slug`, 'must be a lowercase kebab-case slug');
@@ -190,8 +186,6 @@ function validateCreativeArchive(archive) {
         addError(`${location}.${field}`, 'must be a six-digit hexadecimal color');
       }
     }
-    if (hasText(project.link)) validateLinkHref(project.link, `${location}.link`);
-    if (hasText(project.image)) registerAsset(project.image, `${location}.image`);
   });
 }
 
@@ -373,6 +367,173 @@ function validateLinks(links, location) {
   });
 }
 
+function validateIdentity(identity) {
+  const location = `${MANIFEST_PATH}.identity`;
+  if (!isObject(identity)) {
+    addError(location, 'must be an object');
+    return;
+  }
+  for (const field of ['name', 'handle', 'role', 'headline', 'introduction', 'statement', 'location', 'email']) {
+    validateText(identity[field], `${location}.${field}`, field);
+  }
+  validateStringArray(identity.headlineLines, `${location}.headlineLines`);
+
+  if (!isObject(identity.employer)) {
+    addError(`${location}.employer`, 'must be an object');
+  } else {
+    validateText(identity.employer.name, `${location}.employer.name`, 'name');
+    validateLinkHref(identity.employer.url, `${location}.employer.url`);
+  }
+
+  if (!Array.isArray(identity.links) || identity.links.length === 0) {
+    addError(`${location}.links`, 'must be a non-empty array');
+  } else {
+    const ids = new Set();
+    identity.links.forEach((link, index) => {
+      const linkLocation = `${location}.links[${index}]`;
+      if (!isObject(link)) {
+        addError(linkLocation, 'must be an object');
+        return;
+      }
+      if (validateText(link.id, `${linkLocation}.id`, 'id')) {
+        if (ids.has(link.id)) addError(`${linkLocation}.id`, `duplicate link id "${link.id}"`);
+        ids.add(link.id);
+      }
+      validateText(link.label, `${linkLocation}.label`, 'label');
+      validateLinkHref(link.href, `${linkLocation}.href`);
+    });
+  }
+}
+
+function validateWorkReferenceArray(value, location, knownWorkIds) {
+  if (!validateStringArray(value, location)) return;
+  const ids = new Set();
+  value.forEach((workId, index) => {
+    if (ids.has(workId)) addError(`${location}[${index}]`, `duplicate work reference "${workId}"`);
+    ids.add(workId);
+    if (!knownWorkIds.has(workId)) addError(`${location}[${index}]`, `references unknown work "${workId}"`);
+  });
+}
+
+function validateLanding(landing, knownWorkIds) {
+  const location = `${MANIFEST_PATH}.landing`;
+  if (!isObject(landing)) {
+    addError(location, 'must be an object');
+    return;
+  }
+  validateText(landing.eyebrow, `${location}.eyebrow`, 'eyebrow');
+
+  if (!isObject(landing.splice)) {
+    addError(`${location}.splice`, 'must be an object');
+  } else {
+    for (const field of ['simulationWorkId', 'filmWorkId']) {
+      if (validateText(landing.splice[field], `${location}.splice.${field}`, field)
+          && !knownWorkIds.has(landing.splice[field])) {
+        addError(`${location}.splice.${field}`, `references unknown work "${landing.splice[field]}"`);
+      }
+    }
+    validateText(landing.splice.caption, `${location}.splice.caption`, 'caption');
+  }
+
+  if (!Array.isArray(landing.signals) || landing.signals.length === 0) {
+    addError(`${location}.signals`, 'must be a non-empty array');
+  } else {
+    const signalIds = new Set();
+    const signalTypes = new Set(['work', 'note', 'workCollection', 'writingCollection']);
+    landing.signals.forEach((signal, index) => {
+      const signalLocation = `${location}.signals[${index}]`;
+      if (!isObject(signal)) {
+        addError(signalLocation, 'must be an object');
+        return;
+      }
+      if (validateText(signal.id, `${signalLocation}.id`, 'id')) {
+        if (signalIds.has(signal.id)) addError(`${signalLocation}.id`, `duplicate signal id "${signal.id}"`);
+        signalIds.add(signal.id);
+      }
+      if (validateText(signal.type, `${signalLocation}.type`, 'type') && !signalTypes.has(signal.type)) {
+        addError(`${signalLocation}.type`, `must be one of ${[...signalTypes].join(', ')}`);
+      }
+      for (const field of ['nav', 'field', 'accent', 'mode', 'mark']) {
+        validateText(signal[field], `${signalLocation}.${field}`, field);
+      }
+      for (const field of ['field', 'accent']) {
+        if (hasText(signal[field]) && !/^#[0-9A-Fa-f]{6}$/.test(signal[field])) {
+          addError(`${signalLocation}.${field}`, 'must be a six-digit hexadecimal color');
+        }
+      }
+      if (signal.type === 'work') {
+        if (validateText(signal.workId, `${signalLocation}.workId`, 'workId') && !knownWorkIds.has(signal.workId)) {
+          addError(`${signalLocation}.workId`, `references unknown work "${signal.workId}"`);
+        }
+      } else {
+        validateText(signal.meta, `${signalLocation}.meta`, 'meta');
+        for (const field of ['title', 'href', 'linkLabel']) {
+          validateText(signal[field], `${signalLocation}.${field}`, field);
+        }
+        if (signal.href !== undefined) validateLinkHref(signal.href, `${signalLocation}.href`);
+        if (signal.type === 'note') validateText(signal.summary, `${signalLocation}.summary`, 'summary');
+      }
+      if (signal.visualWorkId !== undefined
+          && validateText(signal.visualWorkId, `${signalLocation}.visualWorkId`, 'visualWorkId')
+          && !knownWorkIds.has(signal.visualWorkId)) {
+        addError(`${signalLocation}.visualWorkId`, `references unknown work "${signal.visualWorkId}"`);
+      }
+      if (signal.type === 'workCollection' || signal.type === 'writingCollection') {
+        if (validateText(signal.source, `${signalLocation}.source`, 'source')
+            && !Array.isArray(landing[signal.source])) {
+          addError(`${signalLocation}.source`, `must name an array on ${location}`);
+        }
+      }
+    });
+  }
+
+  validateWorkReferenceArray(landing.openWorkIds, `${location}.openWorkIds`, knownWorkIds);
+
+  if (!Array.isArray(landing.writing) || landing.writing.length === 0) {
+    addError(`${location}.writing`, 'must be a non-empty array');
+  } else {
+    landing.writing.forEach((item, index) => {
+      const itemLocation = `${location}.writing[${index}]`;
+      if (!isObject(item)) {
+        addError(itemLocation, 'must be an object');
+        return;
+      }
+      validateText(item.title, `${itemLocation}.title`, 'title');
+      if (!hasText(item.year) || !/^\d{4}$/.test(item.year)) addError(`${itemLocation}.year`, 'must use YYYY');
+      validateLinkHref(item.href, `${itemLocation}.href`);
+    });
+  }
+
+  if (!isObject(landing.viewingNote)) {
+    addError(`${location}.viewingNote`, 'must be an object');
+  } else {
+    for (const field of ['quote', 'film']) {
+      validateText(landing.viewingNote[field], `${location}.viewingNote.${field}`, field);
+    }
+    validateLinkHref(landing.viewingNote.href, `${location}.viewingNote.href`);
+  }
+
+  if (!Array.isArray(landing.portals) || landing.portals.length === 0) {
+    addError(`${location}.portals`, 'must be a non-empty array');
+  } else {
+    const ids = new Set();
+    landing.portals.forEach((portal, index) => {
+      const portalLocation = `${location}.portals[${index}]`;
+      if (!isObject(portal)) {
+        addError(portalLocation, 'must be an object');
+        return;
+      }
+      if (validateText(portal.id, `${portalLocation}.id`, 'id')) {
+        if (ids.has(portal.id)) addError(`${portalLocation}.id`, `duplicate portal id "${portal.id}"`);
+        ids.add(portal.id);
+      }
+      validateText(portal.label, `${portalLocation}.label`, 'label');
+      validateText(portal.note, `${portalLocation}.note`, 'note');
+      validateLinkHref(portal.href, `${portalLocation}.href`);
+    });
+  }
+}
+
 function validateWork(work, location, defaultTracks, knownTracks, knownMediums) {
   if (!isObject(work)) {
     addError(location, 'must be an object');
@@ -416,8 +577,12 @@ function validateWork(work, location, defaultTracks, knownTracks, knownMediums) 
     validateCover(work.cover, `${location}.cover`);
   } else if (work.image !== undefined) {
     registerAsset(work.image, `${location}.image`);
-  } else {
-    addError(location, 'requires a cover object or legacy image field');
+  } else if (work.presentation !== 'text') {
+    addError(location, 'requires a cover object, legacy image field, or presentation "text"');
+  }
+
+  if (work.presentation !== undefined && work.presentation !== 'text') {
+    addError(`${location}.presentation`, 'must equal "text" when provided');
   }
 
   if (work.gallery !== undefined) {
@@ -489,6 +654,126 @@ function validateProfile(profile) {
   if (!isObject(profile.interests)) addError(`${PROFILE_PATH}.interests`, 'must be an object');
 }
 
+function validateHomeWork(work, location) {
+  if (!isObject(work)) {
+    addError(location, 'must be an object');
+    return;
+  }
+  workCount += 1;
+  if (validateText(work.id, `${location}.id`, 'id')) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(work.id)) {
+      addError(`${location}.id`, 'must contain only letters, numbers, underscores, or hyphens');
+    }
+    if (seenWorkIds.has(work.id)) {
+      addError(`${location}.id`, `duplicate work id; first declared at ${seenWorkIds.get(work.id)}`);
+    } else {
+      seenWorkIds.set(work.id, `${location}.id`);
+    }
+  }
+  for (const field of ['title', 'medium', 'year', 'summary', 'body']) {
+    validateText(work[field], `${location}.${field}`, field);
+  }
+  if (work.images !== undefined) {
+    if (!Array.isArray(work.images)) {
+      addError(`${location}.images`, 'must be an array');
+    } else {
+      work.images.forEach((asset, index) => registerAsset(asset, `${location}.images[${index}]`));
+    }
+  }
+  if (work.links !== undefined) {
+    if (!isObject(work.links) || Object.keys(work.links).length === 0) {
+      addError(`${location}.links`, 'must be a non-empty object');
+    } else {
+      Object.entries(work.links).forEach(([kind, href]) => {
+        if (!hasText(kind)) addError(`${location}.links`, 'link names must not be empty');
+        validateLinkHref(href, `${location}.links.${kind}`);
+      });
+    }
+  }
+}
+
+function validateHome(home, knownSourcePaths) {
+  if (!isObject(home)) {
+    addError(HOME_PATH, 'root must be an object');
+    return;
+  }
+
+  if (!isObject(home.identity)) {
+    addError(`${HOME_PATH}.identity`, 'must be an object');
+  } else {
+    for (const field of ['name', 'role', 'location', 'intro', 'statement', 'email']) {
+      validateText(home.identity[field], `${HOME_PATH}.identity.${field}`, field);
+    }
+    if (!isObject(home.identity.links) || Object.keys(home.identity.links).length === 0) {
+      addError(`${HOME_PATH}.identity.links`, 'must be a non-empty object');
+    } else {
+      Object.entries(home.identity.links).forEach(([name, href]) => {
+        validateLinkHref(href, `${HOME_PATH}.identity.links.${name}`);
+      });
+    }
+  }
+
+  if (!Array.isArray(home.now) || home.now.length === 0) {
+    addError(`${HOME_PATH}.now`, 'must be a non-empty array');
+  } else {
+    home.now.forEach((item, index) => {
+      validateText(item?.title, `${HOME_PATH}.now[${index}].title`, 'title');
+      validateText(item?.text, `${HOME_PATH}.now[${index}].text`, 'text');
+    });
+  }
+
+  if (!Array.isArray(home.sources) || home.sources.length === 0) {
+    addError(`${HOME_PATH}.sources`, 'must be a non-empty array');
+  } else {
+    home.sources.forEach((source, index) => {
+      if (validateText(source, `${HOME_PATH}.sources[${index}]`, 'source') && !knownSourcePaths.has(source)) {
+        addError(`${HOME_PATH}.sources[${index}]`, `must reference a source already registered in ${MANIFEST_PATH}`);
+      }
+    });
+  }
+
+  if (!Array.isArray(home.works) || home.works.length === 0) {
+    addError(`${HOME_PATH}.works`, 'must be a non-empty array');
+  } else {
+    home.works.forEach((work, index) => validateHomeWork(work, `${HOME_PATH}.works[${index}]`));
+  }
+
+  validateWorkReferenceArray(home.featured, `${HOME_PATH}.featured`, seenWorkIds);
+
+  if (!isObject(home.branches) || Object.keys(home.branches).length === 0) {
+    addError(`${HOME_PATH}.branches`, 'must be a non-empty object');
+  } else {
+    Object.entries(home.branches).forEach(([name, branch]) => {
+      const location = `${HOME_PATH}.branches.${name}`;
+      if (!isObject(branch)) {
+        addError(location, 'must be an object');
+        return;
+      }
+      validateLinkHref(branch.href, `${location}.href`);
+      validateText(branch.description, `${location}.description`, 'description');
+    });
+  }
+
+  if (!Array.isArray(home.writing) || home.writing.length === 0) {
+    addError(`${HOME_PATH}.writing`, 'must be a non-empty array');
+  } else {
+    home.writing.forEach((item, index) => {
+      const location = `${HOME_PATH}.writing[${index}]`;
+      validateText(item?.title, `${location}.title`, 'title');
+      validateText(item?.year, `${location}.year`, 'year');
+      validateLinkHref(item?.href, `${location}.href`);
+    });
+  }
+
+  if (!isObject(home.viewing)) {
+    addError(`${HOME_PATH}.viewing`, 'must be an object');
+  } else {
+    validateText(home.viewing.quote, `${HOME_PATH}.viewing.quote`, 'quote');
+    validateText(home.viewing.film, `${HOME_PATH}.viewing.film`, 'film');
+    validateLinkHref(home.viewing.href, `${HOME_PATH}.viewing.href`);
+  }
+}
+
 async function validateLocalAssets() {
   await Promise.all([...localAssets.entries()].map(async ([relativePath, asset]) => {
     try {
@@ -506,10 +791,10 @@ async function validateLocalAssets() {
 
 async function main() {
   const manifest = await readJson(MANIFEST_PATH);
+  const home = await readJson(HOME_PATH);
   const profile = await readJson(PROFILE_PATH);
   const creativeArchive = await readJson(CREATIVE_PATH);
   if (profile) validateProfile(profile);
-  if (creativeArchive) validateCreativeArchive(creativeArchive);
 
   if (!isObject(manifest)) {
     if (manifest !== null) addError(MANIFEST_PATH, 'root must be an object');
@@ -560,8 +845,15 @@ async function main() {
         });
         await Promise.all(feedTasks);
       }
+
+      if (home) {
+        const knownSourcePaths = new Set((manifest.catalog.sources || []).map((source) => source?.src).filter(hasText));
+        validateHome(home, knownSourcePaths);
+      }
     }
   }
+
+  if (creativeArchive) validateCreativeArchive(creativeArchive, seenWorkIds);
 
   await validateLocalAssets();
 

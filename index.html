@@ -3,25 +3,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>satyam kashyap - creative archive & core tech</title>
-  <meta name="description" content="the branching portfolio of Satyam Kashyap: one creative archive in three forms, alongside a separate practice in technology.">
-  <meta name="theme-color" content="#f0ede4">
+  <title>Satyam Kashyap — XR team lead & filmmaker</title>
+  <meta name="description" content="Satyam Kashyap leads XR simulation work at Parallax Labs, makes films, writes, and builds useful tools in public.">
+  <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Satyam Kashyap — choose how to enter">
-  <meta property="og:description" content="Creative archive and Core Tech, gathered under one roof.">
+  <meta property="og:title" content="Satyam Kashyap — XR team lead & filmmaker">
+  <meta property="og:description" content="Simulation systems, films, writing and useful software — made as one practice.">
   <meta property="og:url" content="https://satyam.lol/">
   <meta property="og:image" content="https://satyam.lol/og.png">
+  <meta property="og:image:alt" content="An ace of spades made for satyam.lol">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://satyam.lol/">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/creative-network.css?v=20260715f">
-  <script src="/js/creative-network.js?v=20260715f" defer></script>
+  <link rel="stylesheet" href="/css/landing.css?v=20260815c">
+  <script src="/js/landing.js?v=20260815c" defer></script>
 </head>
-<body data-creative-mode="master">
-  <a class="skip-link" href="#creative-app">Skip to the crossing</a>
-  <div id="creative-app" aria-live="polite">
-    <main class="creative-loading"><p>assembling the crossing…</p></main>
+<body>
+  <a class="skip-link" href="#selected-work">Skip to selected work</a>
+  <div id="landing-app">
+    <main class="landing-loading" id="landing-main">
+      <p>reading /content/home.json…</p>
+    </main>
   </div>
-  <noscript><p class="creative-noscript">This crossing needs JavaScript. <a href="/tech.html">Enter Core Tech →</a></p></noscript>
+  <dialog class="project-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+    <div class="project-dialog__shell">
+      <header>
+        <span>project record</span>
+        <button type="button" data-dialog-close>close [esc]</button>
+      </header>
+      <div class="project-dialog__body" data-project-detail></div>
+    </div>
+  </dialog>
+  <noscript>
+    <main class="landing-noscript">
+      <p class="landing-noscript__eyebrow">XR / cinema / public code</p>
+      <h1>Satyam Kashyap</h1>
+      <p>XR team lead at Parallax Labs, filmmaker behind <em>Chhoti Gold</em> and <em>Blue Dogs</em>, writer, and builder of useful software.</p>
+      <nav aria-label="Portfolio links">
+        <a href="/living/">Living</a>
+        <a href="/river/">River</a>
+        <a href="/doors/">Doors</a>
+        <a href="/tech.html">Core Tech</a>
+        <a href="https://github.com/sudotman">GitHub</a>
+        <a href="mailto:hello@satyam.lol">hello@satyam.lol</a>
+      </nav>
+    </main>
+  </noscript>
 </body>
 </html>

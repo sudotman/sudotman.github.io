@@ -1,124 +1,78 @@
 {
-  "profile": {
-    "name": "satyam kashyap",
-    "role": "filmmaker & creative technologist",
-    "statement": "i make stories and software (sometimes, together)",
-    "location": "mumbai / himalayas",
-    "email": "hello@satyam.lol",
-    "coreTechUrl": "/tech.html"
-  },
+  "schemaVersion": 2,
   "projects": [
     {
-      "slug": "carcinization-internet",
-      "title": "carcinization on the internet",
-      "year": "2024",
-      "discipline": "writing",
-      "note": "We all tend to become crabs.",
-      "link": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html",
-      "image": "",
-      "color": "#ffb427",
-      "accent": "#6b2c59"
-    },
-    {
-      "slug": "the-closet",
-      "title": "the closet",
-      "year": "2024",
-      "discipline": "Interactive archive",
-      "note": "everything that is close",
-      "link": "https://closet.satyam.lol/",
-      "image": "https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg",
-      "color": "#99c4e7",
-      "accent": "#3658d8"
-    },
-    {
-      "slug": "blue-dogs",
-      "title": "Blue Dogs",
-      "year": "2025",
-      "discipline": "film",
-      "note": "Short about bigotry affecting the forsaken.",
-      "link": "https://letterboxd.com/film/blue-dogs/",
-      "image": "https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg",
-      "color": "#536a50",
-      "accent": "#c9ed2f"
-    },
-    {
-      "slug": "public-memory-club",
-      "title": "Public Memory Club",
-      "year": "2024",
-      "discipline": "Research platform",
-      "note": "Membership pending since somebody forgot.",
-      "link": "#public-memory-club",
-      "image": "",
-      "color": "#3559d8",
-      "accent": "#a7cbe7"
-    },
-    {
+      "workId": "film_chhoti_gold",
       "slug": "chhoti-gold",
-      "title": "Chhoti Gold",
-      "year": "2026",
       "discipline": "film",
-      "note": "Narrative short that ebbs and flows in the past tense.",
-      "link": "https://letterboxd.com/film/chhoti-gold/",
-      "image": "https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg",
       "color": "#f33b2f",
       "accent": "#e5a0aa"
     },
     {
-      "slug": "borrowed-light",
-      "title": "Borrowed Light",
-      "year": "2023",
-      "discipline": "Exhibition",
-      "note": "Keep this one near the rain.",
-      "link": "#borrowed-light",
-      "image": "",
-      "color": "#e6a4ac",
-      "accent": "#ffbf3e"
+      "workId": "film_blue_dogs",
+      "slug": "blue-dogs",
+      "discipline": "film",
+      "color": "#536a50",
+      "accent": "#c9ed2f"
     },
     {
-      "slug": "night-school-radio",
-      "title": "Night School Radio",
-      "year": "2023",
-      "discipline": "Sound identity",
-      "note": "Lessons transmitted after the building closed.",
-      "link": "#night-school-radio",
-      "image": "",
+      "workId": "writing_carcinization",
+      "slug": "carcinization-internet",
+      "discipline": "writing",
+      "color": "#ffb427",
+      "accent": "#6b2c59"
+    },
+    {
+      "workId": "p_closet",
+      "slug": "the-closet",
+      "discipline": "interactive archive",
+      "color": "#99c4e7",
+      "accent": "#3658d8"
+    },
+    {
+      "workId": "p_hear",
+      "slug": "hear",
+      "discipline": "listening tool",
       "color": "#d7fb34",
       "accent": "#203a8c"
     },
     {
-      "slug": "common-ground",
-      "title": "Common Ground",
-      "year": "2022",
-      "discipline": "Public installation",
-      "note": "A place made by standing there together.",
-      "link": "#common-ground",
-      "image": "",
+      "workId": "p_pahari",
+      "slug": "pahari-preservation",
+      "discipline": "language archive",
       "color": "#8ca58e",
       "accent": "#f05a47"
     },
     {
-      "slug": "manual-for-monsoon-days",
-      "title": "A Manual for Monsoon Days",
-      "year": "2022",
-      "discipline": "Publication",
-      "note": "Instructions for weather that refuses instructions.",
-      "link": "#manual-for-monsoon-days",
-      "image": "",
+      "workId": "p_openpiano",
+      "slug": "openpiano",
+      "discipline": "learning tool",
       "color": "#f4e8c6",
       "accent": "#ef5d52"
     },
     {
-      "slug": "unfinished-internet",
-      "title": "Unfinished Internet",
-      "year": "2021",
-      "discipline": "Web experiment",
-      "note": "Five things, still becoming.",
-      "link": "#unfinished-internet",
-      "image": "",
+      "workId": "g_unwind",
+      "slug": "unlearn",
+      "year": "playable",
+      "discipline": "game",
       "color": "#6a2e59",
       "accent": "#d8fb34"
+    },
+    {
+      "workId": "r_cbfc",
+      "slug": "cbfc-cut-lists",
+      "year": "2018–22",
+      "discipline": "data explorer",
+      "color": "#3559d8",
+      "accent": "#a7cbe7"
+    },
+    {
+      "workId": "p_betterUnity",
+      "slug": "better-unity",
+      "year": "ongoing",
+      "discipline": "open source",
+      "color": "#e6a4ac",
+      "accent": "#ffbf3e"
     }
   ]
 }
-
-

@@ -1,0 +1,195 @@
+{
+  "identity": {
+    "name": "satyam kashyap",
+    "role": "creative technologist and filmmaker",
+    "location": "mumbai, india",
+    "intro": "I lead an XR team at Parallax Labs, building simulation systems such as MaRTES. I also write and direct films, and ship tools in public that solve specific, real problems.",
+    "statement": "science is only fun if its intersectional!",
+    "email": "hello@satyam.lol",
+    "links": {
+      "github": "https://github.com/sudotman",
+      "writing": "https://blog.satyam.lol/",
+      "letterboxd": "https://letterboxd.com/satyamkashyap/",
+      "x": "https://x.com/satyamkashyapp"
+    }
+  },
+  "now": [
+    {
+      "title": "film 03",
+      "text": "A new film is in development after Chhoti Gold and Blue Dogs."
+    },
+    {
+      "title": "patent-pending × 2",
+      "text": "A non-server-authoritative VR colocation system using QR anchors, and native Android standalone Gaussian Splat rendering."
+    }
+  ],
+  "featured": [
+    "p_martes",
+    "film_chhoti_gold",
+    "film_blue_dogs",
+    "p_hear",
+    "p_pahari",
+    "p_openpiano",
+    "p_openworkout",
+    "p_closet",
+    "p_isro",
+    "p_betterUnity",
+    "g_unwind",
+    "r_cbfc",
+    "p_renderbuddy",
+    "p_blenderqueue"
+  ],
+  "branches": {
+    "living": {
+      "href": "/living/",
+      "description": "The creative archive as a contact sheet."
+    },
+    "river": {
+      "href": "/river/",
+      "description": "The same body of work arranged as a horizontal current."
+    },
+    "doors": {
+      "href": "/doors/",
+      "description": "The archive as a sequence of spatial thresholds."
+    },
+    "core tech": {
+      "href": "/tech.html",
+      "description": "The original technical field manual and complete engineering archive."
+    }
+  },
+  "writing": [
+    {
+      "title": "carcinization on the internet",
+      "year": "2025",
+      "href": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
+    },
+    {
+      "title": "killers of the flower moon defines what cinema is for scorsese",
+      "year": "2023",
+      "href": "https://blog.satyam.lol/2023/10/killers-of-flower-moon-defines-what.html"
+    },
+    {
+      "title": "the corrupting nature of power: a Dark Souls III study",
+      "year": "2021",
+      "href": "https://blog.satyam.lol/2021/08/the-juxtaposition-of-societal.html"
+    }
+  ],
+  "viewing": {
+    "quote": "mesmerising — machine and flesh are one.",
+    "film": "The March of the Machines",
+    "href": "https://letterboxd.com/satyamkashyap/film/the-march-of-the-machines/"
+  },
+  "sources": ["content/programming.json"],
+  "works": [
+    {
+      "id": "p_martes",
+      "title": "MaRTES",
+      "medium": "research & development",
+      "year": "current",
+      "summary": "A full-fledged mission rehearsal and tactical engagement simulator, built by the XR team I lead at Parallax Labs.",
+      "body": "I lead the team developing MaRTES at Parallax Labs. Public detail is intentionally limited; the work centres on mission rehearsal and tactical engagement simulation.",
+      "links": {
+        "contact": "mailto:hello@satyam.lol"
+      }
+    },
+    {
+      "id": "p_hear",
+      "title": "Hear",
+      "medium": "built in public",
+      "year": "ongoing",
+      "summary": "A private browser listening library for Wikipedia, public-domain books and DRM-free EPUBs, spoken with local voices.",
+      "body": "Hear cleans written material for narration, remembers progress and keeps its cached library on the device.",
+      "images": ["https://raw.githubusercontent.com/sudotman/hear/main/docs/images/hear.png"],
+      "links": {
+        "live": "https://hear.satyam.lol/",
+        "source": "https://github.com/sudotman/hear"
+      }
+    },
+    {
+      "id": "p_pahari",
+      "title": "Pahari Preservation",
+      "medium": "language archive",
+      "year": "ongoing",
+      "summary": "A living digital archive for preserving Outer Siraji Pahari language, vocabulary and memory.",
+      "body": "A searchable archive built from a 1909 Pahari dialect dictionary, with room for history, written work and community contributions.",
+      "images": ["https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/art/assets/pahari-painting.jpg"],
+      "links": {
+        "live": "https://pahadi.satyam.lol/",
+        "source": "https://github.com/sudotman/outer-siraji-repo"
+      }
+    },
+    {
+      "id": "p_openpiano",
+      "title": "OpenPiano",
+      "medium": "learning tool",
+      "year": "ongoing",
+      "summary": "A browser piano teacher with real Web MIDI, lessons, a songbook and MIDI import.",
+      "body": "A practical piano-learning surface with notation, falling tiles, wait and flow modes, and local learner profiles.",
+      "links": {
+        "live": "https://www.satyam.lol/openpiano/",
+        "source": "https://github.com/sudotman/openpiano"
+      }
+    },
+    {
+      "id": "p_openworkout",
+      "title": "OpenWorkout",
+      "medium": "local-first tool",
+      "year": "ongoing",
+      "summary": "A local-first, private workout tracker for training with intent instead of feeding another platform.",
+      "body": "A mobile-first PWA with routines, measurements, progress photos and portable exports — without accounts, analytics or an API.",
+      "images": ["https://raw.githubusercontent.com/sudotman/openworkout/main/public/training-hero.jpg"],
+      "links": {
+        "live": "https://workout.satyam.lol/",
+        "source": "https://github.com/sudotman/openworkout"
+      }
+    },
+    {
+      "id": "p_closet",
+      "title": "the closet",
+      "medium": "interactive archive",
+      "year": "ongoing",
+      "summary": "A draggable, drifting personal archive for the things kept close.",
+      "body": "A spatial web archive that resists the neat list and lets fragments of a life drift into view.",
+      "images": ["https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg"],
+      "links": {
+        "live": "https://closet.satyam.lol/",
+        "source": "https://github.com/sudotman/closet"
+      }
+    },
+    {
+      "id": "film_chhoti_gold",
+      "title": "Chhoti Gold",
+      "medium": "film",
+      "year": "2025",
+      "summary": "A 26-minute absurd and surreal short about two people whose lives change after they meet.",
+      "body": "A mystery, horror and romance told in English and Hindi, moving through the aftermath of a chance meeting. Written, directed and edited by Satyam Kashyap.",
+      "images": ["https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg"],
+      "links": {
+        "record": "https://letterboxd.com/film/chhoti-gold/"
+      }
+    },
+    {
+      "id": "film_blue_dogs",
+      "title": "Blue Dogs",
+      "medium": "film",
+      "year": "2023",
+      "summary": "A 15-minute Hindi crime drama about two men in Mumbai caught in bigotry, paranoia and delusion.",
+      "body": "Two men linked to Mumbai's underworld become entangled in the consequences of bigotry and the stories they tell themselves. Directed by Satyam Kashyap and written with Shreya Mishra.",
+      "images": ["https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg"],
+      "links": {
+        "record": "https://letterboxd.com/film/blue-dogs/"
+      }
+    },
+    {
+      "id": "writing_carcinization",
+      "title": "carcinization on the internet",
+      "medium": "writing",
+      "year": "2025",
+      "summary": "An essay about how the internet keeps evolving toward the same handful of forms.",
+      "body": "A web essay on convergent evolution, platform sameness and why so much of the internet keeps becoming the same crab.",
+      "links": {
+        "read": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
+      }
+    }
+  ]
+}

@@ -28,7 +28,7 @@
   function experienceHeader(content, currentMode) {
     return `
       <header class="experience-header experience-header--${currentMode}">
-        <a href="/" class="experience-home">← crossing</a>
+        <a href="/" class="experience-home">← front door</a>
         <p>${escapeHtml(content.profile.name)}</p>
         <p>${currentMode}</p>
         <p>${pad(content.projects.length)} works</p>
@@ -309,11 +309,62 @@
     nodes.forEach((node) => observer.observe(node));
   }
 
-  fetch("/content/creative.json")
-    .then((response) => {
-      if (!response.ok) throw new Error(`Creative archive returned ${response.status}`);
-      return response.json();
-    })
+  const fetchJson = async (url, label) => {
+    const response = await fetch(url, { cache: "no-cache" });
+    if (!response.ok) throw new Error(`${label} returned ${response.status}`);
+    return response.json();
+  };
+
+  async function loadNetworkContent() {
+    const [home, archive] = await Promise.all([
+      fetchJson("/content/home.json", "Homepage content"),
+      fetchJson("/content/creative.json", "Creative archive")
+    ]);
+
+    const sourcePayloads = await Promise.all((home.sources || []).map((source) => (
+      fetchJson(`/${String(source || "").replace(/^\/+/, "")}`, `Portfolio source ${source || "unknown"}`)
+    )));
+    const works = [
+      ...(Array.isArray(home.works) ? home.works : []),
+      ...sourcePayloads.flatMap((payload) => Array.isArray(payload.works) ? payload.works : [])
+    ];
+    const workMap = new Map(works.map((work) => [work.id, work]));
+    const projects = (archive.projects || []).map((entry) => {
+      const work = workMap.get(entry.workId);
+      if (!work) throw new Error(`Creative archive references missing work ${entry.workId}`);
+      const cover = typeof work.cover === "string"
+        ? work.cover
+        : work.cover?.src || work.images?.[0] || work.image;
+      const linkValues = Array.isArray(work.links)
+        ? work.links.map((item) => item?.href)
+        : Object.values(work.links || {});
+      const link = linkValues.find((href) => safeHref(href, "")) || `/#project=${encodeURIComponent(work.id)}`;
+      return {
+        ...entry,
+        title: work.title,
+        year: entry.year || (work.sortDate ? String(work.sortDate).slice(0, 4) : work.year || "ongoing"),
+        discipline: entry.discipline || String(work.medium || work.category || "work").replaceAll("_", " "),
+        note: work.summary || work.short || "",
+        link,
+        image: cover || work.image || ""
+      };
+    });
+    const identity = home.identity || {};
+
+    return {
+      profile: {
+        name: identity.name || "satyam kashyap",
+        role: identity.role || "creative technologist and filmmaker",
+        statement: identity.statement || "stories, simulations and useful software",
+        location: identity.location || "Mumbai, India",
+        email: identity.email || "hello@satyam.lol",
+        coreTechUrl: "/tech.html"
+      },
+      projects
+    };
+  }
+
+  loadNetworkContent()
     .then((content) => {
       if (mode === "living") renderLiving(content);
       else if (mode === "river") renderRiver(content);
@@ -322,6 +373,6 @@
     })
     .catch((error) => {
       console.error(error);
-      app.innerHTML = `<main class="creative-error"><p>The crossing could not assemble itself.</p><a href="/tech.html">Enter Core Tech instead →</a></main>`;
+      app.innerHTML = `<main class="creative-error"><p>The archive could not assemble itself.</p><a href="/">Return to the front door →</a></main>`;
     });
 })();

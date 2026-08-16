@@ -10,6 +10,8 @@
   const reviewCloseButton = reviewDialog?.querySelector("[data-review-dialog-close]");
   if (!app || !dialog || !detail || !closeButton || !reviewDialog || !reviewDetail || !reviewCloseButton) return;
 
+  const REVIEW_BATCH_SIZE = 12;
+
   const escapeHtml = (value = "") => String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -130,13 +132,17 @@
     ];
     const unique = [...new Map(works.map((work) => [work.id, work])).values()];
     const map = new Map(unique.map((work) => [work.id, work]));
+    const reviewMinCharacters = Number(home.externalFeeds?.reviewMinCharacters) || 200;
+    const reviews = (externalContent.reviews || []).filter((review) => (
+      review && review.film && review.id && reviewCharacterCount(review.review) > reviewMinCharacters
+    ));
     return {
       home,
       works: unique,
       workMap: map,
       featured: (home.featured || []).map((id) => map.get(id)).filter(Boolean),
       writing: externalContent.writing || [],
-      reviews: externalContent.reviews || []
+      reviews
     };
   }
 
@@ -198,6 +204,10 @@
     return text.length > maximum ? `${text.slice(0, maximum).trimEnd()}…` : text;
   }
 
+  function reviewCharacterCount(value) {
+    return [...String(value || "")].length;
+  }
+
   function reviewList(reviews, sourceHref) {
     if (!reviews?.length) {
       return `<li class="review-index__empty">No long reviews are available in the current feed. <a href="${escapeHtml(safeHref(sourceHref))}"${externalAttributes(sourceHref)}>Open Letterboxd.</a></li>`;
@@ -244,7 +254,7 @@
     const film = workMap.get("film_chhoti_gold");
     const blogHref = identity.links?.writing || "https://blog.satyam.lol/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
-    const reviewMinCharacters = Number(home.externalFeeds?.reviewMinCharacters) || 150;
+    const initialReviews = reviews.slice(0, REVIEW_BATCH_SIZE);
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="More portfolio visualizations">
@@ -289,7 +299,8 @@
         <section class="hyper-reviews" id="film-writing">
           <h2>Film writing</h2>
           <p class="section-note">Some of my writings from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Open a title to read the full note here.</p>
-          <ol class="review-index">${reviewList(reviews, letterboxdHref)}</ol>
+          <ol class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ol>
+          ${reviews.length > initialReviews.length ? `<button class="review-index__load-more" type="button" data-review-load-more aria-controls="review-index">load more reviews (${initialReviews.length}/${reviews.length})</button>` : ""}
         </section>
 
         <section class="hyper-more" id="more">
@@ -307,6 +318,20 @@
 
     app.querySelectorAll(".hyper-images img").forEach((image) => {
       image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
+    });
+
+    const reviewIndex = app.querySelector("#review-index");
+    const loadMoreReviews = app.querySelector("[data-review-load-more]");
+    let visibleReviewCount = initialReviews.length;
+    loadMoreReviews?.addEventListener("click", () => {
+      const nextReviewCount = Math.min(visibleReviewCount + REVIEW_BATCH_SIZE, reviews.length);
+      reviewIndex?.insertAdjacentHTML("beforeend", reviewList(reviews.slice(visibleReviewCount, nextReviewCount), letterboxdHref));
+      visibleReviewCount = nextReviewCount;
+      if (visibleReviewCount >= reviews.length) {
+        loadMoreReviews.remove();
+      } else {
+        loadMoreReviews.textContent = `load more reviews (${visibleReviewCount}/${reviews.length})`;
+      }
     });
   }
 

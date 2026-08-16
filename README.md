@@ -44,11 +44,11 @@ The front page source is intentionally compact:
 - `now`: the film and applied-R&D notes currently in progress
 - `featured`: stable ids for the selected-project list
 - `branches`: the four existing ways to go deeper — Living, River, Doors, and Core Tech
-- `externalFeeds`: the Blogger and Letterboxd feed URLs, generated cache path, and long-review threshold
+- `externalFeeds`: the Blogger and Letterboxd feed/archive URLs, generated cache path, and long-review threshold
 - `works`: concise homepage-only records
 - `sources`: the existing technical feed used to complete the 27-project index
 
-`content/external-feeds.json` is generated from those public feeds. It contains every Blogger post in the current blog feed and Letterboxd film reviews whose text is longer than the configured threshold. The sync merges older qualifying reviews into the cache as the rolling RSS feed advances, so the local index can grow over time. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
+`content/external-feeds.json` is generated from those public sources. It contains every Blogger post in the current blog feed and every public Letterboxd review found by walking the account's paginated review archive, keeping only reviews whose text is longer than the configured threshold. Letterboxd's RSS feed supplies newly published and recently edited reviews; the archive walk supplies older history. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
 
 Links inside homepage work records use a small object (`live`, `source`, `read`, `record`, or `contact`) so the interface can derive its own wording instead of storing presentation labels in the data.
 

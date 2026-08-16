@@ -762,11 +762,11 @@ function validateHome(home, knownSourcePaths) {
     addError(`${HOME_PATH}.externalFeeds`, 'must be an object');
   } else {
     const location = `${HOME_PATH}.externalFeeds`;
-    for (const field of ['cache', 'blogger', 'letterboxd']) {
+    for (const field of ['cache', 'blogger', 'letterboxd', 'letterboxdArchive']) {
       validateText(home.externalFeeds[field], `${location}.${field}`, field);
     }
     if (hasText(home.externalFeeds.cache)) resolveInsideRepo(home.externalFeeds.cache, `${location}.cache`);
-    for (const field of ['blogger', 'letterboxd']) {
+    for (const field of ['blogger', 'letterboxd', 'letterboxdArchive']) {
       if (hasText(home.externalFeeds[field])) validateRemoteUrl(home.externalFeeds[field], `${location}.${field}`);
     }
     if (!Number.isInteger(home.externalFeeds.reviewMinCharacters) || home.externalFeeds.reviewMinCharacters < 1) {

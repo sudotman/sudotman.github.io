@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: 24
 
-      - name: Refresh Blogger and Letterboxd feeds
+      - name: Refresh Blogger and Letterboxd feeds and review archive
         run: node scripts/sync-external-feeds.mjs
 
       - name: Validate site content

@@ -61,7 +61,8 @@
     "cache": "content/external-feeds.json",
     "blogger": "https://blog.satyam.lol/feeds/posts/default?alt=json&max-results=500",
     "letterboxd": "https://letterboxd.com/satyamkashyap/rss/",
-    "reviewMinCharacters": 150
+    "letterboxdArchive": "https://letterboxd.com/satyamkashyap/reviews/films/",
+    "reviewMinCharacters": 900
   },
   "sources": ["content/programming.json"],
   "works": [

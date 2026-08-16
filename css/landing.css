@@ -337,6 +337,21 @@ button {
   border-bottom: 1px dotted var(--black);
 }
 
+.review-index__load-more {
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--black);
+  background: var(--yellow);
+  color: var(--black);
+  cursor: pointer;
+  font: 700 11px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.review-index__load-more:hover {
+  background: var(--green);
+}
+
 .hyper-more > div {
   border-top: 3px solid var(--black);
 }

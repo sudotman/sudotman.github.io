@@ -180,7 +180,7 @@ button {
   padding: 2px 7px 4px;
   background: var(--black);
   color: var(--white);
-  font: 800 clamp(2.2rem, 5vw, 4.7rem)/0.9 Arial, Helvetica, sans-serif;
+  font: 800 clamp(1.2rem, 3vw, 4.7rem)/0.9 Arial, Helvetica, sans-serif;
   letter-spacing: -0.055em;
 }
 

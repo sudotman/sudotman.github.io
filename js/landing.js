@@ -264,17 +264,19 @@
 
         <section id="selected-work">
           <h2>Selected projects</h2>
-          <p class="section-note">Everything essential is here. Open any title for images, longer notes and outward links.</p>
+          <p class="section-note">Essentials, click to read more about them.</p>
           <ol class="hyper-selected">${selectedProjects(featured)}</ol>
         </section>
 
-        <hr>
+        ${false ? `
+          <hr>
           <p>The left is from a simulator we made for ISRO and the right is the poster from my 2025 film.</p>
-        ${heroImages(simulation, film)}
-        <hr>
+          ${heroImages(simulation, film)}
+          <hr>
+        ` : ""}
 
         <section id="all-projects">
-          <h2>Complete project index (${works.length})</h2>
+          <h2>All projects - (${works.length})</h2>
           <dl class="project-index">${completeIndex(works)}</dl>
         </section>
 
@@ -286,7 +288,7 @@
 
         <section class="hyper-reviews" id="film-writing">
           <h2>Film writing</h2>
-          <p class="section-note">${escapeHtml(reviews.length)} reviews longer than ${escapeHtml(reviewMinCharacters)} characters, fetched from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Older qualifying entries stay in the index as the feed rolls forward; open a title to read the full note here.</p>
+          <p class="section-note">Some of my writings from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Open a title to read the full note here.</p>
           <ol class="review-index">${reviewList(reviews, letterboxdHref)}</ol>
         </section>
 

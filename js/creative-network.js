@@ -21,6 +21,10 @@
     if (/^(https?:\/\/|mailto:|\/|#|\.\.\/|\.\/)/i.test(href)) return href;
     return fallback;
   };
+  const copyEmailMarkup = (email) => {
+    const safeEmail = escapeHtml(email);
+    return `<button type="button" class="copy-email" data-copy-email="${safeEmail}" aria-label="Copy ${safeEmail} to clipboard">${safeEmail}</button>`;
+  };
   const pad = (value) => String(value).padStart(2, "0");
   const projectHref = (project) => safeHref(project.link, `#${project.slug}`);
   const linkExtras = (href) => /^https?:\/\//i.test(href) ? ' target="_blank" rel="noreferrer"' : "";
@@ -93,7 +97,7 @@
         </nav>
         <footer class="master-footer">
           <p>${escapeHtml(content.profile.statement)}</p>
-          <a href="mailto:${escapeHtml(content.profile.email)}">${escapeHtml(content.profile.email)}</a>
+          ${copyEmailMarkup(content.profile.email)}
           <p>${escapeHtml(content.profile.location)}</p>
         </footer>
       </main>`;
@@ -159,7 +163,7 @@
         <section class="living-grid" aria-label="Creative projects">${projects}</section>
         <footer class="living-footer">
           <p>${escapeHtml(content.profile.statement)}</p>
-          <a href="mailto:${escapeHtml(content.profile.email)}">${escapeHtml(content.profile.email)}</a>
+          ${copyEmailMarkup(content.profile.email)}
           <p>Content lives in content/creative.json.</p>
         </footer>
       </main>`;
@@ -213,7 +217,7 @@
             ${projects}
             <aside class="river-coda" style="--river-coda-index:${content.projects.length}">
               <p>${escapeHtml(content.profile.statement)}</p>
-              <a href="mailto:${escapeHtml(content.profile.email)}">${escapeHtml(content.profile.email)}</a>
+              ${copyEmailMarkup(content.profile.email)}
               <p>${escapeHtml(content.profile.location)}</p>
             </aside>
           </div>
@@ -294,7 +298,7 @@
         <nav class="doors-jumps" aria-label="Jump between rooms">${jumps}</nav>
         ${roomMarkup}
         <footer class="doors-footer">
-          <a href="mailto:${escapeHtml(content.profile.email)}">${escapeHtml(content.profile.email)}</a>
+          ${copyEmailMarkup(content.profile.email)}
           <p>${escapeHtml(content.profile.location)}</p>
           <p>when a door closes...</p>
         </footer>

@@ -44,6 +44,10 @@ a:hover {
   color: var(--black);
 }
 
+.hyper-page .copy-email {
+  color: var(--link);
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;

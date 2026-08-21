@@ -1,0 +1,49 @@
+.copy-email {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.copy-email:hover {
+  background: #ffef00;
+  color: #000;
+}
+
+.copy-toast {
+  position: fixed;
+  z-index: 1000010;
+  left: 0;
+  top: 0;
+  padding: 9px 12px;
+  background: #000;
+  color: #fff;
+  font: 12px/1 "Courier New", monospace;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.copy-toast[data-copy-toast-position="below"],
+.copy-toast[data-copy-toast-position="below"].is-visible {
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy-toast {
+    transition: none;
+  }
+}

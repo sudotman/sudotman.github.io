@@ -35,6 +35,21 @@
     ? ' target="_blank" rel="noreferrer"'
     : "";
 
+  const copyEmailMarkup = (email, label = email) => {
+    const safeEmail = escapeHtml(email);
+    return `<button type="button" class="copy-email" data-copy-email="${safeEmail}" aria-label="Copy ${safeEmail} to clipboard">${escapeHtml(label)}</button>`;
+  };
+
+  const emailFromHref = (href) => {
+    if (!/^mailto:/i.test(href)) return "";
+    const value = href.replace(/^mailto:/i, "").split("?", 1)[0];
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
   const fetchJson = async (path) => {
     const response = await fetch(path, { cache: "no-cache" });
     if (!response.ok) throw new Error(`${path} returned ${response.status}`);
@@ -166,7 +181,9 @@
   }
 
   function completeIndex(works) {
-    return works.map((work) => `
+    return [...works]
+      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" }))
+      .map((work) => `
       <div class="project-index__entry">
         <dt><a class="project-link" href="${escapeHtml(projectHref(work))}" data-project-id="${escapeHtml(work.id)}" aria-haspopup="dialog">${escapeHtml(work.title)}</a> <small>[${escapeHtml(work.mediumResolved)} / ${escapeHtml(work.yearResolved)}]</small></dt>
         <dd>${escapeHtml(work.summaryResolved)}</dd>
@@ -258,7 +275,7 @@
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="More portfolio visualizations">
-          ${branchLinks(home.branches)} <a href="mailto:${escapeHtml(identity.email)}">[email]</a>
+          ${branchLinks(home.branches)} ${copyEmailMarkup(identity.email, "[email]")}
         </nav>
 
         <header class="hyper-intro">
@@ -312,7 +329,7 @@
         <hr>
         <footer>
           <p>${escapeHtml(identity.statement)}</p>
-          <p>${socialLinks(identity)} · <a href="mailto:${escapeHtml(identity.email)}">${escapeHtml(identity.email)}</a></p>
+          <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}</p>
         </footer>
       </main>`;
 
@@ -338,7 +355,9 @@
   function detailLinks(work) {
     if (!work.linksResolved.length) return "";
     return `<nav class="project-dialog__links" aria-label="Project links">${work.linksResolved.map((link) => `
-      <a href="${escapeHtml(link.href)}"${externalAttributes(link.href)}>[${escapeHtml(link.name)}] ↗</a>`).join("")}</nav>`;
+      ${emailFromHref(link.href)
+        ? copyEmailMarkup(emailFromHref(link.href), `[${link.name}] ↗`)
+        : `<a href="${escapeHtml(link.href)}"${externalAttributes(link.href)}>[${escapeHtml(link.name)}] ↗</a>`}`).join("")}</nav>`;
   }
 
   function detailImages(work) {

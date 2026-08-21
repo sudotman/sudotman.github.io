@@ -1299,7 +1299,8 @@ a {
   pointer-events: none;
 }
 
-.doors-footer a {
+.doors-footer a,
+.doors-footer .copy-email {
   pointer-events: auto;
 }
 

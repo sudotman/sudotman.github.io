@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { normalizePost, parseFrontmatter } from '../js/lib/post.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
@@ -18,6 +20,7 @@ let workCount = 0;
 let feedCount = 0;
 let remoteAssetCount = 0;
 let creativeWorkCount = 0;
+let postCount = 0;
 
 const EMBED_PROVIDER_IDS = new Map([
   ['youtube', /^[A-Za-z0-9_-]{11}$/],
@@ -762,11 +765,13 @@ function validateHome(home, knownSourcePaths) {
     addError(`${HOME_PATH}.externalFeeds`, 'must be an object');
   } else {
     const location = `${HOME_PATH}.externalFeeds`;
-    for (const field of ['cache', 'blogger', 'letterboxd', 'letterboxdArchive']) {
+    for (const field of ['cache', 'blog', 'letterboxd', 'letterboxdArchive']) {
       validateText(home.externalFeeds[field], `${location}.${field}`, field);
     }
-    if (hasText(home.externalFeeds.cache)) resolveInsideRepo(home.externalFeeds.cache, `${location}.cache`);
-    for (const field of ['blogger', 'letterboxd', 'letterboxdArchive']) {
+    for (const field of ['cache', 'blog']) {
+      if (hasText(home.externalFeeds[field])) resolveInsideRepo(home.externalFeeds[field], `${location}.${field}`);
+    }
+    for (const field of ['letterboxd', 'letterboxdArchive']) {
       if (hasText(home.externalFeeds[field])) validateRemoteUrl(home.externalFeeds[field], `${location}.${field}`);
     }
     if (!Number.isInteger(home.externalFeeds.reviewMinCharacters) || home.externalFeeds.reviewMinCharacters < 1) {
@@ -786,7 +791,7 @@ function validateExternalContent(content, config, contentPath) {
   if (!isObject(content.sources)) {
     addError(`${contentPath}.sources`, 'must be an object');
   } else {
-    for (const name of ['blogger', 'letterboxd']) {
+    for (const name of ['letterboxd']) {
       const source = content.sources[name];
       const location = `${contentPath}.sources.${name}`;
       if (!isObject(source)) {
@@ -800,29 +805,6 @@ function validateExternalContent(content, config, contentPath) {
     if (content.sources.letterboxd?.reviewMinCharacters !== config.reviewMinCharacters) {
       addError(`${contentPath}.sources.letterboxd.reviewMinCharacters`, `must match ${HOME_PATH}.externalFeeds.reviewMinCharacters`);
     }
-  }
-
-  if (!Array.isArray(content.writing) || content.writing.length === 0) {
-    addError(`${contentPath}.writing`, 'must be a non-empty array');
-  } else {
-    const ids = new Set();
-    content.writing.forEach((item, index) => {
-      const location = `${contentPath}.writing[${index}]`;
-      if (!isObject(item)) {
-        addError(location, 'must be an object');
-        return;
-      }
-      for (const field of ['id', 'title', 'published', 'year', 'href']) {
-        validateText(item[field], `${location}.${field}`, field);
-      }
-      if (hasText(item.id)) {
-        if (ids.has(item.id)) addError(`${location}.id`, `duplicate id "${item.id}"`);
-        ids.add(item.id);
-      }
-      if (!isValidDate(item.published)) addError(`${location}.published`, 'must be a valid date');
-      if (!/^\d{4}$/.test(item.year || '')) addError(`${location}.year`, 'must use YYYY');
-      validateLinkHref(item.href, `${location}.href`);
-    });
   }
 
   if (!Array.isArray(content.reviews)) {
@@ -861,6 +843,81 @@ function validateExternalContent(content, config, contentPath) {
     validateLinkHref(review.href, `${location}.href`);
     if (review.poster) registerAsset(review.poster, `${location}.poster`);
   });
+}
+
+/**
+ * Checks the blog end to end: every markdown file parses and carries the
+ * frontmatter the build needs, and the generated index still matches the
+ * source. A stale content/blog.json means the homepage lists posts that the
+ * built pages do not agree with, which is exactly the drift worth catching.
+ */
+async function validateBlog(blogIndexPath) {
+  const postsDirectory = path.join(ROOT, 'content/posts');
+  let files = [];
+  try {
+    files = (await readdir(postsDirectory)).filter((name) => name.endsWith('.md')).sort();
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    addError('content/posts', 'directory is missing');
+    return;
+  }
+
+  const posts = [];
+  for (const file of files) {
+    const location = `content/posts/${file}`;
+    const slug = file.replace(/\.md$/, '');
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      addError(location, 'filename must be a lowercase slug, like my-post.md');
+    }
+
+    const { data, body } = parseFrontmatter(await readFile(path.join(postsDirectory, file), 'utf8'));
+    if (!validateText(data.title, `${location}.title`, 'title')) continue;
+    if (!isValidDate(data.date)) {
+      addError(`${location}.date`, 'must be a valid date, like 2026-08-30');
+      continue;
+    }
+    if (!hasText(body)) addError(location, 'has no body');
+    if (data.tags !== undefined && !Array.isArray(data.tags)) {
+      addError(`${location}.tags`, 'must be a list, like [essays, film]');
+    }
+
+    const post = normalizePost({ slug, data, body });
+    // Posts reference images the way the browser needs them ("/images/..."),
+    // while the asset registry works in repository-relative paths.
+    const asRepoPath = (value) => (value.startsWith('/') ? value.slice(1) : value);
+    if (post.cover) registerAsset(asRepoPath(post.cover), `${location}.cover`);
+    if (post.legacyUrl) validateRemoteUrl(post.legacyUrl, `${location}.legacyUrl`);
+    for (const [index, source] of [...body.matchAll(/!\[[^\]]*\]\(([^()\s]+)/g)].entries()) {
+      registerAsset(asRepoPath(source[1]), `${location}.image[${index}]`);
+    }
+    if (!post.draft) posts.push(post);
+  }
+
+  postCount = posts.length;
+
+  const index = await readJson(blogIndexPath, blogIndexPath);
+  if (!index) return;
+  if (index.schemaVersion !== 1) addError(`${blogIndexPath}.schemaVersion`, 'must equal 1');
+  if (!Array.isArray(index.posts)) {
+    addError(`${blogIndexPath}.posts`, 'must be an array');
+    return;
+  }
+
+  const built = new Set(index.posts.map((post) => post?.slug));
+  for (const post of posts) {
+    if (!built.has(post.slug)) {
+      addError(blogIndexPath, `missing "${post.slug}"; run npm run build`);
+      continue;
+    }
+    const entry = index.posts.find((candidate) => candidate.slug === post.slug);
+    if (entry.title !== post.title) addError(`${blogIndexPath}.${post.slug}.title`, 'is stale; run npm run build');
+    if (entry.published !== post.published) addError(`${blogIndexPath}.${post.slug}.published`, 'is stale; run npm run build');
+  }
+  for (const slug of built) {
+    if (!posts.some((post) => post.slug === slug)) {
+      addError(blogIndexPath, `lists "${slug}", which has no file in content/posts; run npm run build`);
+    }
+  }
 }
 
 async function validateLocalAssets() {
@@ -948,6 +1005,8 @@ async function main() {
 
   if (creativeArchive) validateCreativeArchive(creativeArchive, seenWorkIds);
 
+  if (hasText(home?.externalFeeds?.blog)) await validateBlog(home.externalFeeds.blog);
+
   await validateLocalAssets();
 
   warnings.sort();
@@ -963,6 +1022,7 @@ async function main() {
 
   console.log(
     `Content validation passed: ${workCount} works across ${feedCount} feeds; `
+    + `${postCount} blog posts; `
     + `${creativeWorkCount} creative works; ${localAssets.size} local assets checked; `
     + `${remoteAssetCount} remote asset references checked.`
   );

@@ -100,22 +100,6 @@ async function fetchText(url, { retries = 2 } = {}) {
   throw lastError;
 }
 
-function bloggerPosts(payload) {
-  return (payload?.feed?.entry || []).map((entry) => {
-    const href = entry.link?.find((link) => link.rel === 'alternate')?.href || '';
-    const published = normalizeDate(entry.published?.$t || entry.updated?.$t);
-    const postId = String(entry.id?.$t || '').match(/post-(\d+)$/)?.[1]
-      || href.replace(/^https?:\/\//, '').replace(/\W+/g, '-').replace(/^-|-$/g, '');
-    return {
-      id: `blogger-${postId}`,
-      title: textFromHtml(entry.title?.$t || 'Untitled'),
-      published,
-      year: published.slice(0, 4),
-      href
-    };
-  }).filter((post) => post.id && post.title && post.published && isHttpUrl(post.href));
-}
-
 function letterboxdReviews(xml, minimumCharacters) {
   return [...String(xml).matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)]
     .map((match) => {
@@ -403,40 +387,28 @@ async function main() {
     throw new Error('externalFeeds.reviewMinCharacters must be a positive integer');
   }
 
-  const [blogger, letterboxd] = await Promise.all([
-    refreshOrReuse({
-      name: 'Blogger',
-      url: config.blogger,
-      currentItems: current?.writing,
-      currentMetadata: current?.sources?.blogger,
-      transform: (source) => bloggerPosts(JSON.parse(source))
-    }),
-    refreshLetterboxd({ config, current, minimumCharacters, skipArchive })
-  ]);
+  const letterboxd = await refreshLetterboxd({ config, current, minimumCharacters, skipArchive });
 
   const output = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     sources: {
-      blogger: blogger.metadata,
       letterboxd: {
         ...letterboxd.metadata,
         reviewMinCharacters: minimumCharacters
       }
     },
-    writing: blogger.items,
     reviews: letterboxd.items
   };
 
   const tempPath = `${outputPath}.tmp`;
   await writeFile(tempPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
   await rename(tempPath, outputPath);
-  console.log(`Synced ${output.writing.length} Blogger posts and ${output.reviews.length} long Letterboxd reviews (including cached history).`);
+  console.log(`Synced ${output.reviews.length} long Letterboxd reviews (including cached history).`);
 
   // A silent fall back to the committed cache means the site quietly serves an
   // old snapshot forever. Surface it, and fail the build under --strict.
   const stale = [
-    blogger.metadata.status === 'cached' ? 'Blogger' : null,
     letterboxd.metadata.status === 'cached' ? 'Letterboxd RSS' : null,
     letterboxd.metadata.archiveStatus === 'cached' ? 'Letterboxd archive' : null
   ].filter(Boolean);

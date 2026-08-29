@@ -1,0 +1,723 @@
+/**
+ * The writing desk at /write/.
+ *
+ * Same palette and type as the rest of satyam.lol, arranged as a full-height
+ * two-pane workspace. Chrome stays monospaced and quiet; the prose column and
+ * the preview both use the published post's type so what is on screen while
+ * writing is what lands on the page.
+ */
+
+:root {
+  --white: #fff;
+  --black: #000;
+  --link: #0000e7;
+  --yellow: #ffef00;
+  --green: #00d16f;
+  --red: #d10021;
+  --muted: #555;
+  --line: #000;
+  --sunken: #fafafa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body.editor-body {
+  height: 100%;
+}
+
+body.editor-body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--black);
+  font-family: "Times New Roman", Times, serif;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 2px;
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  white-space: nowrap;
+}
+
+.editor {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  height: 100dvh;
+}
+
+/* ---------- top bar ---------- */
+
+.editor-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: var(--black);
+  color: var(--white);
+  font: 12px/1 "Courier New", monospace;
+}
+
+.editor-bar__left,
+.editor-bar__right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.editor-brand {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.editor-brand span {
+  color: var(--yellow);
+}
+
+.editor-bar button {
+  padding: 3px 7px;
+  border: 1px solid #555;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  font: inherit;
+  text-transform: lowercase;
+}
+
+.editor-bar button:hover {
+  border-color: var(--yellow);
+  background: var(--yellow);
+  color: var(--black);
+}
+
+.editor-bar [data-github-state="on"] {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.editor-bar [data-github-state="on"]::before {
+  content: "● ";
+}
+
+.editor-bar [data-github-state="off"]::before {
+  content: "○ ";
+}
+
+.editor-stat,
+.editor-save {
+  color: #9a9a9a;
+}
+
+.editor-save[data-dirty="true"] {
+  color: var(--yellow);
+}
+
+/* ---------- metadata ---------- */
+
+.editor-meta {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.editor-meta__title input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--black);
+  font: 900 clamp(1.7rem, 4vw, 2.9rem)/1.05 Arial, Helvetica, sans-serif;
+  letter-spacing: -0.045em;
+}
+
+.editor-meta__title input::placeholder {
+  color: #c9c9c9;
+}
+
+.editor-meta__title input:focus {
+  outline: 0;
+}
+
+.editor-meta__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+
+.editor-meta__wide {
+  grid-column: span 2;
+}
+
+.editor-meta label {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+}
+
+.editor-meta label > span {
+  color: var(--muted);
+  font: 10px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-meta input[type="text"],
+.editor-meta input[type="date"] {
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid #cfcfcf;
+  background: var(--white);
+  color: var(--black);
+  font: 13px/1.3 "Courier New", monospace;
+}
+
+.editor-meta input:focus {
+  border-color: var(--black);
+}
+
+.editor-meta__check {
+  flex-direction: row;
+  align-items: center;
+  align-self: end;
+  gap: 7px;
+  padding-bottom: 5px;
+}
+
+.editor-meta__check span {
+  font: 11px/1.2 "Courier New", monospace;
+}
+
+.editor-meta__check input {
+  accent-color: var(--black);
+}
+
+.editor-meta__url {
+  margin: 10px 0 0;
+  font: 11px/1.3 "Courier New", monospace;
+  color: var(--muted);
+}
+
+/* ---------- toolbar ---------- */
+
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--sunken);
+}
+
+.editor-tools button {
+  min-width: 30px;
+  padding: 4px 8px;
+  border: 1px solid #cfcfcf;
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  font: 11px/1.3 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-tools button:hover {
+  border-color: var(--black);
+  background: var(--yellow);
+}
+
+.editor-tools__spacer {
+  flex: 1;
+}
+
+.editor-tools [data-toggle-preview].is-off {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* ---------- panes ---------- */
+
+.editor-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+
+.editor-panes[data-preview-hidden="true"] {
+  grid-template-columns: 1fr;
+}
+
+.editor-panes[data-preview-hidden="true"] .editor-preview {
+  display: none;
+}
+
+.editor-source {
+  display: flex;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+}
+
+.editor-source textarea {
+  width: 100%;
+  height: 100%;
+  padding: 26px clamp(18px, 3vw, 40px);
+  border: 0;
+  background: var(--white);
+  color: var(--black);
+  font: 16px/1.65 ui-monospace, "SF Mono", "Courier New", monospace;
+  resize: none;
+  tab-size: 2;
+}
+
+.editor-source textarea:focus {
+  outline: 0;
+}
+
+.editor-source textarea::placeholder {
+  color: #b8b8b8;
+}
+
+.editor-preview {
+  overflow-y: auto;
+  padding: 26px clamp(18px, 3vw, 46px) 70px;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.editor-preview > :first-child {
+  margin-top: 0;
+}
+
+.editor-preview p {
+  margin: 0 0 1.1em;
+  overflow-wrap: break-word;
+}
+
+.editor-preview h1,
+.editor-preview h2,
+.editor-preview h3,
+.editor-preview h4 {
+  margin: 1.7em 0 0.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.editor-preview h2 {
+  display: inline-block;
+  padding: 2px 6px 3px;
+  background: var(--black);
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.editor-preview h3 {
+  font-size: 1.2rem;
+}
+
+.editor-preview blockquote {
+  margin: 1.4em 0;
+  padding-left: 18px;
+  border-left: 5px solid var(--black);
+  font-style: italic;
+}
+
+.editor-preview figure {
+  margin: 1.6em 0;
+}
+
+.editor-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--black);
+  background: #f2f2f2;
+}
+
+.editor-preview figcaption {
+  margin-top: 4px;
+  color: var(--muted);
+  font: 11px/1.4 "Courier New", monospace;
+}
+
+.editor-preview pre {
+  overflow-x: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--black);
+  background: var(--sunken);
+}
+
+.editor-preview code {
+  font: 0.86em/1.5 ui-monospace, "Courier New", monospace;
+}
+
+.editor-preview pre code {
+  font-size: 13px;
+}
+
+.editor-preview hr {
+  height: 3px;
+  margin: 2em 0;
+  border: 0;
+  background: var(--black);
+}
+
+.editor-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.editor-preview th,
+.editor-preview td {
+  padding: 6px 8px;
+  border: 1px solid var(--black);
+  text-align: left;
+}
+
+.editor-preview th {
+  background: var(--yellow);
+}
+
+.editor-preview ul,
+.editor-preview ol {
+  padding-left: 1.4em;
+}
+
+/* ---------- actions ---------- */
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--sunken);
+}
+
+.editor-actions__main,
+.editor-actions__right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editor-actions__right {
+  margin-left: auto;
+}
+
+.editor-actions button {
+  padding: 7px 12px;
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  font: 700 12px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-actions button:hover:not(:disabled) {
+  background: var(--yellow);
+}
+
+.editor-actions button:disabled {
+  border-color: #cfcfcf;
+  color: #a3a3a3;
+  cursor: not-allowed;
+}
+
+.editor-actions .is-primary {
+  background: var(--black);
+  color: var(--white);
+}
+
+.editor-actions .is-primary:hover:not(:disabled) {
+  background: var(--green);
+  color: var(--black);
+}
+
+.editor-actions .is-danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.editor-actions .is-danger:hover:not(:disabled) {
+  background: var(--red);
+  color: var(--white);
+}
+
+.editor-status {
+  flex-basis: 100%;
+  margin: 0;
+  font: 11px/1.4 "Courier New", monospace;
+  color: var(--muted);
+}
+
+.editor-status[data-tone="error"] {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.editor-status[data-tone="ok"] {
+  color: #00743d;
+  font-weight: 700;
+}
+
+.editor-status:empty {
+  display: none;
+}
+
+/* ---------- dialogs ---------- */
+
+.editor-dialog {
+  width: min(680px, calc(100% - 32px));
+  max-height: 84dvh;
+  padding: 0;
+  border: 3px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+}
+
+.editor-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.editor-dialog header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  background: var(--black);
+  color: var(--white);
+  font: 11px/1 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-dialog header button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.editor-dialog__body {
+  padding: 18px 20px 24px;
+}
+
+.editor-dialog__note,
+.editor-dialog__warn,
+.editor-dialog__result {
+  margin: 0 0 14px;
+  font: 12px/1.55 "Courier New", monospace;
+}
+
+.editor-dialog__warn {
+  padding: 9px 11px;
+  border-left: 4px solid var(--yellow);
+  background: #fffdf0;
+  color: #3d3d00;
+}
+
+.editor-dialog__result:empty {
+  display: none;
+}
+
+.editor-dialog__result[data-tone="error"] {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.editor-dialog__result[data-tone="ok"] {
+  color: #00743d;
+  font-weight: 700;
+}
+
+.editor-dialog code {
+  padding: 0 3px;
+  background: #f0f0f0;
+}
+
+.editor-setting {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.editor-setting > span {
+  color: var(--muted);
+  font: 10px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-setting input {
+  padding: 6px 8px;
+  border: 1px solid #cfcfcf;
+  background: var(--white);
+  color: var(--black);
+  font: 13px/1.3 "Courier New", monospace;
+}
+
+.editor-setting input:focus {
+  border-color: var(--black);
+}
+
+.editor-setting__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0 12px;
+}
+
+.editor-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.editor-dialog__actions button {
+  padding: 7px 11px;
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  font: 700 12px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+}
+
+.editor-dialog__actions button:hover {
+  background: var(--yellow);
+}
+
+.editor-dialog__actions .is-danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.editor-dialog__actions .is-danger:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+/* ---------- library ---------- */
+
+.editor-library h3 {
+  margin: 18px 0 8px;
+  font: 700 11px/1.2 "Courier New", monospace;
+  text-transform: lowercase;
+  color: var(--muted);
+}
+
+.editor-library__entry {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px dotted var(--black);
+  background: none;
+  color: var(--black);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.editor-library__entry:first-of-type {
+  border-top: 1px dotted var(--black);
+}
+
+.editor-library__entry:hover {
+  background: var(--yellow);
+}
+
+.editor-library__entry strong {
+  font: 700 15px/1.25 Arial, Helvetica, sans-serif;
+}
+
+.editor-library__entry small {
+  flex-shrink: 0;
+  color: var(--muted);
+  font: 10px/1.4 "Courier New", monospace;
+}
+
+.editor-library__empty {
+  padding: 14px 0;
+  font: 12px/1.5 "Courier New", monospace;
+  color: var(--muted);
+}
+
+.editor-noscript {
+  max-width: 60ch;
+  margin: 12vh auto;
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.editor-noscript h1 {
+  font: 900 4rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: -0.06em;
+}
+
+@media (max-width: 860px) {
+  body.editor-body {
+    overflow: auto;
+  }
+
+  .editor {
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  .editor-panes {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-source {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .editor-source textarea {
+    min-height: 58dvh;
+  }
+
+  .editor-meta__wide {
+    grid-column: span 1;
+  }
+
+  .editor-actions__right {
+    margin-left: 0;
+  }
+}

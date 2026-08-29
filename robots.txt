@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /write/
 
 Sitemap: https://satyam.lol/sitemap.xml

@@ -8,7 +8,7 @@
     "email": "hello@satyam.lol",
     "links": {
       "github": "https://github.com/sudotman",
-      "writing": "https://blog.satyam.lol/",
+      "writing": "/blog/",
       "letterboxd": "https://letterboxd.com/satyamkashyap/",
       "x": "https://x.com/satyamkashyapp"
     }
@@ -59,12 +59,14 @@
   },
   "externalFeeds": {
     "cache": "content/external-feeds.json",
-    "blogger": "https://blog.satyam.lol/feeds/posts/default?alt=json&max-results=500",
     "letterboxd": "https://letterboxd.com/satyamkashyap/rss/",
     "letterboxdArchive": "https://letterboxd.com/satyamkashyap/reviews/films/",
-    "reviewMinCharacters": 900
+    "reviewMinCharacters": 900,
+    "blog": "content/blog.json"
   },
-  "sources": ["content/programming.json"],
+  "sources": [
+    "content/programming.json"
+  ],
   "works": [
     {
       "id": "p_martes",
@@ -84,7 +86,9 @@
       "year": "ongoing",
       "summary": "A private browser listening library for Wikipedia, public-domain books and DRM-free EPUBs, spoken with local voices.",
       "body": "Hear cleans written material for narration, remembers progress and keeps its cached library on the device.",
-      "images": ["https://raw.githubusercontent.com/sudotman/hear/main/docs/images/hear.png"],
+      "images": [
+        "https://raw.githubusercontent.com/sudotman/hear/main/docs/images/hear.png"
+      ],
       "links": {
         "live": "https://hear.satyam.lol/",
         "source": "https://github.com/sudotman/hear"
@@ -97,7 +101,9 @@
       "year": "ongoing",
       "summary": "A living digital archive for preserving Outer Siraji Pahari language, vocabulary and memory.",
       "body": "A searchable archive built from a 1909 Pahari dialect dictionary, with room for history, written work and community contributions.",
-      "images": ["https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/art/assets/pahari-painting.jpg"],
+      "images": [
+        "https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/art/assets/pahari-painting.jpg"
+      ],
       "links": {
         "live": "https://pahadi.satyam.lol/",
         "source": "https://github.com/sudotman/outer-siraji-repo"
@@ -122,7 +128,9 @@
       "year": "ongoing",
       "summary": "A local-first, private workout tracker for training with intent instead of feeding another platform.",
       "body": "A mobile-first PWA with routines, measurements, progress photos and portable exports — without accounts, analytics or an API.",
-      "images": ["https://raw.githubusercontent.com/sudotman/openworkout/main/public/training-hero.jpg"],
+      "images": [
+        "https://raw.githubusercontent.com/sudotman/openworkout/main/public/training-hero.jpg"
+      ],
       "links": {
         "live": "https://workout.satyam.lol/",
         "source": "https://github.com/sudotman/openworkout"
@@ -135,7 +143,9 @@
       "year": "ongoing",
       "summary": "A draggable, drifting personal archive for the things kept close.",
       "body": "A spatial web archive that resists the neat list and lets fragments of a life drift into view.",
-      "images": ["https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg"],
+      "images": [
+        "https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg"
+      ],
       "links": {
         "live": "https://closet.satyam.lol/",
         "source": "https://github.com/sudotman/closet"
@@ -148,7 +158,9 @@
       "year": "2025",
       "summary": "A 26-minute absurd and surreal short about two people whose lives change after they meet.",
       "body": "A mystery, horror and romance told in English and Hindi, moving through the aftermath of a chance meeting. Written, directed and edited by Satyam Kashyap.",
-      "images": ["https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg"],
+      "images": [
+        "https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg"
+      ],
       "links": {
         "record": "https://letterboxd.com/film/chhoti-gold/"
       }
@@ -160,7 +172,9 @@
       "year": "2023",
       "summary": "A 15-minute Hindi crime drama about two men in Mumbai caught in bigotry, paranoia and delusion.",
       "body": "Two men linked to Mumbai's underworld become entangled in the consequences of bigotry and the stories they tell themselves. Directed by Satyam Kashyap and written with Shreya Mishra.",
-      "images": ["https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg"],
+      "images": [
+        "https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg"
+      ],
       "links": {
         "record": "https://letterboxd.com/film/blue-dogs/"
       }
@@ -173,7 +187,7 @@
       "summary": "An essay about how the internet keeps evolving toward the same handful of forms.",
       "body": "A web essay on convergent evolution, platform sameness and why so much of the internet keeps becoming the same crab.",
       "links": {
-        "read": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
+        "read": "/blog/carcinization-on-the-internet/"
       }
     }
   ]

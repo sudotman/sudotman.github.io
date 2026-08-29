@@ -2,7 +2,7 @@
 
 Satyam Kashyap's static portfolio network: one concise front door, three exploratory arrangements of the creative archive, and a deeper technical field manual.
 
-Everything is plain HTML, CSS, JavaScript, and JSON deployed through GitHub Pages. There is no build step.
+Everything is plain HTML, CSS, JavaScript, JSON, and Markdown deployed through GitHub Pages. There is no bundler; the only generated output is the blog, and it is committed so a clone previews correctly with nothing installed.
 
 ## Routes
 
@@ -10,6 +10,10 @@ Everything is plain HTML, CSS, JavaScript, and JSON deployed through GitHub Page
 - `/living/`: the archive as a contact sheet
 - `/river/`: the archive as a horizontal current
 - `/doors/`: the archive as spatial thresholds
+- `/blog/`: the native writing archive, built from `content/posts/*.md`
+- `/blog/<slug>/`: a post, rendered to static HTML at build time
+- `/blog/feed.xml`: RSS, with full post content
+- `/write/`: the editor (noindex, and disallowed in `robots.txt`)
 - `/tech.html`: the complete Core Tech field manual and project dossiers
 
 The root is intentionally brief. It establishes Satyam's identity, current practice, films, R&D, public-code products, and writing without duplicating the full dossiers. Living, River, Doors, and Core Tech remain the deeper entrances.
@@ -42,11 +46,13 @@ The front page source is intentionally compact:
 - `now`: the film and applied-R&D notes currently in progress
 - `featured`: stable ids for the selected-project list
 - `branches`: the four existing ways to go deeper — Living, River, Doors, and Core Tech
-- `externalFeeds`: the Blogger and Letterboxd feed/archive URLs, generated cache path, and long-review threshold
+- `externalFeeds`: the Letterboxd feed/archive URLs, the generated caches (`cache` for reviews, `blog` for the writing index), and the long-review threshold
 - `works`: concise homepage-only records
 - `sources`: the existing technical feed used to complete the 27-project index
 
-`content/external-feeds.json` is generated from those public sources. It contains every Blogger post in the current blog feed and every public Letterboxd review found by walking the account's paginated review archive, keeping only reviews whose text is longer than the configured threshold. Letterboxd's RSS feed supplies newly published and recently edited reviews; the archive walk supplies older history. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
+`content/external-feeds.json` is generated from Letterboxd. It contains every public review found by walking the account's paginated review archive, keeping only reviews whose text is longer than the configured threshold. The RSS feed supplies newly published and recently edited reviews; the archive walk supplies older history. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
+
+Writing is no longer fetched from Blogspot. It lives in this repository — see [The blog](#the-blog).
 
 Links inside homepage work records use a small object (`live`, `source`, `read`, `record`, or `contact`) so the interface can derive its own wording instead of storing presentation labels in the data.
 
@@ -73,9 +79,9 @@ This controls the detailed Core Tech profile:
 - `css/landing.css`: the responsive Hypertext visual system and project dialog
 - `js/landing.js`: compact data loading, visible indexes, branch register, and native project records
 
-The front page exposes identity, current work, selected projects, the complete project index, Blogger writing, long-form Letterboxd reviews, and all four deeper branches. Project summaries stay visible; opening a project or review reveals its full record in a dedicated native dialog.
+The front page exposes identity, current work, selected projects, the complete project index, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches. Project summaries stay visible; opening a project or review reveals its full record in a dedicated native dialog.
 
-The Pages workflow refreshes both external feeds on every deployment and every six hours. A checked-in cache keeps local development and deployments resilient when a source is briefly unavailable.
+The Pages workflow rebuilds the blog and refreshes the Letterboxd feed on every deployment and every six hours. A checked-in cache keeps local development and deployments resilient when a source is briefly unavailable.
 
 ### Creative archive
 
@@ -100,6 +106,72 @@ JavaScript modules:
 - `js/modules/heatmap.js`
 
 Core Tech supports its existing `#work/<id>` deep links.
+
+## The blog
+
+Posts are Markdown files in `content/posts/`. One file is one post, and the filename is the URL slug:
+`content/posts/absurdism-and-life.md` becomes `satyam.lol/blog/absurdism-and-life/`.
+
+```markdown
+---
+title: "Grimes: dream art pop"
+date: 2026-08-30
+summary: One sentence. Omit it and the opening lines are used.
+tags: [music, essays]
+cover: /images/blog/cover.png
+coverAlt: Alternative text for the cover
+legacyUrl: https://blog.satyam.lol/2022/04/…
+draft: true
+---
+
+Body in Markdown.
+```
+
+Only `title` and `date` are required. `draft: true` keeps a post out of the build.
+
+### Writing a post
+
+Open `/write/` — the editor. It previews with the same renderer the build script uses, so the preview is
+the published page. Work autosaves to this browser's localStorage on every keystroke.
+
+Publishing commits `content/posts/<slug>.md` straight to this repository through the GitHub contents API,
+and the Pages workflow rebuilds and deploys. To enable it, open the **github** panel and paste a
+[fine-grained personal access token](https://github.com/settings/personal-access-tokens) scoped to
+**this repository only**, with **Contents: read and write** and nothing else.
+
+The token is kept in localStorage on that device and is sent only to `api.github.com`. Anyone with access
+to the browser profile can read it, so use **forget token** on a shared machine. `/write/` is `noindex`
+and disallowed in `robots.txt`, but it is a public URL — it is the token, not the page, that is the secret.
+
+Without a token the editor still works fully offline: **download .md** or **copy** the file and commit it
+yourself. Editing posts in any text editor works just as well; the editor is a convenience, not the pipeline.
+
+Shortcuts: `⌘S` save locally, `⌘↵` publish, `⌘B` / `⌘I` / `⌘K` bold, italic, link.
+
+### Building
+
+```sh
+npm run build        # regenerate blog/, content/blog.json, sitemap.xml, docs/
+npm run build:check  # fail if the committed output is stale
+```
+
+The build writes `blog/index.html`, one `blog/<slug>/index.html` per post, `blog/feed.xml`,
+`content/blog.json` for the homepage and the editor, the blog block in `sitemap.xml`, and
+`docs/blogspot-redirect.html`. Directories for deleted posts are pruned. CI rebuilds before deploying,
+so the live site cannot serve stale HTML.
+
+Rendering is shared code: `js/lib/markdown.js` and `js/lib/post.js` are imported by the build script,
+the validator and the browser editor alike. Raw HTML in a post is escaped rather than passed through.
+
+### Migrating from Blogspot
+
+`scripts/import-blogger.mjs` converted the six Blogspot posts to Markdown, pulling the author's own
+uploaded images into `images/blog/`. It never overwrites an existing file — once a post is in
+`content/posts/`, that file is the source of truth.
+
+Blogger cannot issue a 301 from this repository, so the build emits `docs/blogspot-redirect.html`:
+paste it into the Blogspot theme's `<head>` (Blogger → Theme → Edit HTML) to canonical and redirect each
+old post to its new home. That file is excluded from the deployed artifact.
 
 ## Publishing a work
 
@@ -133,33 +205,36 @@ Published public code without an explicit license should be described as public 
 ## Validation
 
 ```sh
-node scripts/sync-external-feeds.mjs
-node scripts/validate-content.mjs
+npm test
 ```
 
-The validator checks the Core Tech manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, and local assets. It has no package dependencies.
+The validator checks the Core Tech manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, blog frontmatter, and local assets. It also fails when `content/blog.json` has drifted from `content/posts/`. It has no package dependencies.
 
 Run `node --check` on any changed JavaScript file as well.
 
 ## Running locally
 
-Use a static server because the interfaces fetch JSON:
+The interfaces fetch JSON, the blog serves directory URLs, and the editor loads ES modules, so a static
+server is required:
 
 ```sh
-python3 -m http.server 8000
+npm run serve
 ```
 
-Then open `http://localhost:8000/`.
+Then open `http://localhost:4173/`, `/blog/`, or `/write/`. It resolves directory URLs to `index.html`
+and falls back to `404.html`, the way Pages does.
 
 ## Checks
 
-There is still no build step. The two Node scripts only generate and verify content:
+There is still no bundler. The Node scripts only generate and verify content:
 
 ```sh
 npm test
 ```
 
-That runs `node --check` over every script and then `scripts/validate-content.mjs`. To refresh the external feeds by hand:
+That runs `node --check` over every script, the markdown renderer and post-format test suites,
+`npm run build:check` for stale blog output, and then `scripts/validate-content.mjs`.
+To refresh the Letterboxd feed by hand:
 
 ```sh
 npm run sync
@@ -175,6 +250,10 @@ npm run sync
 - Films and art: `content/film-art.json`
 - Creative-archive appearance and order: `content/creative.json`
 - Experience, stack, and interests: `profile.json`
+- Writing: `content/posts/*.md`, through `/write/` or any text editor
+- Blog appearance: `css/blog.css`; blog page structure: `scripts/build-blog.mjs`
+- Editor: `write/index.html`, `css/editor.css`, `js/editor.js`
+- Markdown rendering and the post file format: `js/lib/markdown.js` and `js/lib/post.js`
 - Front-door visuals or behavior: `css/landing.css` and `js/landing.js`
 - Living, River, or Doors: `css/creative-network.css` and `js/creative-network.js`
 - Core Tech: the existing files under `css/modules/` and `js/modules/`

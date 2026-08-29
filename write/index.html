@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>write — satyam.lol</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/editor.css?v=20260829a">
+  <script type="module" src="/js/editor.js?v=20260829a"></script>
+</head>
+<body class="editor-body">
+  <div class="editor" id="editor" hidden>
+
+    <header class="editor-bar">
+      <div class="editor-bar__left">
+        <span class="editor-brand">satyam.lol<span>/write</span></span>
+        <button type="button" data-open-library>posts</button>
+        <button type="button" data-new-post>new</button>
+      </div>
+      <div class="editor-bar__right">
+        <span class="editor-stat" data-stats>0 words · 1 min</span>
+        <span class="editor-save" data-save-state>saved locally</span>
+        <button type="button" data-open-settings data-github-state="off">github</button>
+      </div>
+    </header>
+
+    <section class="editor-meta">
+      <label class="editor-meta__title">
+        <span class="visually-hidden">Post title</span>
+        <input type="text" data-field="title" placeholder="an untitled post" autocomplete="off" spellcheck="true">
+      </label>
+
+      <div class="editor-meta__grid">
+        <label>
+          <span>slug</span>
+          <input type="text" data-field="slug" placeholder="auto from title" autocomplete="off" spellcheck="false">
+        </label>
+        <label>
+          <span>date</span>
+          <input type="date" data-field="date">
+        </label>
+        <label>
+          <span>tags</span>
+          <input type="text" data-field="tags" placeholder="comma, separated" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="editor-meta__wide">
+          <span>summary</span>
+          <input type="text" data-field="summary" placeholder="left blank, the first lines are used" autocomplete="off" spellcheck="true">
+        </label>
+        <label class="editor-meta__wide">
+          <span>cover image</span>
+          <input type="text" data-field="cover" placeholder="/images/blog/… or an https URL" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="editor-meta__check">
+          <input type="checkbox" data-field="draft">
+          <span>draft — kept out of the build</span>
+        </label>
+      </div>
+      <p class="editor-meta__url">→ <a data-preview-url href="/blog/" target="_blank" rel="noreferrer">satyam.lol/blog/…</a></p>
+    </section>
+
+    <div class="editor-tools" role="toolbar" aria-label="Formatting">
+      <button type="button" data-insert="bold" title="Bold (⌘B)"><b>B</b></button>
+      <button type="button" data-insert="italic" title="Italic (⌘I)"><i>I</i></button>
+      <button type="button" data-insert="link" title="Link (⌘K)">link</button>
+      <button type="button" data-insert="h2" title="Heading">H2</button>
+      <button type="button" data-insert="quote" title="Quote">&ldquo;&rdquo;</button>
+      <button type="button" data-insert="list" title="List">list</button>
+      <button type="button" data-insert="image" title="Image">image</button>
+      <button type="button" data-insert="code" title="Code block">code</button>
+      <button type="button" data-insert="rule" title="Divider">hr</button>
+      <span class="editor-tools__spacer"></span>
+      <button type="button" data-toggle-preview title="Toggle the preview">preview</button>
+    </div>
+
+    <main class="editor-panes" data-panes>
+      <label class="editor-source">
+        <span class="visually-hidden">Post body, in markdown</span>
+        <textarea data-field="body" spellcheck="true" placeholder="Write in markdown.
+
+# a heading
+**bold**, *italic*, [a link](https://…)
+> a quote
+- a list
+
+![alt text](/images/blog/picture.png &quot;an optional caption&quot;)"></textarea>
+      </label>
+      <article class="editor-preview" data-preview aria-live="polite"></article>
+    </main>
+
+    <footer class="editor-actions">
+      <div class="editor-actions__main">
+        <button type="button" class="is-primary" data-publish>publish to satyam.lol</button>
+        <button type="button" data-download>download .md</button>
+        <button type="button" data-copy>copy</button>
+      </div>
+      <div class="editor-actions__right">
+        <button type="button" class="is-danger" data-delete hidden>delete post</button>
+      </div>
+      <p class="editor-status" data-status role="status"></p>
+    </footer>
+  </div>
+
+  <noscript>
+    <main class="editor-noscript">
+      <h1>write</h1>
+      <p>The editor needs JavaScript. Posts also live as plain markdown in <code>content/posts/</code> — editing them in any text editor works just as well.</p>
+      <p><a href="/blog/">← back to the writing</a></p>
+    </main>
+  </noscript>
+
+  <dialog class="editor-dialog" data-library>
+    <header>
+      <span>posts</span>
+      <button type="button" data-close-dialog>close [esc]</button>
+    </header>
+    <div class="editor-dialog__body">
+      <p class="editor-dialog__note">Published posts come from <code>content/blog.json</code>. Local drafts live only in this browser.</p>
+      <div data-library-list class="editor-library"></div>
+    </div>
+  </dialog>
+
+  <dialog class="editor-dialog" data-settings>
+    <header>
+      <span>github</span>
+      <button type="button" data-close-dialog>close [esc]</button>
+    </header>
+    <div class="editor-dialog__body">
+      <p class="editor-dialog__note">
+        Publishing commits <code>content/posts/&lt;slug&gt;.md</code> to the site repository. GitHub Actions rebuilds
+        the blog and deploys, usually within a minute.
+      </p>
+      <label class="editor-setting">
+        <span>fine-grained token</span>
+        <input type="password" data-setting="token" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      </label>
+      <p class="editor-dialog__warn">
+        Stored in this browser's localStorage on this device only, and sent to <code>api.github.com</code> and nowhere
+        else. Scope it to <strong>this repository only</strong> with <strong>Contents: read and write</strong> — nothing
+        more. Anyone with access to this browser profile can read it, so use “forget token” on a shared machine.
+      </p>
+      <div class="editor-setting__row">
+        <label class="editor-setting">
+          <span>owner</span>
+          <input type="text" data-setting="owner" spellcheck="false" autocomplete="off">
+        </label>
+        <label class="editor-setting">
+          <span>repository</span>
+          <input type="text" data-setting="repo" spellcheck="false" autocomplete="off">
+        </label>
+        <label class="editor-setting">
+          <span>branch</span>
+          <input type="text" data-setting="branch" spellcheck="false" autocomplete="off">
+        </label>
+      </div>
+      <div class="editor-dialog__actions">
+        <button type="button" data-verify-token>check connection</button>
+        <button type="button" class="is-danger" data-forget-token>forget token</button>
+      </div>
+      <p class="editor-dialog__result" data-settings-result role="status"></p>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -134,12 +134,21 @@
   async function loadPortfolio() {
     const home = await fetchJson("/content/home.json");
     const feeds = await Promise.all((home.sources || []).map((source) => fetchJson(`/${String(source).replace(/^\/+/, "")}`)));
-    let externalContent = { writing: [], reviews: [] };
+    let externalContent = { reviews: [] };
     try {
       const cachePath = String(home.externalFeeds?.cache || "content/external-feeds.json").replace(/^\/+/, "");
       externalContent = await fetchJson(`/${cachePath}`);
     } catch (error) {
-      console.warn("External writing feeds did not load", error);
+      console.warn("The Letterboxd feed cache did not load", error);
+    }
+
+    // Writing is native now: content/blog.json is generated from content/posts.
+    let blog = { posts: [] };
+    try {
+      const blogPath = String(home.externalFeeds?.blog || "content/blog.json").replace(/^\/+/, "");
+      blog = await fetchJson(`/${blogPath}`);
+    } catch (error) {
+      console.warn("The blog index did not load", error);
     }
     const works = [
       ...(home.works || []).map((work) => normalizeWork(work, "home")),
@@ -156,7 +165,7 @@
       works: unique,
       workMap: map,
       featured: (home.featured || []).map((id) => map.get(id)).filter(Boolean),
-      writing: externalContent.writing || [],
+      writing: blog.posts || [],
       reviews
     };
   }
@@ -192,7 +201,7 @@
 
   function writingList(writing, sourceHref) {
     if (!writing?.length) {
-      return `<li>The feed is temporarily unavailable. <a href="${escapeHtml(safeHref(sourceHref))}"${externalAttributes(sourceHref)}>Read the blog directly.</a></li>`;
+      return `<li>Nothing is published yet. <a href="${escapeHtml(safeHref(sourceHref))}">Open the writing index.</a></li>`;
     }
     return writing.map((item) => {
       const href = safeHref(item.href);
@@ -254,7 +263,7 @@
 
   function render({ home, works, featured, writing, reviews }) {
     const identity = home.identity || {};
-    const blogHref = identity.links?.writing || "https://blog.satyam.lol/";
+    const blogHref = identity.links?.writing || "/blog/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
     const initialReviews = reviews.slice(0, REVIEW_BATCH_SIZE);
     app.innerHTML = `
@@ -287,7 +296,7 @@
 
         <section class="hyper-writing" id="writing">
           <h2>Writing</h2>
-          <p class="section-note">Essays and notes fetched from <a href="${escapeHtml(safeHref(blogHref))}"${externalAttributes(blogHref)}>blog.satyam.lol</a>.</p>
+          <p class="section-note">Essays and notes. <a href="${escapeHtml(safeHref(blogHref))}">Read them all →</a></p>
           <ul>${writingList(writing, blogHref)}</ul>
         </section>
 

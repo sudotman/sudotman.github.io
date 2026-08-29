@@ -35,13 +35,19 @@ jobs:
 
       # The Letterboxd archive walk is ~40 paginated requests. It only needs to
       # run on the schedule; a push refreshes RSS and reuses committed history.
-      - name: Refresh Blogger and Letterboxd feeds and review archive
+      - name: Refresh the Letterboxd feed and review archive
         run: node scripts/sync-external-feeds.mjs
         if: github.event_name != 'push'
 
-      - name: Refresh Blogger and Letterboxd feeds (RSS only)
+      - name: Refresh the Letterboxd feed (RSS only)
         run: node scripts/sync-external-feeds.mjs --skip-archive
         if: github.event_name == 'push'
+
+      - name: Build the blog from content/posts
+        run: node scripts/build-blog.mjs
+
+      - name: Check the markdown renderer
+        run: node scripts/test-markdown.mjs
 
       - name: Validate site content
         run: node scripts/validate-content.mjs
@@ -60,6 +66,7 @@ jobs:
             --exclude='AGENTS.md' \
             --exclude='README.md' \
             --exclude='scripts/' \
+            --exclude='docs/' \
             --exclude='package.json' \
             --exclude='_site/' \
             ./ _site/

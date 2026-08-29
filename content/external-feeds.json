@@ -1,67 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-16T16:34:41.614Z",
+  "generatedAt": "2026-08-29T18:34:32.491Z",
   "sources": {
-    "blogger": {
-      "url": "https://blog.satyam.lol/feeds/posts/default?alt=json&max-results=500",
-      "fetchedAt": "2026-08-16T16:34:32.704Z",
-      "status": "fresh"
-    },
     "letterboxd": {
       "url": "https://letterboxd.com/satyamkashyap/rss/",
-      "fetchedAt": "2026-08-16T16:34:31.422Z",
+      "fetchedAt": "2026-08-29T18:34:32.486Z",
       "status": "fresh",
       "archiveUrl": "https://letterboxd.com/satyamkashyap/reviews/films/",
-      "archiveStatus": "fresh",
+      "archiveStatus": "skipped",
       "archivePages": 41,
       "archiveEntries": 486,
       "reviewMinCharacters": 900
     }
   },
-  "writing": [
-    {
-      "id": "blogger-8391919040145562438",
-      "title": "carcinization on the internet",
-      "published": "2025-07-27T15:57:00.001Z",
-      "year": "2025",
-      "href": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
-    },
-    {
-      "id": "blogger-2526144067657945626",
-      "title": "Political Discussion and Debates in the Modern Attention-Defecient age",
-      "published": "2024-03-29T19:58:00.003Z",
-      "year": "2024",
-      "href": "https://blog.satyam.lol/2024/03/political-discussion-and-debates-in.html"
-    },
-    {
-      "id": "blogger-2691929640720240521",
-      "title": "killers of the flower moon defines what cinema is for scorsese - a review and a study",
-      "published": "2023-10-28T16:44:00.006Z",
-      "year": "2023",
-      "href": "https://blog.satyam.lol/2023/10/killers-of-flower-moon-defines-what.html"
-    },
-    {
-      "id": "blogger-6691530912440099118",
-      "title": "Grimes: Intersection of Background stimulus and Excellent Dream Art Pop",
-      "published": "2022-04-22T21:29:00.004Z",
-      "year": "2022",
-      "href": "https://blog.satyam.lol/2022/04/grimes-intersection-of-background.html"
-    },
-    {
-      "id": "blogger-2674735096561552763",
-      "title": "Absurdism and Life",
-      "published": "2022-03-13T21:45:00.001Z",
-      "year": "2022",
-      "href": "https://blog.satyam.lol/2022/03/absurdism-and-life.html"
-    },
-    {
-      "id": "blogger-527062765674463668",
-      "title": "The juxtaposition of societal disposition with the corrupting nature of power: A short Dark Souls 3 study",
-      "published": "2021-08-26T19:14:00.007Z",
-      "year": "2021",
-      "href": "https://blog.satyam.lol/2021/08/the-juxtaposition-of-societal.html"
-    }
-  ],
   "reviews": [
     {
       "id": "letterboxd-review-1441824562",

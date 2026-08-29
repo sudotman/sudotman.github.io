@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "source": "content/posts",
+  "count": 6,
+  "posts": [
+    {
+      "id": "carcinization-on-the-internet",
+      "slug": "carcinization-on-the-internet",
+      "title": "carcinization on the internet",
+      "href": "/blog/carcinization-on-the-internet/",
+      "published": "2025-07-27T00:00:00.000Z",
+      "year": "2025",
+      "summary": "there is this natural phenomenon in the world which is called \"carcinization\" which essentially is this evolution philosophy where overtime through different lineages, different species end…",
+      "tags": [],
+      "minutes": 3,
+      "words": 727,
+      "legacyUrl": "https://blog.satyam.lol/2025/07/carcinization-on-internet.html"
+    },
+    {
+      "id": "political-discussion-in-the-attention-deficit-age",
+      "slug": "political-discussion-in-the-attention-deficit-age",
+      "title": "Political Discussion and Debates in the Modern Attention-Defecient age",
+      "href": "/blog/political-discussion-in-the-attention-deficit-age/",
+      "published": "2024-03-29T00:00:00.000Z",
+      "year": "2024",
+      "summary": "You aren't saying anything all too much new if you say that \"Social Media is frying people's dopamine receptors\". It has been long documented and we have truly experienced first-hand the…",
+      "tags": [],
+      "minutes": 8,
+      "words": 1818,
+      "legacyUrl": "https://blog.satyam.lol/2024/03/political-discussion-and-debates-in.html"
+    },
+    {
+      "id": "killers-of-the-flower-moon",
+      "slug": "killers-of-the-flower-moon",
+      "title": "killers of the flower moon defines what cinema is for scorsese - a review and a study",
+      "href": "/blog/killers-of-the-flower-moon/",
+      "published": "2023-10-28T00:00:00.000Z",
+      "year": "2023",
+      "summary": "scorsese just released his latest film in theatres and its called 'killers of the flower moon' and is based in 1920s oklahoma surrounding the osage tribes scorsese has been in the news…",
+      "tags": [],
+      "minutes": 3,
+      "words": 608,
+      "legacyUrl": "https://blog.satyam.lol/2023/10/killers-of-flower-moon-defines-what.html"
+    },
+    {
+      "id": "grimes-and-dream-art-pop",
+      "slug": "grimes-and-dream-art-pop",
+      "title": "Grimes: Intersection of Background stimulus and Excellent Dream Art Pop",
+      "href": "/blog/grimes-and-dream-art-pop/",
+      "published": "2022-04-22T00:00:00.000Z",
+      "year": "2022",
+      "summary": "Music being one of the oldest art forms has obviously undergone major evolutions with major sonic differences helping us classify our beloved art form better. Music has become such an…",
+      "tags": [],
+      "minutes": 3,
+      "words": 704,
+      "legacyUrl": "https://blog.satyam.lol/2022/04/grimes-intersection-of-background.html"
+    },
+    {
+      "id": "absurdism-and-life",
+      "slug": "absurdism-and-life",
+      "title": "Absurdism and Life",
+      "href": "/blog/absurdism-and-life/",
+      "published": "2022-03-13T00:00:00.000Z",
+      "year": "2022",
+      "summary": "Throughout human history, as our species has faced the frightening, terrorizing fact that we do not know who we are, or where we are going in this ocean of chaos, it has been the…",
+      "tags": [],
+      "minutes": 4,
+      "words": 825,
+      "legacyUrl": "https://blog.satyam.lol/2022/03/absurdism-and-life.html"
+    },
+    {
+      "id": "dark-souls-3-power-and-society",
+      "slug": "dark-souls-3-power-and-society",
+      "title": "The juxtaposition of societal disposition with the corrupting nature of power: A short Dark Souls 3 study",
+      "href": "/blog/dark-souls-3-power-and-society/",
+      "published": "2021-08-26T00:00:00.000Z",
+      "year": "2021",
+      "summary": "It's a recurring theme in a lot of art forms about power corrupting the greedy, the wealthy, and the sadistic people. There is no coincidence that this theme keeps repeating itself, it…",
+      "tags": [
+        "games",
+        "story"
+      ],
+      "minutes": 6,
+      "words": 1254,
+      "legacyUrl": "https://blog.satyam.lol/2021/08/the-juxtaposition-of-societal.html"
+    }
+  ]
+}

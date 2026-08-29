@@ -2,6 +2,7 @@
 title: killers of the flower moon defines what cinema is for scorsese - a review and a study
 date: 2023-10-28
 summary: scorsese just released his latest film in theatres and its called 'killers of the flower moon' and is based in 1920s oklahoma surrounding the osage tribes scorsese has been in the news…
+tags: [cinema, culture]
 legacyUrl: https://blog.satyam.lol/2023/10/killers-of-flower-moon-defines-what.html
 ---
 

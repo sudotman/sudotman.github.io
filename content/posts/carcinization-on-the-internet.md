@@ -2,6 +2,7 @@
 title: carcinization on the internet
 date: 2025-07-27
 summary: there is this natural phenomenon in the world which is called "carcinization" which essentially is this evolution philosophy where overtime through different lineages, different species end…
+tags: [internet, philosophy]
 legacyUrl: https://blog.satyam.lol/2025/07/carcinization-on-internet.html
 ---
 

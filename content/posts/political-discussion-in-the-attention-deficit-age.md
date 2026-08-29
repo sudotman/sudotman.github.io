@@ -2,6 +2,7 @@
 title: Political Discussion and Debates in the Modern Attention-Defecient age
 date: 2024-03-29
 summary: You aren't saying anything all too much new if you say that "Social Media is frying people's dopamine receptors". It has been long documented and we have truly experienced first-hand the…
+tags: [politics, internet]
 legacyUrl: https://blog.satyam.lol/2024/03/political-discussion-and-debates-in.html
 ---
 

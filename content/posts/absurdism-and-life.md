@@ -2,6 +2,7 @@
 title: Absurdism and Life
 date: 2022-03-13
 summary: Throughout human history, as our species has faced the frightening, terrorizing fact that we do not know who we are, or where we are going in this ocean of chaos, it has been the…
+tags: [philosophy]
 legacyUrl: https://blog.satyam.lol/2022/03/absurdism-and-life.html
 ---
 

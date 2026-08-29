@@ -331,7 +331,7 @@ async function refreshOrReuse({ name, url, currentItems, currentMetadata, transf
   }
 }
 
-async function refreshLetterboxd({ config, current, minimumCharacters }) {
+async function refreshLetterboxd({ config, current, minimumCharacters, skipArchive }) {
   const recent = await refreshOrReuse({
     name: 'Letterboxd RSS',
     url: config.letterboxd,
@@ -339,6 +339,23 @@ async function refreshLetterboxd({ config, current, minimumCharacters }) {
     currentMetadata: current?.sources?.letterboxd,
     transform: (source) => letterboxdReviews(source, minimumCharacters)
   });
+
+  // The archive walk costs ~40 paginated requests. History almost never changes,
+  // and RSS already carries newly published and recently edited reviews, so the
+  // walk is reserved for scheduled runs rather than every push.
+  if (skipArchive) {
+    console.log('Skipping the Letterboxd archive walk; merging RSS into the existing cache.');
+    return {
+      items: mergeReviews(current?.reviews, recent.items, minimumCharacters),
+      metadata: {
+        ...recent.metadata,
+        archiveUrl: config.letterboxdArchive,
+        archiveStatus: 'skipped',
+        archivePages: current?.sources?.letterboxd?.archivePages,
+        archiveEntries: current?.sources?.letterboxd?.archiveEntries
+      }
+    };
+  }
 
   try {
     const archive = await letterboxdArchiveReviews({
@@ -371,6 +388,9 @@ async function refreshLetterboxd({ config, current, minimumCharacters }) {
 }
 
 async function main() {
+  const skipArchive = process.argv.includes('--skip-archive') || process.env.SYNC_SKIP_ARCHIVE === '1';
+  const strict = process.argv.includes('--strict') || process.env.SYNC_STRICT === '1';
+
   const home = await readJson(HOME_PATH);
   const config = home?.externalFeeds;
   if (!config) throw new Error('content/home.json requires an externalFeeds object');
@@ -391,7 +411,7 @@ async function main() {
       currentMetadata: current?.sources?.blogger,
       transform: (source) => bloggerPosts(JSON.parse(source))
     }),
-    refreshLetterboxd({ config, current, minimumCharacters })
+    refreshLetterboxd({ config, current, minimumCharacters, skipArchive })
   ]);
 
   const output = {
@@ -412,6 +432,20 @@ async function main() {
   await writeFile(tempPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
   await rename(tempPath, outputPath);
   console.log(`Synced ${output.writing.length} Blogger posts and ${output.reviews.length} long Letterboxd reviews (including cached history).`);
+
+  // A silent fall back to the committed cache means the site quietly serves an
+  // old snapshot forever. Surface it, and fail the build under --strict.
+  const stale = [
+    blogger.metadata.status === 'cached' ? 'Blogger' : null,
+    letterboxd.metadata.status === 'cached' ? 'Letterboxd RSS' : null,
+    letterboxd.metadata.archiveStatus === 'cached' ? 'Letterboxd archive' : null
+  ].filter(Boolean);
+
+  if (stale.length) {
+    const message = `Served from cache instead of a live fetch: ${stale.join(', ')}.`;
+    if (strict) throw new Error(`${message} Failing because --strict is set.`);
+    console.warn(`WARNING: ${message}`);
+  }
 }
 
 await main();

@@ -252,23 +252,8 @@
     }).join(" · ");
   }
 
-  function heroImages(simulation, film) {
-    const simulationImage = simulation?.imagesResolved[0] || "/images/isro1.jpg";
-    const filmImage = film?.imagesResolved[0] || "";
-    return `
-      <section class="hyper-images" aria-label="Two kinds of world-building">
-        <figure>
-          <img src="${escapeHtml(simulationImage)}" alt="${escapeHtml(simulation?.title || "XR simulation")}" fetchpriority="high" decoding="async">
-          <figcaption>simulation / ${escapeHtml(simulation?.title || "ISRO Gaganyaan VR Simulator")}</figcaption>
-        </figure>
-        ${filmImage ? `<figure><img src="${escapeHtml(filmImage)}" alt="${escapeHtml(film?.title || "Film")}" loading="lazy" decoding="async"><figcaption>cinema / ${escapeHtml(film?.title || "Chhoti Gold")}</figcaption></figure>` : ""}
-      </section>`;
-  }
-
-  function render({ home, works, workMap, featured, writing, reviews }) {
+  function render({ home, works, featured, writing, reviews }) {
     const identity = home.identity || {};
-    const simulation = workMap.get("p_isro");
-    const film = workMap.get("film_chhoti_gold");
     const blogHref = identity.links?.writing || "https://blog.satyam.lol/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
     const initialReviews = reviews.slice(0, REVIEW_BATCH_SIZE);
@@ -294,13 +279,6 @@
           <p class="section-note">Essentials, click to read more about them.</p>
           <ol class="hyper-selected">${selectedProjects(featured)}</ol>
         </section>
-
-        ${false ? `
-          <hr>
-          <p>The left is from a simulator we made for ISRO and the right is the poster from my 2025 film.</p>
-          ${heroImages(simulation, film)}
-          <hr>
-        ` : ""}
 
         <section id="all-projects">
           <h2>All projects - (${works.length})</h2>
@@ -332,10 +310,6 @@
           <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}</p>
         </footer>
       </main>`;
-
-    app.querySelectorAll(".hyper-images img").forEach((image) => {
-      image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
-    });
 
     const reviewIndex = app.querySelector("#review-index");
     const loadMoreReviews = app.querySelector("[data-review-load-more]");

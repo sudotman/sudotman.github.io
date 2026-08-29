@@ -1,2 +1,21 @@
 # Kiro's specs
 .kiro/specs
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor / tooling
+.vscode/*
+!.vscode/settings.json
+node_modules/
+_site/
+*.tmp
+
+# Local preview scaffolding (not part of the site)
+.claude/

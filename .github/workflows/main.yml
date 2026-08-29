@@ -14,7 +14,9 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  # Never cancel a deploy in flight. A scheduled feed refresh interrupting a
+  # push deploy would leave the site on the older commit.
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -31,8 +33,15 @@ jobs:
         with:
           node-version: 24
 
+      # The Letterboxd archive walk is ~40 paginated requests. It only needs to
+      # run on the schedule; a push refreshes RSS and reuses committed history.
       - name: Refresh Blogger and Letterboxd feeds and review archive
         run: node scripts/sync-external-feeds.mjs
+        if: github.event_name != 'push'
+
+      - name: Refresh Blogger and Letterboxd feeds (RSS only)
+        run: node scripts/sync-external-feeds.mjs --skip-archive
+        if: github.event_name == 'push'
 
       - name: Validate site content
         run: node scripts/validate-content.mjs
@@ -45,10 +54,13 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.vscode/' \
+            --exclude='.cursor/' \
             --exclude='.env' \
+            --exclude='.DS_Store' \
             --exclude='AGENTS.md' \
             --exclude='README.md' \
             --exclude='scripts/' \
+            --exclude='package.json' \
             --exclude='_site/' \
             ./ _site/
           touch _site/.nojekyll

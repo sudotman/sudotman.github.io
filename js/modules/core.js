@@ -802,26 +802,26 @@ function loadExperienceData(workExperience) {
         <span class="experience-chip">${job.roles.length} role${job.roles.length > 1 ? 's' : ''}</span>
       </div>
       <div class="experience-card-header">
-        ${job.website ? `
-          <a class="experience-org" href="${job.website}" target="_blank" rel="noopener noreferrer">${job.organization}</a>
+        ${job.website && isSafeUrl(job.website) ? `
+          <a class="experience-org" href="${escapeHtml(job.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(job.organization)}</a>
         ` : `
-          <div class="experience-org">${job.organization}</div>
+          <div class="experience-org">${escapeHtml(job.organization)}</div>
         `}
-        <div class="experience-period">${job.period}</div>
+        <div class="experience-period">${escapeHtml(job.period)}</div>
       </div>
       <div class="experience-roles">
         ${job.roles.map((role) => `
           <div class="experience-role">
             <span class="experience-role-head" aria-hidden="true"></span>
             <div class="experience-role-copy">
-              <span class="experience-role-title">${role.title}</span>
-              <span class="experience-role-period">${role.period}</span>
+              <span class="experience-role-title">${escapeHtml(role.title)}</span>
+              <span class="experience-role-period">${escapeHtml(role.period)}</span>
             </div>
             <span class="experience-role-resonator" aria-hidden="true"></span>
           </div>
         `).join('')}
       </div>
-      <div class="experience-summary">${job.summary}</div>
+      <div class="experience-summary">${escapeHtml(job.summary)}</div>
     </article>
   `).join('');
   
@@ -941,8 +941,8 @@ function loadInterestsData(interests) {
       kicker: 'humanity #1',
       tag: ' ',
       essence: 'kinos and more',
-      description: interests.cinema.description,
-      links: [{ label: 'letterboxd', url: interests.cinema.letterboxd }]
+      description: interests.cinema?.description,
+      links: [{ label: 'letterboxd', url: interests.cinema?.letterboxd }]
     },
     {
       title: 'music',
@@ -951,10 +951,10 @@ function loadInterestsData(interests) {
       kicker: 'humanity #2',
       tag: ' ',
       essence: 'grails and more',
-      description: interests.music.description,
+      description: interests.music?.description,
       links: [
-        { label: 'last.fm', url: interests.music.lastfm },
-        { label: 'topster', url: interests.music.topster }
+        { label: 'last.fm', url: interests.music?.lastfm },
+        { label: 'topster', url: interests.music?.topster }
       ]
     },
     {
@@ -964,7 +964,7 @@ function loadInterestsData(interests) {
       kicker: 'humanity #3',
       tag: ' ',
       essence: 'performativeness and more',
-      description: interests.books.description,
+      description: interests.books?.description,
       links: []
     },
     {
@@ -974,7 +974,7 @@ function loadInterestsData(interests) {
       kicker: 'humanity #4',
       tag: ' ',
       essence: 'vidya and more',
-      description: interests.games.description,
+      description: interests.games?.description,
       links: []
     }
   ];
@@ -993,12 +993,12 @@ function loadInterestsData(interests) {
             <div class="interest-title">${node.title}</div>
             <div class="interest-essence">${node.essence}</div>
           </div>
-          <div class="interest-description">${node.description}</div>
+          <div class="interest-description">${escapeHtml(node.description)}</div>
           <div class="interest-footer">
             <span class="interest-tag">${node.tag}</span>
             <div class="interest-links">
-              ${node.links.map(link => `
-                <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="interest-link">${link.label}</a>
+              ${node.links.filter(link => isSafeUrl(link.url)).map(link => `
+                <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="interest-link">${escapeHtml(link.label)}</a>
               `).join('')}
             </div>
           </div>
@@ -1006,7 +1006,8 @@ function loadInterestsData(interests) {
       </div>
     </article>
   `).join('');
-  
+
+  if (!constellationWeb) return;
   constellationWeb.insertAdjacentHTML('beforebegin', nodesHtml);
 
   const notePairs = [

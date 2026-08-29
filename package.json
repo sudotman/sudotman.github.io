@@ -1,0 +1,16 @@
+{
+  "name": "satyam-lol",
+  "private": true,
+  "type": "module",
+  "description": "Static portfolio network at satyam.lol. No build step — these scripts only generate and check content.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate": "node scripts/validate-content.mjs",
+    "sync": "node scripts/sync-external-feeds.mjs",
+    "sync:rss": "node scripts/sync-external-feeds.mjs --skip-archive",
+    "check": "node --check js/landing.js && node --check js/creative-network.js && node --check js/copy-email.js && node --check js/modules/core.js && node --check js/modules/interface.js && node --check js/modules/content.js && node --check js/modules/heatmap.js && node --check scripts/validate-content.mjs && node --check scripts/sync-external-feeds.mjs",
+    "test": "npm run check && npm run validate"
+  }
+}

@@ -9,9 +9,11 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - Treat `index.html` as the parent crossing.
 - Treat `living/`, `river/`, and `doors/` as three renderings of `content/creative.json` through `js/creative-network.js`.
 - Treat `tech.html` as the Core Tech homepage shell, with shared assets in `css/modules/` and `js/modules/`.
-- Treat `content.json` and `profile.json` as the source of truth for homepage content.
-- Treat `content/creative.json` as the source of truth for the parent identity and creative archive.
-- Treat `minimalist.html`, `outer_siraji_project.html`, `test.html`, and `terminal/` as standalone surfaces unless explicitly asked to merge them into the main architecture.
+- Treat `content/home.json` as the source of truth for the front door: identity, `now`, `featured` order, branches, external feeds, and homepage-only work records.
+- Treat `content.json` and `profile.json` as the source of truth for Core Tech (`tech.html`) content and taxonomy.
+- Treat `content/creative.json` as presentation-only for the creative archive. It references a canonical `workId`; identity, summaries, links, and media resolve from `content/home.json` and its registered feed.
+- Treat `content/external-feeds.json` as generated. Never hand-edit it; run `npm run sync`.
+- Treat `minimalist.html` and `terminal/` as standalone surfaces unless explicitly asked to merge them into the main architecture.
 
 ## Core Tech Module Map
 
@@ -40,6 +42,13 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 
 ## Verification Expectations
 
-- Run `node --check` on changed JavaScript modules after edits.
+- Run `npm test` after edits. It syntax-checks every script and runs the content validator.
 - If visual behavior changes, do a browser sanity pass when possible.
 - Call out when something was syntax-checked but not browser-tested.
+
+## Invariants
+
+- Never commit `.env`. It is gitignored and rsync-excluded from the Pages artifact.
+- Everything user-supplied or feed-derived goes through `escapeHtml` before it reaches `innerHTML`, and every href through `safeHref`/`isSafeUrl`. Match that discipline in new renderers.
+- Deleting an image requires checking it is unreferenced across every HTML, JS, CSS, and JSON file first — the validator only checks that referenced assets exist, not the reverse.
+- `CNAME` is `satyam.lol` (apex). Every canonical and `og:url` must use the apex host; www 301s to it.

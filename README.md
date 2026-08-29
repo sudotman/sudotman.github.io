@@ -17,8 +17,6 @@ The root is intentionally brief. It establishes Satyam's identity, current pract
 Standalone surfaces remain isolated unless deliberately folded into the network:
 
 - `minimalist.html`
-- `outer_siraji_project.html`
-- `test.html`
 - `terminal/`
 
 ## Source of truth
@@ -152,6 +150,22 @@ python3 -m http.server 8000
 ```
 
 Then open `http://localhost:8000/`.
+
+## Checks
+
+There is still no build step. The two Node scripts only generate and verify content:
+
+```sh
+npm test
+```
+
+That runs `node --check` over every script and then `scripts/validate-content.mjs`. To refresh the external feeds by hand:
+
+```sh
+npm run sync
+```
+
+`npm run sync:rss` does the same without the ~40-request Letterboxd archive walk, which is what CI uses on a push. Pass `--strict` to fail instead of silently reusing the committed cache when a source is unreachable.
 
 ## Maintenance rule of thumb
 

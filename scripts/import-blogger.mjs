@@ -17,7 +17,6 @@ import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { excerpt } from '../js/lib/markdown.js';
 import { serializePost } from '../js/lib/post.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -218,7 +217,11 @@ async function main() {
     const file = serializePost({
       title,
       date: new Date(entry.published?.$t).toISOString().slice(0, 10),
-      summary: excerpt(body, 190),
+      // Left blank on purpose: an auto-excerpt here just repeats the post's
+      // opening lines back at the reader in its own header. Leaving it out
+      // lets the build fall back to an excerpt for the index card and feed,
+      // without showing that same redundant line on the post itself. Write a
+      // real one-sentence summary by hand once the post is imported.
       tags,
       legacyUrl
     }, body);

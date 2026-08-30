@@ -1,8 +1,8 @@
 ---
 title: "The juxtaposition of societal disposition with the corrupting nature of power: A short Dark Souls 3 study"
 date: 2021-08-26
-summary: It's a recurring theme in a lot of art forms about power corrupting the greedy, the wealthy, and the sadistic people. There is no coincidence that this theme keeps repeating itself, it…
-tags: [games, story]
+summary: Reading Dark Souls 3's Pontiff Sulyvahn and its two princes as a study in power and corruption.
+tags: [games, philosophy, art]
 legacyUrl: https://blog.satyam.lol/2021/08/the-juxtaposition-of-societal.html
 ---
 

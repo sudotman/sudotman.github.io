@@ -129,6 +129,12 @@ Body in Markdown.
 
 Only `title` and `date` are required. `draft: true` keeps a post out of the build.
 
+Leaving `summary` out doesn't leave a gap — the opening lines fill in for the index card, the RSS
+description and the meta/OG description, same as most blogs. The one place that fallback is deliberately
+suppressed is the post's own header, since an auto-excerpt there would just repeat the text sitting right
+below it. Write a real one-sentence summary when a post deserves that header line; a quiet fallback everywhere
+else is the point, not a bug.
+
 ### Writing a post
 
 Open `/write/` — the editor. It previews with the same renderer the build script uses, so the preview is

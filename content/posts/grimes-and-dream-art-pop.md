@@ -1,7 +1,8 @@
 ---
 title: "Grimes: Intersection of Background stimulus and Excellent Dream Art Pop"
 date: 2022-04-22
-summary: Music being one of the oldest art forms has obviously undergone major evolutions with major sonic differences helping us classify our beloved art form better. Music has become such an…
+summary: The undeniable charm and intersection of Grime's works.
+tags: [music, art]
 legacyUrl: https://blog.satyam.lol/2022/04/grimes-intersection-of-background.html
 ---
 
@@ -23,9 +24,6 @@ The production on her albums is usually heavily reliant on synths, bass, and a l
 
 The contextualizing took longer than it took to talk about Grimes because honestly, she is an incredibly talented artist and someone you should give a listen to.
 
-The song I would recommend:
-
-The album I would recommend:
 
 I recommend reading my blogs with her music for a good self-contained litmus test on if my ramblings make any sense.
 

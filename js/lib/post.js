@@ -140,6 +140,7 @@ export function toIsoDate(value) {
 export function normalizePost({ slug, data = {}, body = '' }) {
   const id = String(slug || slugify(data.title || '')).trim();
   const published = isValidDate(data.date) ? new Date(data.date).toISOString() : '';
+  const explicitSummary = String(data.summary || '').trim();
   const tags = (Array.isArray(data.tags) ? data.tags : [])
     .map((tag) => String(tag).trim().toLowerCase())
     .filter(Boolean);
@@ -154,7 +155,11 @@ export function normalizePost({ slug, data = {}, body = '' }) {
     date: published.slice(0, 10),
     dateLabel: dateLabel(published),
     year: published.slice(0, 4),
-    summary: String(data.summary || '').trim() || excerpt(body, 200),
+    summary: explicitSummary || excerpt(body, 200),
+    // True when nobody wrote a summary and this is just the opening lines.
+    // The index card and meta description are fine with that; the post's own
+    // header is not, since the excerpt would sit right above that same text.
+    summaryIsGenerated: !explicitSummary,
     tags: [...new Set(tags)],
     draft: data.draft === true,
     cover: String(data.cover || '').trim(),

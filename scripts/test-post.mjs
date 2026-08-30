@@ -108,6 +108,17 @@ check('normalizePost derives a summary when none is given', normalized.summary.l
 check('normalizePost counts reading time', normalized.minutes === 2, String(normalized.minutes));
 check('normalizePost exposes the year', normalized.year === '2025', normalized.year);
 
+// The post page hides its header summary when it is just the opening lines
+// repeated; the flag it keys off has to be right in both directions.
+check('normalizePost flags a missing summary as generated', normalized.summaryIsGenerated === true);
+const withSummary = normalizePost({
+  slug: 'b-post',
+  data: { title: 'B Post', date: '2025-07-27', summary: 'A hand-written summary.' },
+  body: 'Some unrelated body text that the summary does not repeat.'
+});
+check('normalizePost keeps an explicit summary verbatim', withSummary.summary === 'A hand-written summary.', withSummary.summary);
+check('normalizePost flags an explicit summary as not generated', withSummary.summaryIsGenerated === false);
+
 const ordered = sortPosts([
   { title: 'b', published: '2021-01-01T00:00:00.000Z' },
   { title: 'a', published: '2025-01-01T00:00:00.000Z' }

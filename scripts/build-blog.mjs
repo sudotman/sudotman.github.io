@@ -129,6 +129,7 @@ function layout({ title, description, canonical, image, head = '', body, bodyCla
   <link rel="canonical" href="${escapeHtml(canonical)}">
   <link rel="alternate" type="application/rss+xml" title="satyam kashyap — writing" href="${SITE}/blog/feed.xml">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/copy-email.css?v=20260821a">
   <link rel="stylesheet" href="/css/blog.css?v=20260829a">
 ${head}</head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
@@ -197,7 +198,7 @@ ${chrome()}
     <header class="blog-masthead">
       <h1>writing</h1>
       <p class="blog-masthead__lead">Essays and notes, written here rather than rented from somewhere else. ${posts.length} post${posts.length === 1 ? '' : 's'}, ${years.at(-1) ? `${escapeHtml(years.at(-1))}–${escapeHtml(years[0])}` : 'so far'}.</p>
-      <p class="blog-masthead__note"><a href="/blog/feed.xml">subscribe by rss</a>.</p>
+      <p class="blog-masthead__note"><a href="/blog/feed.xml">subscribe by rss</a> · <a href="/write/">writer</a></p>
     </header>
 
     <main id="writing-index">
@@ -260,7 +261,7 @@ function postPage(post, { newer, older }, identity) {
     : '';
 
   const legacy = post.legacyUrl
-    ? `        <p class="post-legacy">First published on <a href="${escapeHtml(post.legacyUrl)}" target="_blank" rel="noreferrer nofollow">Blogspot</a>. This page is the canonical version.</p>`
+    ? `        <p class="post-legacy">First published on <a href="${escapeHtml(post.legacyUrl)}" target="_blank" rel="noreferrer nofollow">Blogspot</a>.</p>`
     : '';
 
   const neighbours = newer || older
@@ -278,7 +279,7 @@ ${chrome()}
       <header class="post-header">
         <p class="post-header__meta"><time datetime="${escapeHtml(post.date)}">${escapeHtml(post.dateLabel)}</time> · ${post.minutes} min read${post.updated && post.updated !== post.published ? ` · updated ${escapeHtml(dateLabel(post.updated))}` : ''}</p>
         <h1>${escapeHtml(post.title)}</h1>
-        <p class="post-header__summary">${escapeHtml(post.summary)}</p>
+        ${post.summaryIsGenerated ? '' : `<p class="post-header__summary">${escapeHtml(post.summary)}</p>`}
         ${tagList(post.tags, 'post-header__tags')}
 ${legacy}
       </header>

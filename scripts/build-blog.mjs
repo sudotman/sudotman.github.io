@@ -129,7 +129,7 @@ function layout({ title, description, canonical, image, head = '', body, bodyCla
   <link rel="canonical" href="${escapeHtml(canonical)}">
   <link rel="alternate" type="application/rss+xml" title="satyam kashyap — writing" href="${SITE}/blog/feed.xml">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/blog.css?v=20260830a">
+  <link rel="stylesheet" href="/css/blog.css?v=20260829a">
 ${head}</head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
 ${body}
@@ -196,8 +196,8 @@ ${chrome()}
 
     <header class="blog-masthead">
       <h1>writing</h1>
-      <p class="blog-masthead__lead">Essays and notes.</p>
-      <p class="blog-masthead__note"><a href="/blog/feed.xml">subscribe by rss</a> . <a href="/write">writer</a></p>
+      <p class="blog-masthead__lead">Essays and notes, written here rather than rented from somewhere else. ${posts.length} post${posts.length === 1 ? '' : 's'}, ${years.at(-1) ? `${escapeHtml(years.at(-1))}–${escapeHtml(years[0])}` : 'so far'}.</p>
+      <p class="blog-masthead__note"><a href="/blog/feed.xml">subscribe by rss</a>.</p>
     </header>
 
     <main id="writing-index">
@@ -232,32 +232,6 @@ function outlineMarkup(headings) {
       </nav>`;
 }
 
-function postNavigator(posts, currentPost) {
-  if (posts.length < 2) return '';
-
-  const currentIndex = posts.findIndex((post) => post.slug === currentPost.slug);
-  const items = posts.map((post, index) => {
-    const number = String(index + 1).padStart(2, '0');
-    const contents = `<span class="post-navigator__number" aria-hidden="true">${number}</span><span class="post-navigator__title">${escapeHtml(post.title)}</span><span class="post-navigator__when">${post.slug === currentPost.slug ? '<em>reading</em> · ' : ''}<time datetime="${escapeHtml(post.date)}">${escapeHtml(post.year)}</time></span>`;
-
-    return post.slug === currentPost.slug
-      ? `            <li><span class="post-navigator__item is-current" aria-current="page">${contents}</span></li>`
-      : `            <li><a class="post-navigator__item" href="${escapeHtml(post.href)}">${contents}</a></li>`;
-  }).join('\n');
-
-  return `    <nav class="post-navigator" aria-label="Browse all writing">
-      <details>
-        <summary>
-          <span><strong>writing index</strong> · choose another essay</span>
-          <span class="post-navigator__count">${String(currentIndex + 1).padStart(2, '0')} / ${String(posts.length).padStart(2, '0')}</span>
-        </summary>
-        <ol>
-${items}
-        </ol>
-      </details>
-    </nav>`;
-}
-
 function articleSchema(post, identity) {
   return JSON.stringify({
     '@context': 'https://schema.org',
@@ -275,7 +249,7 @@ function articleSchema(post, identity) {
   });
 }
 
-function postPage(post, { newer, older, posts }, identity) {
+function postPage(post, { newer, older }, identity) {
   const { html, headings } = renderMarkdown(post.body);
   const canonical = `${SITE}${post.href}`;
   const cover = post.cover
@@ -286,7 +260,7 @@ function postPage(post, { newer, older, posts }, identity) {
     : '';
 
   const legacy = post.legacyUrl
-    ? `        <p class="post-legacy">First published on <a href="${escapeHtml(post.legacyUrl)}" target="_blank" rel="noreferrer nofollow">Blogspot</a>.</p>`
+    ? `        <p class="post-legacy">First published on <a href="${escapeHtml(post.legacyUrl)}" target="_blank" rel="noreferrer nofollow">Blogspot</a>. This page is the canonical version.</p>`
     : '';
 
   const neighbours = newer || older
@@ -300,12 +274,11 @@ function postPage(post, { newer, older, posts }, identity) {
   <div class="blog-page blog-page--post">
 ${chrome()}
 
-${postNavigator(posts, post)}
-
     <article class="post">
       <header class="post-header">
         <p class="post-header__meta"><time datetime="${escapeHtml(post.date)}">${escapeHtml(post.dateLabel)}</time> · ${post.minutes} min read${post.updated && post.updated !== post.published ? ` · updated ${escapeHtml(dateLabel(post.updated))}` : ''}</p>
         <h1>${escapeHtml(post.title)}</h1>
+        <p class="post-header__summary">${escapeHtml(post.summary)}</p>
         ${tagList(post.tags, 'post-header__tags')}
 ${legacy}
       </header>
@@ -484,7 +457,7 @@ async function main() {
   await emit(path.join(BLOG_DIR, 'index.html'), indexPage(posts, identity));
 
   for (const [position, post] of posts.entries()) {
-    const neighbours = { newer: posts[position - 1], older: posts[position + 1], posts };
+    const neighbours = { newer: posts[position - 1], older: posts[position + 1] };
     await emit(path.join(BLOG_DIR, post.slug, 'index.html'), postPage(post, neighbours, identity));
   }
 

@@ -2,7 +2,6 @@
 title: "Grimes: Intersection of Background stimulus and Excellent Dream Art Pop"
 date: 2022-04-22
 summary: Music being one of the oldest art forms has obviously undergone major evolutions with major sonic differences helping us classify our beloved art form better. Music has become such an…
-tags: [music, culture]
 legacyUrl: https://blog.satyam.lol/2022/04/grimes-intersection-of-background.html
 ---
 

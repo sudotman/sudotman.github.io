@@ -7,14 +7,24 @@ function initScrollBasedDotAnimation() {
   let scrollTimeout;
   let ticking = false;
 
+  // Repainting the full-viewport dot canvas on every scroll frame is the single
+  // most expensive thing the deck does, and the field sits behind an almost
+  // opaque backdrop while the deck is open. Sample it instead of tracking every
+  // frame on the devices that can least afford it.
+  const scrollSampleMs = PERF.isLowEnd ? 160 : (PERF.isMobile ? 90 : 0);
+  let lastSample = 0;
+
   projectsContent.addEventListener('scroll', () => {
     const field = getPrimaryDotField();
     if (!field || field.asciiMode || !projectsContent.classList.contains('revealed')) return;
+    if (PERF.prefersReducedMotion) return;
 
     if (!ticking) {
       ticking = true;
-      requestAnimationFrame(() => {
+      requestAnimationFrame(timestamp => {
         ticking = false;
+        if (scrollSampleMs && timestamp - lastSample < scrollSampleMs) return;
+        lastSample = timestamp;
         const scrollRange = projectsContent.scrollHeight - projectsContent.clientHeight;
         field.setScrollState(scrollRange > 0 ? projectsContent.scrollTop / scrollRange : 0, 1);
       });
@@ -22,7 +32,7 @@ function initScrollBasedDotAnimation() {
 
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
-      if (typeof gsap !== 'undefined' && !PERF.prefersReducedMotion) {
+      if (typeof gsap !== 'undefined') {
         gsap.to(field, {
           scrollInfluence: 0,
           duration: 0.35,
@@ -698,6 +708,54 @@ function playShuffleSound() {
 
 /* ----------- Card Action Control Flag & Helpers ------------ */
 let cardActionInProgress = false;
+let cardActionWatchdog = null;
+
+// The deck scrolls inside #projects-content, not the window. Every card
+// measurement has to be taken against that box or a stack computed after a
+// scroll lands hundreds of pixels above the visible glass.
+function getDeckScroller() {
+  return document.getElementById('projects-content');
+}
+
+// Card animations own the inline transform while they run; layout owns it at
+// rest. Anything that re-lays the grid out (filters, tracks, resize) has to
+// hand ownership back or the cards keep their stale offsets and scatter.
+function resetCardTransforms(cards) {
+  if (typeof gsap === 'undefined') return;
+  const targets = cards || document.querySelectorAll('.projects-grid .project-card');
+  targets.forEach(card => {
+    gsap.killTweensOf(card);
+    gsap.set(card, { clearProps: 'transform,translate,rotate,scale,x,y,opacity,zIndex' });
+    card.style.removeProperty('z-index');
+  });
+}
+
+// A timeline that never completes (backgrounded tab, interrupted animation)
+// used to latch the flag on and disable stack/shuffle for the rest of the
+// session. The watchdog makes the lock self-releasing.
+function beginCardAction(maxDurationMs = 6000) {
+  cardActionInProgress = true;
+  // The cards carry a 200ms transform transition for the hover lift. While gsap
+  // is writing a transform every frame that transition lags each write, so the
+  // deck rubber-bands and the rects the animation measures are stale.
+  document.querySelector('.projects-grid')?.classList.add('is-animating');
+  setCardActionButtonsDisabled(true);
+  clearTimeout(cardActionWatchdog);
+  // A shuffle that is interrupted between its fade out and its fade in leaves
+  // the whole deck at zero opacity, so the recovery path has to put the cards
+  // back rather than just re-enable the buttons.
+  cardActionWatchdog = setTimeout(() => endCardAction({ restore: true }), maxDurationMs);
+}
+
+function endCardAction({ restore = false } = {}) {
+  clearTimeout(cardActionWatchdog);
+  cardActionWatchdog = null;
+  cardActionInProgress = false;
+  document.querySelector('.projects-grid')?.classList.remove('is-animating');
+  if (restore) resetCardTransforms();
+  setCardActionButtonsDisabled(false);
+  syncCardActionAvailability();
+}
 
 function setCardActionButtonsDisabled(disabled) {
   document.querySelectorAll('.cards-action-btn').forEach(btn => {
@@ -724,40 +782,33 @@ function syncCardActionAvailability() {
 /* ------------------- Card Stack & Shuffle Controls ------------------- */
 function stackProjectCards() {
   if (cardActionInProgress) return; // prevent overlapping actions
-  cardActionInProgress = true;
-  setCardActionButtonsDisabled(true);
-
-  // Play stack sound
-  playStackSound();
   const grid = document.querySelector('.projects-grid');
-  if (!grid) {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
-    syncCardActionAvailability();
-    return;
-  }
-  const cards = Array.from(grid.querySelectorAll('.project-card:not([hidden])'));
-  if (!cards.length) {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
-    syncCardActionAvailability();
-    return;
-  }
+  const cards = grid ? Array.from(grid.querySelectorAll('.project-card:not([hidden])')) : [];
+  if (!grid || !cards.length || typeof gsap === 'undefined') return;
+
+  beginCardAction();
+  playStackSound();
 
   const gridRect = grid.getBoundingClientRect();
-  const centerX = gridRect.left + gridRect.width / 2;
   const tallestCard = Math.max(...cards.map(card => card.offsetHeight));
   const stackClearance = Math.max(18, Math.min(40, gridRect.width * 0.025));
-  const centerY = gridRect.top + (tallestCard / 2) + stackClearance;
+
+  // Anchor the pile to what the reader can actually see. Using the grid's own
+  // rect sends the stack off the top of the glass as soon as the deck has been
+  // scrolled, because that rect is viewport-relative and goes negative.
+  const scroller = getDeckScroller();
+  const viewRect = scroller ? scroller.getBoundingClientRect() : gridRect;
+  const centerX = gridRect.left + (gridRect.width / 2);
+  const centerY = Math.min(
+    viewRect.top + (tallestCard / 2) + stackClearance,
+    viewRect.bottom - (tallestCard / 2) - stackClearance
+  );
   const stackSpread = Math.min(10, 3 + (cards.length * 0.35));
 
   // Create satisfying stacking animation with momentum
   const tl = gsap.timeline({
-    onComplete: () => {
-      cardActionInProgress = false;
-      setCardActionButtonsDisabled(false);
-      syncCardActionAvailability();
-    }
+    onComplete: () => endCardAction(),
+    onInterrupt: () => endCardAction({ restore: true })
   });
 
   const eased = gsap.parseEase('steps(6)');
@@ -815,33 +866,15 @@ function stackProjectCards() {
 
 function shuffleProjectCards() {
   if (cardActionInProgress) return; // prevent overlapping actions
-  cardActionInProgress = true;
-  setCardActionButtonsDisabled(true);
-
-  // Play shuffle sound
-  playShuffleSound();
   const grid = document.querySelector('.projects-grid');
-  if (!grid) {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
-    syncCardActionAvailability();
-    return;
-  }
-  const cards = Array.from(grid.querySelectorAll('.project-card:not([hidden])'));
-  if (!cards.length) {
-    cardActionInProgress = false;
-    setCardActionButtonsDisabled(false);
-    syncCardActionAvailability();
-    return;
-  }
+  const cards = grid ? Array.from(grid.querySelectorAll('.project-card:not([hidden])')) : [];
+  if (!grid || !cards.length || typeof gsap === 'undefined') return;
+
+  beginCardAction();
+  playShuffleSound();
 
   // Reset any transforms so layout is authoritative
-  cards.forEach(card => {
-    const tilt = Number.parseFloat(
-      window.getComputedStyle(card).getPropertyValue('--card-tilt')
-    ) || 0;
-    gsap.set(card, { x: 0, y: 0, rotation: tilt, scale: 1 });
-  });
+  resetCardTransforms(cards);
 
   const fadeOutDuration = PERF && PERF.isLowEnd ? 0.08 : 0.12;
   const fadeInDuration = PERF && PERF.isLowEnd ? 0.10 : 0.15;
@@ -863,10 +896,12 @@ function shuffleProjectCards() {
         duration: fadeInDuration,
         ease: 'power1.out',
         onComplete: () => {
-          cardActionInProgress = false;
-          setCardActionButtonsDisabled(false);
-          syncCardActionAvailability();
-        }
+          // Hand the transform back to the stylesheet so tilt and the hover
+          // lift keep working after a shuffle.
+          resetCardTransforms(cards);
+          endCardAction();
+        },
+        onInterrupt: () => endCardAction({ restore: true })
       });
     }
   });
@@ -995,6 +1030,12 @@ function applyProjectFilters({ announce = false, animate = false } = {}) {
   const empty = document.getElementById('projects-empty');
   const filterButton = document.querySelector('.filter-cards-btn');
   if (!grid) return;
+
+  // A stack or a drag leaves inline offsets on the cards. The grid is about to
+  // re-flow around a different visible set, so those offsets have to go or the
+  // surviving cards land wherever the last animation parked them.
+  resetCardTransforms();
+  if (cardActionInProgress) endCardAction();
 
   let visibleCount = 0;
   grid.querySelectorAll('.project-card').forEach(card => {

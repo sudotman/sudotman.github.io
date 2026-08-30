@@ -40,9 +40,14 @@
     animation: none;
   }
 
+  /* The sweep animates background-position across a full-viewport blended
+     layer, which repaints the whole screen every frame for as long as the page
+     is open. That is the bulk of the scroll jank on phones. Hold the retrace
+     band still instead and keep the phosphor dither. */
   body::after {
     opacity: 0.28;
-    animation-duration: 44s;
+    animation: none;
+    background-position: 0 34%, 0 0;
   }
 
   .osmo-ui::before {

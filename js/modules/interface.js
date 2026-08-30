@@ -35,6 +35,10 @@ function returnToDots() {
   if (typeof closeFilterDropdown === 'function') closeFilterDropdown();
   
   if (dotsContainer && projectsContent && centerIcon) {
+    // Leaving with a stacked or dragged deck used to mean returning to a pile
+    // of cards parked wherever the last animation left them.
+    if (typeof resetCardTransforms === 'function') resetCardTransforms();
+
     // Hide projects content
     projectsContent.classList.remove('revealed');
     projectsContent.setAttribute('aria-hidden', 'true');

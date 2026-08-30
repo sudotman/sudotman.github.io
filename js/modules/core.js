@@ -553,10 +553,15 @@ function initGlowingInteractiveDotsGrid() {
 document.addEventListener('DOMContentLoaded', function() {
   initGlowingInteractiveDotsGrid();
   loadProjects().then(() => {
-    const shouldDisableDrag = compactViewportQuery.matches || !finePointerQuery.matches;
-    if (!shouldDisableDrag) {
+    const enableDrag = () => {
+      if (compactViewportQuery.matches || !finePointerQuery.matches) return;
       initCardDragSystem();
-    }
+    };
+    enableDrag();
+    // A phone rotated into a wide layout, or a tablet docked to a keyboard,
+    // should still get the deck; the boot-time check alone never re-runs.
+    compactViewportQuery.addEventListener?.('change', enableDrag);
+    finePointerQuery.addEventListener?.('change', enableDrag);
   });
   loadProfileData();
   initTabSwitching();
@@ -1108,15 +1113,41 @@ function initCardDragSystem() {
   if (cardDragSystemInitialized || typeof gsap === 'undefined') return;
   cardDragSystemInitialized = true;
 
+  const DRAG_THRESHOLD = 3;
   let currentCard = null;
   let activePointerId = null;
   let startX = 0;
   let startY = 0;
+  let startScrollTop = 0;
   let originX = 0;
   let originY = 0;
   let highestZIndex = 200;
   let pendingPoint = null;
   let moveRAF = null;
+  let moved = false;
+
+  function deckScroller() {
+    return document.getElementById('projects-content');
+  }
+
+  // The stylesheet owns the card transform at rest (tilt plus the hover lift).
+  // gsap borrows it for the length of a drag and hands it straight back, so a
+  // card that was only clicked never ends up pinned to an inline transform.
+  function releaseTransform(card) {
+    gsap.set(card, { clearProps: 'transform,translate,rotate,scale,x,y' });
+    card.style.removeProperty('z-index');
+  }
+
+  function offsetFor(point) {
+    const scroller = deckScroller();
+    // The card scrolls with the deck, so the pointer delta alone is not enough
+    // to keep it under the cursor when the wheel turns mid-drag.
+    const scrollDelta = scroller ? startScrollTop - scroller.scrollTop : 0;
+    return {
+      x: originX + point.x - startX,
+      y: originY + point.y - startY - scrollDelta
+    };
+  }
 
   function handleStart(e, card) {
     if (compactViewportQuery.matches || !finePointerQuery.matches) return;
@@ -1128,8 +1159,10 @@ function initCardDragSystem() {
     activePointerId = e.pointerId;
     startX = e.clientX;
     startY = e.clientY;
+    startScrollTop = deckScroller()?.scrollTop || 0;
     originX = Number(gsap.getProperty(card, 'x')) || 0;
     originY = Number(gsap.getProperty(card, 'y')) || 0;
+    moved = false;
 
     gsap.killTweensOf(card);
     card.classList.add('dragging');
@@ -1137,28 +1170,30 @@ function initCardDragSystem() {
     card.style.zIndex = ++highestZIndex;
     card.setPointerCapture?.(e.pointerId);
 
-    gsap.to(card, {
-      scale: 1.035,
-      rotation: 0,
-      duration: PERF.prefersReducedMotion ? 0 : 0.16,
-      ease: 'power2.out'
-    });
-
     e.preventDefault();
   }
 
   function handleMove(e) {
     if (!currentCard || e.pointerId !== activePointerId) return;
     pendingPoint = { x: e.clientX, y: e.clientY };
-    if (moveRAF) return;
 
+    if (!moved) {
+      if (Math.abs(pendingPoint.x - startX) < DRAG_THRESHOLD
+        && Math.abs(pendingPoint.y - startY) < DRAG_THRESHOLD) return;
+      moved = true;
+      gsap.to(currentCard, {
+        scale: 1.035,
+        rotation: 0,
+        duration: PERF.prefersReducedMotion ? 0 : 0.16,
+        ease: 'power2.out'
+      });
+    }
+
+    if (moveRAF) return;
     moveRAF = requestAnimationFrame(() => {
       moveRAF = null;
       if (!pendingPoint || !currentCard) return;
-      gsap.set(currentCard, {
-        x: originX + pendingPoint.x - startX,
-        y: originY + pendingPoint.y - startY
-      });
+      gsap.set(currentCard, offsetFor(pendingPoint));
     });
 
     e.preventDefault();
@@ -1172,12 +1207,6 @@ function initCardDragSystem() {
       cancelAnimationFrame(moveRAF);
       moveRAF = null;
     }
-    if (pendingPoint) {
-      gsap.set(releasedCard, {
-        x: originX + pendingPoint.x - startX,
-        y: originY + pendingPoint.y - startY
-      });
-    }
 
     releasedCard.classList.remove('dragging');
     releasedCard.setAttribute('aria-grabbed', 'false');
@@ -1185,36 +1214,28 @@ function initCardDragSystem() {
       releasedCard.releasePointerCapture(e.pointerId);
     }
 
-    gsap.to(releasedCard, {
-      scale: 1,
-      duration: PERF.prefersReducedMotion ? 0 : 0.18,
-      ease: 'power2.out'
-    });
+    if (!moved) {
+      releaseTransform(releasedCard);
+    } else {
+      if (pendingPoint) gsap.set(releasedCard, offsetFor(pendingPoint));
+      gsap.to(releasedCard, {
+        scale: 1,
+        duration: PERF.prefersReducedMotion ? 0 : 0.18,
+        ease: 'power2.out'
+      });
+    }
 
     currentCard = null;
     activePointerId = null;
     pendingPoint = null;
+    moved = false;
   }
 
   function setupCardEvents() {
-    const cards = document.querySelectorAll('.project-card');
-
-    cards.forEach(card => {
+    document.querySelectorAll('.project-card').forEach(card => {
       if (card.dataset.dragBound === 'true') return;
       card.dataset.dragBound = 'true';
       card.setAttribute('aria-grabbed', 'false');
-
-      const tilt = Number.parseFloat(
-        window.getComputedStyle(card).getPropertyValue('--card-tilt')
-      ) || 0;
-
-      gsap.set(card, {
-        x: 0,
-        y: 0,
-        rotation: tilt,
-        transformOrigin: '50% 50%'
-      });
-
       card.addEventListener('pointerdown', e => handleStart(e, card));
     });
   }
@@ -1222,6 +1243,18 @@ function initCardDragSystem() {
   document.addEventListener('pointermove', handleMove, { passive: false });
   document.addEventListener('pointerup', handleEnd);
   document.addEventListener('pointercancel', handleEnd);
+
+  // A resize re-flows the grid under any dragged or stacked card. Put every
+  // card back on its layout position rather than leaving stale offsets behind.
+  let dragResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(dragResizeTimer);
+    dragResizeTimer = setTimeout(() => {
+      if (currentCard) return;
+      if (typeof resetCardTransforms === 'function') resetCardTransforms();
+    }, 160);
+  });
+
   setupCardEvents();
 }
 

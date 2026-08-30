@@ -212,22 +212,22 @@ button {
 
 .work-lead__link {
   display: grid;
-  grid-template-columns: 30px minmax(190px, 0.75fr) 1fr;
+  grid-template-columns: 22px minmax(150px, 0.5fr) 1fr;
   gap: 18px;
-  padding: 16px 4px 17px 0;
+  padding: 13px 4px 14px 0;
   color: inherit;
   text-decoration: none;
 }
 
 .work-lead__mark {
-  font: 13px/1.9 "Courier New", monospace;
+  font: 11px/2.1 "Courier New", monospace;
 }
 
 .work-lead__title {
   margin: 0;
   color: var(--link);
-  font: 700 clamp(1.35rem, 2.8vw, 2.5rem)/1 Arial, Helvetica, sans-serif;
-  letter-spacing: -0.04em;
+  font: 700 clamp(1.2rem, 1.9vw, 1.75rem)/1.1 Arial, Helvetica, sans-serif;
+  letter-spacing: -0.025em;
   overflow-wrap: anywhere;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -773,9 +773,9 @@ button {
 
   /* The lead tier stacks: there is no room for a title column beside a body. */
   .work-lead__link {
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: 7px 10px;
-    padding: 14px 4px 15px 0;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 5px 9px;
+    padding: 12px 4px 13px 0;
   }
 
   .work-lead__body {

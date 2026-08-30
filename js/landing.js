@@ -505,7 +505,7 @@
       ${detailImages(work)}`
   });
 
-  const reviewState = { visibleCount: 0, ensure: null };
+  const reviewState = { visibleCount: 0, ensure: null, showUpTo: null };
 
   const reviewDialog = createRecordDialog({
     root: reviewDialogElement,
@@ -555,8 +555,59 @@
       if (index >= reviewState.visibleCount) showUpTo(index + 1);
     };
 
+    reviewState.showUpTo = showUpTo;
     loadMore?.addEventListener("click", () => showUpTo(reviewState.visibleCount + REVIEW_BATCH_SIZE));
   }
+
+  /* ---------------------------------------------------------------------- */
+  /* Scroll memory                                                           */
+  /* ---------------------------------------------------------------------- */
+
+  const SCROLL_KEY = "landing:position";
+
+  // This page only renders once its JSON arrives, so on a back-navigation the
+  // browser has nothing tall enough to restore to and drops you at the top.
+  // Take it over: record the offset on the way out, reapply it once the page
+  // exists. How many reviews were expanded goes with it, or a position below
+  // the collapsed list would clamp to the bottom.
+  function rememberPosition() {
+    try {
+      sessionStorage.setItem(SCROLL_KEY, JSON.stringify({
+        y: Math.round(window.scrollY),
+        reviews: reviewState.visibleCount
+      }));
+    } catch {
+      /* Private mode can refuse writes; losing the offset is not worth an error. */
+    }
+  }
+
+  function applySavedPosition() {
+    let saved = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || "null");
+    } catch {
+      return;
+    }
+    if (!saved || !(saved.y > 0)) return;
+    if (saved.reviews > 0) reviewState.showUpTo?.(saved.reviews);
+    window.scrollTo({ top: saved.y, behavior: "instant" });
+  }
+
+  function bindScrollMemory() {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.addEventListener("pagehide", rememberPosition);
+    // pagehide is unreliable on iOS, where hiding the tab is the exit signal.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") rememberPosition();
+    });
+    // A back-forward that hits the bfcache keeps the rendered page, so restore
+    // there too rather than leaving it to the restoration we just turned off.
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) applySavedPosition();
+    });
+  }
+
+  const arrivedByHistory = () => performance.getEntriesByType?.("navigation")[0]?.type === "back_forward";
 
   function syncDialogFromUrl() {
     const projectId = hashValue("project");
@@ -600,6 +651,8 @@
     window.addEventListener("popstate", syncDialogFromUrl);
   }
 
+  bindScrollMemory();
+
   loadPortfolio()
     .then((portfolio) => {
       projectDialog.setRecords(portfolio.workMap);
@@ -607,6 +660,7 @@
       reviewDialog.setSequence(portfolio.reviews.map((review) => review.id));
       render(portfolio);
       bindInteractions(portfolio);
+      if (arrivedByHistory()) applySavedPosition();
       syncDialogFromUrl();
     })
     .catch((error) => {

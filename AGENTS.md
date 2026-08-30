@@ -49,6 +49,7 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - Prefer changing data files over hardcoding content into HTML.
 - The front door renders one Work section in two tiers, not a selected list plus a full index that repeats it. `featured` decides which works lead and in what order; everything else follows alphabetically under `everything else`. Keep every work to a single appearance, and keep the section free of filter, search and sort controls.
 - Both landing dialogs share `createRecordDialog` in `js/landing.js`. Add behaviour there rather than to one dialog, so the project and review records stay identical.
+- The front door restores its own scroll position because it renders after fetching. If you change when `render` runs, keep `applySavedPosition` after it, or back-navigation from the blog and the branches lands at the top again.
 - Keep shared homepage logic inside the existing module split instead of creating a new monolith.
 - For responsiveness work, fix the base rule first when possible; use `mobile.css` for targeted overrides.
 - For the dots system, preserve the canvas-backed approach unless there is a strong reason to reintroduce DOM-heavy rendering.

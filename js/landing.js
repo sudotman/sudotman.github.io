@@ -307,7 +307,7 @@
 
         <section class="hyper-work" id="work">
           <h2>Work</h2>
-          <p class="section-note">★ marks the ones I would show you first. Open any row to read the record — inside it, ← and → move between them.</p>
+          <p class="section-note">★ marks the ones I am <i>currently</i> most proud of. Open any row to read the record, ← and → move between them.</p>
           <ol class="work-lead-list">${leadRegister(lead)}</ol>
           ${rest.length ? `
           <div class="work-rest">
@@ -324,7 +324,7 @@
 
         <section class="hyper-reviews" id="film-writing">
           <h2>Film writing</h2>
-          <p class="section-note">Some of my writings from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Open a title to read the full note here, then keep moving with ← and →.</p>
+          <p class="section-note">Expect sometimes profound, sometimes low-brow, sometimes erudite, sometimes frustratingly colloquial, sometimes structured and sometimes akin to a scribble.</p>
           <ol class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ol>
           ${reviews.length > initialReviews.length ? `<button class="review-index__load-more" type="button" data-review-load-more aria-controls="review-index">load more reviews (${initialReviews.length}/${reviews.length})</button>` : ""}
         </section>
@@ -669,7 +669,7 @@
         <main class="landing-error" id="landing-main">
           <h1>Satyam Kashyap</h1>
           <p>The project index did not load.</p>
-          <p><a href="/living/">Living</a> · <a href="/river/">River</a> · <a href="/doors/">Doors</a> · <a href="/tech.html">Core Tech</a></p>
+          <p><a href="/living/">Living</a> · <a href="/river/">River</a> · <a href="/doors/">Doors</a> · <a href="/tech.html">ononline</a></p>
         </main>`;
     });
 })();

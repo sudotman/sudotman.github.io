@@ -2,15 +2,15 @@
 
 ## Repo Purpose
 
-This repository powers the complete static portfolio network at `satyam.lol`. The parent experience is `index.html`; creative routes and the Core Tech field manual are hosted by the same repository.
+This repository powers the complete static portfolio network at `satyam.lol`. The parent experience is `index.html`; creative routes and the ononline field manual are hosted by the same repository.
 
 ## Working Boundaries
 
 - Treat `index.html` as the parent crossing.
 - Treat `living/`, `river/`, and `doors/` as three renderings of `content/creative.json` through `js/creative-network.js`.
-- Treat `tech.html` as the Core Tech homepage shell, with shared assets in `css/modules/` and `js/modules/`.
+- Treat `tech.html` as the ononline homepage shell, with shared assets in `css/modules/` and `js/modules/`.
 - Treat `content/home.json` as the source of truth for the front door: identity, `now`, `featured` order, branches, external feeds, and homepage-only work records.
-- Treat `content.json` and `profile.json` as the source of truth for Core Tech (`tech.html`) content and taxonomy.
+- Treat `content.json` and `profile.json` as the source of truth for ononline (`tech.html`) content and taxonomy.
 - Treat `content/creative.json` as presentation-only for the creative archive. It references a canonical `workId`; identity, summaries, links, and media resolve from `content/home.json` and its registered feed.
 - Treat `content/posts/*.md` as the source of truth for the blog. One file is one post; the filename is the slug.
 - Treat `blog/`, `content/blog.json`, the `blog:start`/`blog:end` block in `sitemap.xml`, and `docs/` as generated. Never hand-edit them; run `npm run build`.
@@ -27,7 +27,7 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - `css/blog.css`, `js/blog.js`: the writing index and post pages
 - `write/index.html`, `css/editor.css`, `js/editor.js`: the editor, which commits posts via the GitHub contents API
 
-## Core Tech Module Map
+## ononline Module Map
 
 ### CSS
 

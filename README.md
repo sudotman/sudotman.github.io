@@ -14,9 +14,9 @@ Everything is plain HTML, CSS, JavaScript, JSON, and Markdown deployed through G
 - `/blog/<slug>/`: a post, rendered to static HTML at build time
 - `/blog/feed.xml`: RSS, with full post content
 - `/write/`: the editor (noindex, and disallowed in `robots.txt`)
-- `/tech.html`: the complete Core Tech field manual and project dossiers
+- `/tech.html`: the complete ononline field manual and project dossiers
 
-The root is intentionally brief. It establishes Satyam's identity, current practice, films, R&D, public-code products, and writing without duplicating the full dossiers. Living, River, Doors, and Core Tech remain the deeper entrances.
+The root is intentionally brief. It establishes Satyam's identity, current practice, films, R&D, public-code products, and writing without duplicating the full dossiers. Living, River, Doors, and ononline remain the deeper entrances.
 
 Standalone surfaces remain isolated unless deliberately folded into the network:
 
@@ -27,16 +27,16 @@ Standalone surfaces remain isolated unless deliberately folded into the network:
 
 ### `content.json`
 
-The original, deliberately small Core Tech manifest contains:
+The original, deliberately small ononline manifest contains:
 
-- `siteHeader`: the Core Tech archive introduction
+- `siteHeader`: the ononline archive introduction
 - `catalog.tracks` and `catalog.mediums`: shared taxonomy
 - `catalog.sources`: the ordered publishing-feed registry
 
 The current feeds are:
 
 - `content/programming.json`: technical and programming work
-- `content/film-art.json`: the original, currently empty Core Tech publishing path for films and art
+- `content/film-art.json`: the original, currently empty ononline publishing path for films and art
 
 ### `content/home.json`
 
@@ -45,7 +45,7 @@ The front page source is intentionally compact:
 - `identity`: name, role, introduction, contact, and public profiles
 - `now`: the film and applied-R&D notes currently in progress
 - `featured`: stable ids for the works that lead the Work section, in the order they appear there
-- `branches`: the four existing ways to go deeper — Living, River, Doors, and Core Tech
+- `branches`: the four existing ways to go deeper — Living, River, Doors, and ononline
 - `externalFeeds`: the Letterboxd feed/archive URLs, the generated caches (`cache` for reviews, `blog` for the writing index), and the long-review threshold
 - `works`: concise homepage-only records
 - `sources`: the existing technical feed used to complete the 27-project index
@@ -64,7 +64,7 @@ Do not duplicate identity, summaries, links, or media here. Those resolve from `
 
 ### `profile.json`
 
-This controls the detailed Core Tech profile:
+This controls the detailed ononline profile:
 
 - experience
 - education
@@ -94,7 +94,7 @@ The Pages workflow rebuilds the blog and refreshes the Letterboxd feed on every 
 - `css/creative-network.css`: shared styling for Living, River, and Doors
 - `js/creative-network.js`: canonical-data resolution and route-specific interactions
 
-### Core Tech
+### ononline
 
 CSS modules:
 
@@ -111,7 +111,7 @@ JavaScript modules:
 - `js/modules/content.js`
 - `js/modules/heatmap.js`
 
-Core Tech supports its existing `#work/<id>` deep links.
+ononline supports its existing `#work/<id>` deep links.
 
 ## The blog
 
@@ -220,7 +220,7 @@ Published public code without an explicit license should be described as public 
 npm test
 ```
 
-The validator checks the Core Tech manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, blog frontmatter, and local assets. It also fails when `content/blog.json` has drifted from `content/posts/`. It has no package dependencies.
+The validator checks the ononline manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, blog frontmatter, and local assets. It also fails when `content/blog.json` has drifted from `content/posts/`. It has no package dependencies.
 
 Run `node --check` on any changed JavaScript file as well.
 
@@ -257,7 +257,7 @@ npm run sync
 ## Maintenance rule of thumb
 
 - Identity, front-door language, featured order, branches, and homepage-only work: `content/home.json`
-- Core Tech manifest and taxonomy: `content.json`
+- ononline manifest and taxonomy: `content.json`
 - Technical work: `content/programming.json`
 - Films and art: `content/film-art.json`
 - Creative-archive appearance and order: `content/creative.json`
@@ -268,4 +268,4 @@ npm run sync
 - Markdown rendering and the post file format: `js/lib/markdown.js` and `js/lib/post.js`
 - Front-door visuals or behavior: `css/landing.css` and `js/landing.js`
 - Living, River, or Doors: `css/creative-network.css` and `js/creative-network.js`
-- Core Tech: the existing files under `css/modules/` and `js/modules/`
+- ononline: the existing files under `css/modules/` and `js/modules/`

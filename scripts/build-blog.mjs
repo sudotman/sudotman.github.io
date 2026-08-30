@@ -144,7 +144,7 @@ function chrome() {
         <a href="/">[home]</a>
         <a href="/blog/">[writing]</a>
         <a href="/blog/feed.xml">[rss]</a>
-        <a href="/tech.html">[core tech]</a>
+        <a href="/tech.html">[ononline]</a>
       </nav>`;
 }
 

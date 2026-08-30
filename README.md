@@ -44,7 +44,7 @@ The front page source is intentionally compact:
 
 - `identity`: name, role, introduction, contact, and public profiles
 - `now`: the film and applied-R&D notes currently in progress
-- `featured`: stable ids for the selected-project list
+- `featured`: stable ids for the works that lead the Work section, in the order they appear there
 - `branches`: the four existing ways to go deeper — Living, River, Doors, and Core Tech
 - `externalFeeds`: the Letterboxd feed/archive URLs, the generated caches (`cache` for reviews, `blog` for the writing index), and the long-review threshold
 - `works`: concise homepage-only records
@@ -76,10 +76,14 @@ This controls the detailed Core Tech profile:
 ### Front door
 
 - `index.html`: accessible shell, SEO metadata, and no-script fallback
-- `css/landing.css`: the responsive Hypertext visual system and project dialog
-- `js/landing.js`: compact data loading, visible indexes, branch register, and native project records
+- `css/landing.css`: the responsive Hypertext visual system, the work register, and the record dialogs
+- `js/landing.js`: compact data loading, the filterable work register, branch register, and native project records
 
-The front page exposes identity, current work, selected projects, the complete project index, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches. Project summaries stay visible; opening a project or review reveals its full record in a dedicated native dialog.
+The front page exposes identity, current work, one filterable work register, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches.
+
+Work is one section in two tiers rather than a selected list plus a full index that repeated it. Every project appears exactly once. The `featured` ids lead, in the author's order, each given a full row — ★, large title, medium and year, summary. Everything else follows under `everything else` as one compact line each, alphabetically. There are no filters, no search and no sort control: the two tiers are the whole interface.
+
+Opening a project or review reveals its full record in a native dialog. Both dialogs are driven by one controller, so they behave identically: `←`/`→` and the arrow keys step to the neighbouring record, the bar shows the position in the sequence, and `esc` closes. The project sequence runs across both tiers in reading order, so stepping past the last featured record continues into `everything else`. Opening pushes a single history entry, so one Back leaves the record however far you stepped; closing returns focus and scroll to the row you were actually reading, not the one you opened from.
 
 The Pages workflow rebuilds the blog and refreshes the Letterboxd feed on every deployment and every six hours. A checked-in cache keeps local development and deployments resilient when a source is briefly unavailable.
 

@@ -15,34 +15,44 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://satyam.lol/">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/copy-email.css?v=20260821a">
-  <link rel="stylesheet" href="/css/landing.css?v=20260821a">
-  <script src="/js/copy-email.js?v=20260821a" defer></script>
-  <script src="/js/landing.js?v=20260821a" defer></script>
+  <link rel="stylesheet" href="/css/copy-email.css?v=20260830a">
+  <link rel="stylesheet" href="/css/landing.css?v=20260830a">
+  <script src="/js/copy-email.js?v=20260830a" defer></script>
+  <script src="/js/landing.js?v=20260830a" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#selected-work">Skip to selected work</a>
+  <a class="skip-link" href="#work">Skip to the work index</a>
   <div id="landing-app">
     <main class="landing-loading" id="landing-main">
       <p>reading /content/home.json…</p>
     </main>
   </div>
-  <dialog class="project-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
-    <div class="project-dialog__shell">
-      <header>
-        <span>project record</span>
-        <button type="button" data-dialog-close>close [esc]</button>
+  <dialog class="record-dialog project-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+    <div class="record-dialog__shell">
+      <header class="record-dialog__bar">
+        <span class="record-dialog__label">project record</span>
+        <span class="record-dialog__nav">
+          <button type="button" data-dialog-prev aria-label="Previous project">&#8592;</button>
+          <span class="record-dialog__position" data-dialog-position aria-live="polite"></span>
+          <button type="button" data-dialog-next aria-label="Next project">&#8594;</button>
+        </span>
+        <button type="button" class="record-dialog__close" data-dialog-close>close [esc]</button>
       </header>
-      <div class="project-dialog__body" data-project-detail></div>
+      <div class="record-dialog__body project-dialog__body" data-dialog-body></div>
     </div>
   </dialog>
-  <dialog class="project-dialog review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
-    <div class="project-dialog__shell">
-      <header>
-        <span>letterboxd review</span>
-        <button type="button" data-review-dialog-close>close [esc]</button>
+  <dialog class="record-dialog project-dialog review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+    <div class="record-dialog__shell">
+      <header class="record-dialog__bar">
+        <span class="record-dialog__label">letterboxd review</span>
+        <span class="record-dialog__nav">
+          <button type="button" data-dialog-prev aria-label="Previous review">&#8592;</button>
+          <span class="record-dialog__position" data-dialog-position aria-live="polite"></span>
+          <button type="button" data-dialog-next aria-label="Next review">&#8594;</button>
+        </span>
+        <button type="button" class="record-dialog__close" data-dialog-close>close [esc]</button>
       </header>
-      <div class="project-dialog__body" data-review-detail></div>
+      <div class="record-dialog__body project-dialog__body" data-dialog-body></div>
     </div>
   </dialog>
   <noscript>

@@ -47,6 +47,8 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 ## Editing Guidance
 
 - Prefer changing data files over hardcoding content into HTML.
+- The front door renders one Work section in two tiers, not a selected list plus a full index that repeats it. `featured` decides which works lead and in what order; everything else follows alphabetically under `everything else`. Keep every work to a single appearance, and keep the section free of filter, search and sort controls.
+- Both landing dialogs share `createRecordDialog` in `js/landing.js`. Add behaviour there rather than to one dialog, so the project and review records stay identical.
 - Keep shared homepage logic inside the existing module split instead of creating a new monolith.
 - For responsiveness work, fix the base rule first when possible; use `mobile.css` for targeted overrides.
 - For the dots system, preserve the canvas-backed approach unless there is a strong reason to reintroduce DOM-heavy rendering.

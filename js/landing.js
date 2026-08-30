@@ -2,13 +2,9 @@
   "use strict";
 
   const app = document.getElementById("landing-app");
-  const dialog = document.getElementById("project-dialog");
-  const detail = dialog?.querySelector("[data-project-detail]");
-  const closeButton = dialog?.querySelector("[data-dialog-close]");
-  const reviewDialog = document.getElementById("review-dialog");
-  const reviewDetail = reviewDialog?.querySelector("[data-review-detail]");
-  const reviewCloseButton = reviewDialog?.querySelector("[data-review-dialog-close]");
-  if (!app || !dialog || !detail || !closeButton || !reviewDialog || !reviewDetail || !reviewCloseButton) return;
+  const projectDialogElement = document.getElementById("project-dialog");
+  const reviewDialogElement = document.getElementById("review-dialog");
+  if (!app || !projectDialogElement || !reviewDialogElement) return;
 
   const REVIEW_BATCH_SIZE = 12;
 
@@ -64,6 +60,13 @@
       .replaceAll(/<\/li>/gi, "\n");
     return (template.content.textContent || "").replaceAll(/\n{3,}/g, "\n\n").trim();
   };
+
+  const paragraphs = (value) => String(value || "")
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
+    .join("");
+
+  const ordinal = (index, total) => `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
 
   const yearFor = (work) => work.sortDate
     ? String(work.sortDate).slice(0, 4)
@@ -131,6 +134,8 @@
     };
   }
 
+  const titleComparator = (a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" });
+
   async function loadPortfolio() {
     const home = await fetchJson("/content/home.json");
     const feeds = await Promise.all((home.sources || []).map((source) => fetchJson(`/${String(source).replace(/^\/+/, "")}`)));
@@ -156,15 +161,23 @@
     ];
     const unique = [...new Map(works.map((work) => [work.id, work])).values()];
     const map = new Map(unique.map((work) => [work.id, work]));
+
+    // Two tiers, one appearance each: the author's featured order leads, the
+    // remainder follows alphabetically.
+    const featuredIds = new Set((home.featured || []).filter((id) => map.has(id)));
+    const lead = (home.featured || []).map((id) => map.get(id)).filter(Boolean);
+    const rest = unique.filter((work) => !featuredIds.has(work.id)).sort(titleComparator);
+
     const reviewMinCharacters = Number(home.externalFeeds?.reviewMinCharacters) || 200;
     const reviews = (externalContent.reviews || []).filter((review) => (
       review && review.film && review.id && reviewCharacterCount(review.review) > reviewMinCharacters
     ));
     return {
       home,
-      works: unique,
+      lead,
+      rest,
+      works: [...lead, ...rest],
       workMap: map,
-      featured: (home.featured || []).map((id) => map.get(id)).filter(Boolean),
       writing: blog.posts || [],
       reviews
     };
@@ -173,30 +186,35 @@
   const projectHref = (work) => `#project=${encodeURIComponent(work.id)}`;
   const reviewHref = (review) => `#review=${encodeURIComponent(review.id)}`;
 
-  function branchLinks(branches, className = "") {
+  function branchLinks(branches) {
     return Object.entries(branches || {}).map(([name, branch]) => {
       const href = safeHref(branch.href);
-      return `<a class="${className}" href="${escapeHtml(href)}">[${escapeHtml(name)}]</a>`;
+      return `<a href="${escapeHtml(href)}">[${escapeHtml(name)}]</a>`;
     }).join(" ");
   }
 
-  function selectedProjects(works) {
-    return works.map((work, index) => `
-      <li>
-        <span>${String(index + 1).padStart(2, "0")}.</span>
-        <h3><a class="project-link" href="${escapeHtml(projectHref(work))}" data-project-id="${escapeHtml(work.id)}" aria-haspopup="dialog">${escapeHtml(work.title)}</a></h3>
-        <p><small>${escapeHtml(work.mediumResolved)}, ${escapeHtml(work.yearResolved)}</small><br>${escapeHtml(work.summaryResolved)}</p>
+  const workLink = (work) => `href="${escapeHtml(projectHref(work))}" data-project-id="${escapeHtml(work.id)}" aria-haspopup="dialog"`;
+
+  function leadRegister(works) {
+    return works.map((work) => `
+      <li class="work-lead" data-work-id="${escapeHtml(work.id)}">
+        <a class="project-link work-lead__link" ${workLink(work)}>
+          <span class="work-lead__mark" aria-hidden="true">★</span>
+          <h3 class="work-lead__title">${escapeHtml(work.title)}</h3>
+          <p class="work-lead__body"><small>${escapeHtml(work.mediumResolved)}, ${escapeHtml(work.yearResolved)}</small><br>${escapeHtml(work.summaryResolved)}</p>
+        </a>
       </li>`).join("");
   }
 
-  function completeIndex(works) {
-    return [...works]
-      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" }))
-      .map((work) => `
-      <div class="project-index__entry">
-        <dt><a class="project-link" href="${escapeHtml(projectHref(work))}" data-project-id="${escapeHtml(work.id)}" aria-haspopup="dialog">${escapeHtml(work.title)}</a> <small>[${escapeHtml(work.mediumResolved)} / ${escapeHtml(work.yearResolved)}]</small></dt>
-        <dd>${escapeHtml(work.summaryResolved)}</dd>
-      </div>`).join("");
+  function restRegister(works) {
+    return works.map((work) => `
+      <li class="work-rest__item" data-work-id="${escapeHtml(work.id)}">
+        <a class="project-link work-rest__link" ${workLink(work)}>
+          <span class="work-rest__mark" aria-hidden="true">→</span>
+          <span class="work-rest__title">${escapeHtml(work.title)}</span>
+          <span class="work-rest__meta">${escapeHtml(work.mediumResolved)} / ${escapeHtml(work.yearResolved)}</span>
+        </a>
+      </li>`).join("");
   }
 
   function writingList(writing, sourceHref) {
@@ -239,10 +257,13 @@
       return `<li class="review-index__empty">No long reviews are available in the current feed. <a href="${escapeHtml(safeHref(sourceHref))}"${externalAttributes(sourceHref)}>Open Letterboxd.</a></li>`;
     }
     return reviews.map((review) => `
-      <li class="review-index__entry">
-        <p class="review-index__date">${escapeHtml(dateLabel(review.watchedDate))}</p>
-        <h3><a class="review-link" href="${escapeHtml(reviewHref(review))}" data-review-id="${escapeHtml(review.id)}" aria-haspopup="dialog">${escapeHtml(review.film)}</a></h3>
-        <p class="review-index__excerpt"><small>${escapeHtml(review.filmYear)} ${ratingMarkup(review.rating)}</small><br>${escapeHtml(reviewExcerpt(review.review))}</p>
+      <li class="review-index__entry" data-review-row="${escapeHtml(review.id)}">
+        <a class="review-link review-index__link" href="${escapeHtml(reviewHref(review))}" data-review-id="${escapeHtml(review.id)}" aria-haspopup="dialog">
+          <span class="review-index__date">${escapeHtml(dateLabel(review.watchedDate))}</span>
+          <span class="review-index__film">${escapeHtml(review.film)}</span>
+          <span class="review-index__meta">${escapeHtml(review.filmYear)} ${ratingMarkup(review.rating)}</span>
+          <span class="review-index__excerpt">${escapeHtml(reviewExcerpt(review.review))}</span>
+        </a>
       </li>`).join("");
   }
 
@@ -261,7 +282,8 @@
     }).join(" · ");
   }
 
-  function render({ home, works, featured, writing, reviews }) {
+  function render(portfolio) {
+    const { home, lead, rest, writing, reviews } = portfolio;
     const identity = home.identity || {};
     const blogHref = identity.links?.writing || "/blog/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
@@ -283,15 +305,15 @@
           <ul>${(home.now || []).map((item) => `<li><strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.text)}</li>`).join("")}</ul>
         </section>
 
-        <section id="selected-work">
-          <h2>Selected projects</h2>
-          <p class="section-note">Essentials, click to read more about them.</p>
-          <ol class="hyper-selected">${selectedProjects(featured)}</ol>
-        </section>
-
-        <section id="all-projects">
-          <h2>All projects - (${works.length})</h2>
-          <dl class="project-index">${completeIndex(works)}</dl>
+        <section class="hyper-work" id="work">
+          <h2>Work</h2>
+          <p class="section-note">★ marks the ones I would show you first. Open any row to read the record — inside it, ← and → move between them.</p>
+          <ol class="work-lead-list">${leadRegister(lead)}</ol>
+          ${rest.length ? `
+          <div class="work-rest">
+            <h3 class="work-rest__heading">everything else <small>(${rest.length})</small></h3>
+            <ul class="work-rest__list">${restRegister(rest)}</ul>
+          </div>` : ""}
         </section>
 
         <section class="hyper-writing" id="writing">
@@ -302,7 +324,7 @@
 
         <section class="hyper-reviews" id="film-writing">
           <h2>Film writing</h2>
-          <p class="section-note">Some of my writings from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Open a title to read the full note here.</p>
+          <p class="section-note">Some of my writings from <a href="${escapeHtml(safeHref(letterboxdHref))}"${externalAttributes(letterboxdHref)}>my Letterboxd diary</a>. Open a title to read the full note here, then keep moving with ← and →.</p>
           <ol class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ol>
           ${reviews.length > initialReviews.length ? `<button class="review-index__load-more" type="button" data-review-load-more aria-controls="review-index">load more reviews (${initialReviews.length}/${reviews.length})</button>` : ""}
         </section>
@@ -319,20 +341,137 @@
           <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}</p>
         </footer>
       </main>`;
+  }
 
-    const reviewIndex = app.querySelector("#review-index");
-    const loadMoreReviews = app.querySelector("[data-review-load-more]");
-    let visibleReviewCount = initialReviews.length;
-    loadMoreReviews?.addEventListener("click", () => {
-      const nextReviewCount = Math.min(visibleReviewCount + REVIEW_BATCH_SIZE, reviews.length);
-      reviewIndex?.insertAdjacentHTML("beforeend", reviewList(reviews.slice(visibleReviewCount, nextReviewCount), letterboxdHref));
-      visibleReviewCount = nextReviewCount;
-      if (visibleReviewCount >= reviews.length) {
-        loadMoreReviews.remove();
-      } else {
-        loadMoreReviews.textContent = `load more reviews (${visibleReviewCount}/${reviews.length})`;
+  /* Record dialogs                                                          */
+  /* ---------------------------------------------------------------------- */
+
+  const workRows = new Map();
+  let historyIsClosing = false;
+
+  const hashValue = (key) => new URLSearchParams(location.hash.slice(1)).get(key);
+
+  const clearHash = () => history.replaceState(null, "", `${location.pathname}${location.search}`);
+
+  /**
+   * One controller drives both record dialogs so the project modal and the
+   * review modal behave identically: prev/next, a position counter, arrow keys,
+   * and a close that puts you back on the row you are actually looking at.
+   */
+  function createRecordDialog({ root, hashKey, hrefFor, renderRecord, rowFor, onNavigate }) {
+    const shellBody = root.querySelector("[data-dialog-body]");
+    const closeButton = root.querySelector("[data-dialog-close]");
+    const previousButton = root.querySelector("[data-dialog-prev]");
+    const nextButton = root.querySelector("[data-dialog-next]");
+    const position = root.querySelector("[data-dialog-position]");
+
+    let records = new Map();
+    let sequence = [];
+    let currentId = "";
+
+    function indexOfCurrent() {
+      return sequence.indexOf(currentId);
+    }
+
+    function updateControls() {
+      const index = indexOfCurrent();
+      const total = sequence.length;
+      const known = index >= 0 && total > 0;
+      previousButton.disabled = !known || index === 0;
+      nextButton.disabled = !known || index === total - 1;
+      position.textContent = known ? ordinal(index, total) : "";
+    }
+
+    function open(id, { push = false } = {}) {
+      const record = records.get(id);
+      if (!record) return false;
+      currentId = id;
+      shellBody.innerHTML = `<article class="record-dialog__record">${renderRecord(record)}</article>`;
+      shellBody.querySelectorAll("img").forEach((image) => {
+        image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
+      });
+      shellBody.scrollTop = 0;
+      updateControls();
+      const href = hrefFor(record);
+      // Opening pushes one entry so Back leaves the record; stepping through
+      // replaces it so a long browse does not bury the page in history.
+      if (push) history.pushState(null, "", href);
+      else if (root.open) history.replaceState(null, "", href);
+      if (!root.open) {
+        root.showModal();
+        document.body.classList.add("dialog-open");
+        closeButton.focus({ preventScroll: true });
+      }
+      onNavigate?.(id);
+      return true;
+    }
+
+    function step(delta) {
+      const index = indexOfCurrent();
+      if (index < 0) return;
+      const target = sequence[index + delta];
+      if (target) open(target);
+    }
+
+    function returnToRow() {
+      const row = rowFor?.(currentId);
+      if (!row) return;
+      row.focus({ preventScroll: true });
+      const box = row.getBoundingClientRect();
+      if (box.top < 80 || box.bottom > window.innerHeight - 40) {
+        row.scrollIntoView({ block: "center", behavior: "auto" });
+      }
+    }
+
+    closeButton.addEventListener("click", () => root.close());
+    previousButton.addEventListener("click", () => step(-1));
+    nextButton.addEventListener("click", () => step(1));
+
+    root.addEventListener("click", (event) => {
+      if (event.target === root) root.close();
+    });
+
+    root.addEventListener("keydown", (event) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        step(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        step(1);
+      } else if (event.key === "Escape") {
+        // Closing is handled here rather than left to the native cancel so the
+        // bar's "close [esc]" holds even where that path is unavailable.
+        event.preventDefault();
+        root.close();
       }
     });
+
+    root.addEventListener("close", () => {
+      document.body.classList.remove("dialog-open");
+      const wasHistory = historyIsClosing;
+      historyIsClosing = false;
+      if (!wasHistory && hashValue(hashKey)) clearHash();
+      returnToRow();
+      shellBody.replaceChildren();
+      currentId = "";
+    });
+
+    return {
+      has: (id) => records.has(id),
+      isOpen: () => root.open,
+      open,
+      close: () => root.close(),
+      setRecords(next) {
+        records = next;
+        if (!sequence.length) sequence = [...records.keys()];
+        updateControls();
+      },
+      setSequence(next) {
+        sequence = next.filter((id) => records.has(id));
+        updateControls();
+      }
+    };
   }
 
   function detailLinks(work) {
@@ -352,35 +491,34 @@
       </figure>`).join("")}</div>`;
   }
 
-  let projectMap = new Map();
-  let reviewMap = new Map();
-  let historyIsClosing = false;
-
-  function openProject(id) {
-    const work = projectMap.get(id);
-    if (!work) return;
-    detail.innerHTML = `
+  const projectDialog = createRecordDialog({
+    root: projectDialogElement,
+    hashKey: "project",
+    hrefFor: projectHref,
+    rowFor: (id) => workRows.get(id)?.querySelector(".project-link"),
+    renderRecord: (work) => `
       <p class="project-dialog__meta">${escapeHtml(work.mediumResolved)} / ${escapeHtml(work.yearResolved)}</p>
       <h2 id="project-dialog-title">${escapeHtml(work.title)}</h2>
       <p class="project-dialog__summary">${escapeHtml(work.summaryResolved)}</p>
-      <div class="project-dialog__text">${work.bodyResolved.split(/\n{2,}/).map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`).join("")}</div>
+      <div class="project-dialog__text">${paragraphs(work.bodyResolved)}</div>
       ${detailLinks(work)}
-      ${detailImages(work)}`;
+      ${detailImages(work)}`
+  });
 
-    detail.querySelectorAll("img").forEach((image) => {
-      image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
-    });
-    if (!dialog.open) dialog.showModal();
-    document.body.classList.add("dialog-open");
-    closeButton.focus({ preventScroll: true });
-  }
+  const reviewState = { visibleCount: 0, ensure: null };
 
-  function openReview(id) {
-    const review = reviewMap.get(id);
-    if (!review) return;
-    const href = safeHref(review.href, "");
-    const poster = safeAsset(review.poster, "");
-    reviewDetail.innerHTML = `
+  const reviewDialog = createRecordDialog({
+    root: reviewDialogElement,
+    hashKey: "review",
+    hrefFor: reviewHref,
+    rowFor: (id) => {
+      reviewState.ensure?.(id);
+      return app.querySelector(`[data-review-row="${CSS.escape(id)}"] .review-index__link`);
+    },
+    renderRecord: (review) => {
+      const href = safeHref(review.href, "");
+      const poster = safeAsset(review.poster, "");
+      return `
       <div class="review-dialog__lead">
         <div>
           <p class="project-dialog__meta">watched ${escapeHtml(dateLabel(review.watchedDate))}</p>
@@ -389,84 +527,86 @@
         </div>
         ${poster ? `<figure class="review-dialog__poster"><img src="${escapeHtml(poster)}" alt="${escapeHtml(`${review.film} poster`)}" loading="lazy" decoding="async"></figure>` : ""}
       </div>
-      <div class="project-dialog__text review-dialog__text">${String(review.review || "").split(/\n{2,}/).map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`).join("")}</div>
+      <div class="project-dialog__text review-dialog__text">${paragraphs(review.review)}</div>
       ${href ? `<nav class="project-dialog__links" aria-label="Review links"><a href="${escapeHtml(href)}"${externalAttributes(href)}>[read on letterboxd] ↗</a></nav>` : ""}`;
+    }
+  });
 
-    reviewDetail.querySelectorAll("img").forEach((image) => {
-      image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
-    });
-    if (!reviewDialog.open) reviewDialog.showModal();
-    document.body.classList.add("dialog-open");
-    reviewCloseButton.focus({ preventScroll: true });
-  }
+  function bindReviewIndex(reviews, letterboxdHref) {
+    const list = app.querySelector("#review-index");
+    const loadMore = app.querySelector("[data-review-load-more]");
+    if (!list) return;
+    reviewState.visibleCount = Math.min(REVIEW_BATCH_SIZE, reviews.length);
 
-  function hashValue(key) {
-    return new URLSearchParams(location.hash.slice(1)).get(key);
+    function showUpTo(count) {
+      const next = Math.min(count, reviews.length);
+      if (next <= reviewState.visibleCount) return;
+      list.insertAdjacentHTML("beforeend", reviewList(reviews.slice(reviewState.visibleCount, next), letterboxdHref));
+      reviewState.visibleCount = next;
+      if (!loadMore) return;
+      if (reviewState.visibleCount >= reviews.length) loadMore.remove();
+      else loadMore.textContent = `load more reviews (${reviewState.visibleCount}/${reviews.length})`;
+    }
+
+    // Stepping through reviews in the dialog can outrun the rendered list, so
+    // closing on an unrendered review reveals it first and lands you on it.
+    reviewState.ensure = (id) => {
+      const index = reviews.findIndex((review) => review.id === id);
+      if (index >= reviewState.visibleCount) showUpTo(index + 1);
+    };
+
+    loadMore?.addEventListener("click", () => showUpTo(reviewState.visibleCount + REVIEW_BATCH_SIZE));
   }
 
   function syncDialogFromUrl() {
     const projectId = hashValue("project");
     const reviewId = hashValue("review");
-    if (projectId && projectMap.has(projectId)) {
-      openProject(projectId);
-    } else if (reviewId && reviewMap.has(reviewId)) {
-      openReview(reviewId);
-    } else if (dialog.open || reviewDialog.open) {
+    if (projectId && projectDialog.has(projectId)) {
+      projectDialog.open(projectId);
+    } else if (reviewId && reviewDialog.has(reviewId)) {
+      reviewDialog.open(reviewId);
+    } else if (projectDialog.isOpen() || reviewDialog.isOpen()) {
       historyIsClosing = true;
-      if (dialog.open) dialog.close();
-      if (reviewDialog.open) reviewDialog.close();
+      projectDialog.close();
+      reviewDialog.close();
     }
   }
 
-  function bindDialog(dialogElement, closeElement, detailElement, hashKey) {
-    closeElement.addEventListener("click", () => dialogElement.close());
-    dialogElement.addEventListener("click", (event) => {
-      if (event.target === dialogElement) dialogElement.close();
-    });
-    dialogElement.addEventListener("close", () => {
-      document.body.classList.remove("dialog-open");
-      detailElement.replaceChildren();
-      if (historyIsClosing) {
-        historyIsClosing = false;
-      } else if (hashValue(hashKey)) {
-        history.replaceState(null, "", `${location.pathname}${location.search}`);
-      }
-    });
-  }
-
-  function bindInteractions() {
+  function bindInteractions(portfolio) {
     app.addEventListener("click", (event) => {
       const projectLink = event.target.closest(".project-link");
       if (projectLink) {
-        event.preventDefault();
         const id = projectLink.dataset.projectId;
-        if (!projectMap.has(id)) return;
-        history.pushState(null, "", projectHref(projectMap.get(id)));
-        openProject(id);
+        if (!projectDialog.has(id)) return;
+        event.preventDefault();
+        projectDialog.open(id, { push: true });
         return;
       }
 
       const reviewLink = event.target.closest(".review-link");
       if (reviewLink) {
-        event.preventDefault();
         const id = reviewLink.dataset.reviewId;
-        if (!reviewMap.has(id)) return;
-        history.pushState(null, "", reviewHref(reviewMap.get(id)));
-        openReview(id);
+        if (!reviewDialog.has(id)) return;
+        event.preventDefault();
+        reviewDialog.open(id, { push: true });
       }
     });
 
-    bindDialog(dialog, closeButton, detail, "project");
-    bindDialog(reviewDialog, reviewCloseButton, reviewDetail, "review");
+    // Both tiers are one sequence, so stepping through records follows the
+    // order they are read in and closing can return to the right row.
+    app.querySelectorAll("[data-work-id]").forEach((row) => workRows.set(row.dataset.workId, row));
+    projectDialog.setSequence(portfolio.works.map((work) => work.id));
+    bindReviewIndex(portfolio.reviews, portfolio.home.identity?.links?.letterboxd || "https://letterboxd.com/satyamkashyap/");
     window.addEventListener("popstate", syncDialogFromUrl);
   }
 
   loadPortfolio()
     .then((portfolio) => {
-      projectMap = portfolio.workMap;
-      reviewMap = new Map(portfolio.reviews.map((review) => [review.id, review]));
+      projectDialog.setRecords(portfolio.workMap);
+      reviewDialog.setRecords(new Map(portfolio.reviews.map((review) => [review.id, review])));
+      reviewDialog.setSequence(portfolio.reviews.map((review) => review.id));
       render(portfolio);
-      bindInteractions();
+      bindInteractions(portfolio);
       syncDialogFromUrl();
     })
     .catch((error) => {

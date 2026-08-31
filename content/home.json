@@ -155,9 +155,9 @@
       "id": "p_missed_mumbai",
       "title": "missed you mumbai",
       "medium": "community experiment",
-      "year": "ongoing",
+      "year": "archived",
       "summary": "An anonymous missed-connections board for the fleeting encounters of Mumbai.",
-      "body": "A small public noticeboard for describing a person, place and moment that passed before contact could be made — part city diary, part hopeful message in a bottle.",
+      "body": "A small public noticeboard for describing a person, place and moment that passed before contact could be made — part city diary, part hopeful message in a bottle. The static shell remains online, but its original Supabase message archive is no longer available.",
       "links": {
         "live": "https://missedyoumumbai.com/"
       }

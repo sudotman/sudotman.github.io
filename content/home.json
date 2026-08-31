@@ -152,6 +152,17 @@
       }
     },
     {
+      "id": "p_missed_mumbai",
+      "title": "missed you mumbai",
+      "medium": "community experiment",
+      "year": "ongoing",
+      "summary": "An anonymous missed-connections board for the fleeting encounters of Mumbai.",
+      "body": "A small public noticeboard for describing a person, place and moment that passed before contact could be made — part city diary, part hopeful message in a bottle.",
+      "links": {
+        "live": "https://missedyoumumbai.com/"
+      }
+    },
+    {
       "id": "film_chhoti_gold",
       "title": "Chhoti Gold",
       "medium": "film",

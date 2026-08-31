@@ -48,7 +48,7 @@ The front page source is intentionally compact:
 - `branches`: the four existing ways to go deeper — Living, River, Doors, and ononline
 - `externalFeeds`: the Letterboxd feed/archive URLs, the generated caches (`cache` for reviews, `blog` for the writing index), and the long-review threshold
 - `works`: concise homepage-only records
-- `sources`: the existing technical feed used to complete the 27-project index
+- `sources`: the existing technical feed used to complete the full work index
 
 `content/external-feeds.json` is generated from Letterboxd. It contains every public review found by walking the account's paginated review archive, keeping only reviews whose text is longer than the configured threshold. The RSS feed supplies newly published and recently edited reviews; the archive walk supplies older history. Do not hand-edit it; run `node scripts/sync-external-feeds.mjs` instead.
 
@@ -77,9 +77,9 @@ This controls the detailed ononline profile:
 
 - `index.html`: accessible shell, SEO metadata, and no-script fallback
 - `css/landing.css`: the responsive Hypertext visual system, the work register, and the record dialogs
-- `js/landing.js`: compact data loading, the filterable work register, branch register, and native project records
+- `js/landing.js`: compact data loading, the two-tier work register, branch register, and native project records
 
-The front page exposes identity, current work, one filterable work register, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches.
+The front page exposes identity, current work, one two-tier work register, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches.
 
 Work is one section in two tiers rather than a selected list plus a full index that repeated it. Every project appears exactly once. The `featured` ids lead, in the author's order, each given a full row — ★, large title, medium and year, summary. Everything else follows under `everything else` as one compact line each, alphabetically. There are no filters, no search and no sort control: the two tiers are the whole interface.
 

@@ -6,6 +6,271 @@
   },
   "works": [
     {
+      "id": "p_aynse",
+      "category": "open_source",
+      "title": "aynse",
+      "short": "a resilient Python adapter for historical, archive and live National Stock Exchange data.",
+      "long": "A typed Python library and CLI for fetching NSE stock, index, derivative, valuation, bhavcopy, bulk-deal and option-chain data. It combines HTTP/2 connection pooling, adaptive batching, streaming parsers, rate limiting, retry jitter and a circuit breaker in a small public API.",
+      "presentation": "text",
+      "links": [
+        {
+          "href": "https://github.com/sudotman/aynse",
+          "label": "github repo"
+        },
+        {
+          "href": "https://pypi.org/project/aynse/",
+          "label": "python package"
+        }
+      ]
+    },
+    {
+      "id": "p_uassetlens",
+      "category": "open_source",
+      "title": "uasset lens",
+      "short": "inspect, diff and safely patch fixed-width properties in Unreal Engine assets without opening the editor.",
+      "long": "A dependency-free Python GUI, CLI and API for reading Unreal Engine 5 .uasset files. It can inventory large Content folders, capture reviewable snapshots, diff asset drift and apply length-preserving edits with automatic backups and verification.",
+      "image": "https://raw.githubusercontent.com/sudotman/unrealassetlens/master/docs/screenshot.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/unrealassetlens/master/docs/screenshot.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/unrealassetlens",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_heartsync",
+      "category": "open_source",
+      "title": "heartsync",
+      "short": "direct, encrypted two-person playback sync for videos already stored on each Mac.",
+      "long": "A native macOS app that mirrors play, pause and seek operations without relaying either viewer's media. It measures clock offset and latency, corrects timeline drift, supports browser, VLC and QuickTime control, and uses short-lived HMAC-authenticated AES-GCM rooms.",
+      "image": "https://raw.githubusercontent.com/sudotman/heartsync/main/docs/screenshots/heartsync-start.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/heartsync/main/docs/screenshots/heartsync-start.png",
+        "https://raw.githubusercontent.com/sudotman/heartsync/main/docs/screenshots/heartsync-join.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/heartsync",
+          "label": "github repo"
+        },
+        {
+          "href": "https://github.com/sudotman/heartsync/releases/latest",
+          "label": "latest release"
+        }
+      ]
+    },
+    {
+      "id": "p_tvrelay",
+      "category": "open_source",
+      "title": "tv relay",
+      "short": "a cross-platform Android TV remote with typing, app launching, sideloading and screen mirroring.",
+      "long": "An Electron desktop remote for Android and smart TVs. It combines ADB control with an optional native remote path, remembers several devices, discovers installed apps, types from the computer keyboard, sideloads APKs and packages the matching scrcpy runtime for dependable mirroring.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/tvrelay/ss1.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/tvrelay/ss1.png",
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/tvrelay/ss2.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/tvrelay",
+          "label": "github repo"
+        },
+        {
+          "href": "https://github.com/sudotman/tvrelay/releases/latest",
+          "label": "latest release"
+        }
+      ]
+    },
+    {
+      "id": "p_artsaver",
+      "category": "art",
+      "title": "artsaver",
+      "short": "an ambient desktop gallery that endlessly shuffles public art from four museum collections.",
+      "long": "A cross-platform Electron screensaver with museum and immersive display modes, curated playlists, favourites, history, offline caching, procedural room tone and a small local server that can extend the gallery to a smart TV.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/artsaver/demo.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/artsaver/demo.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/artsaver",
+          "label": "github repo"
+        },
+        {
+          "href": "https://github.com/sudotman/artsaver/releases/latest",
+          "label": "latest release"
+        }
+      ]
+    },
+    {
+      "id": "p_uecamera2",
+      "category": "open_source",
+      "title": "UE Camera2 plugin",
+      "short": "direct Android Camera2 access for Unreal Engine and Meta Quest standalone projects.",
+      "long": "An Unreal Engine plugin that streams Camera2 frames into a Texture2D and exposes deterministic left/right selection, calibrated intrinsics, lens data and camera-in-headset transforms to Blueprints. It includes Quest 3 calibration fallbacks and render-thread texture updates.",
+      "image": "https://raw.githubusercontent.com/sudotman/UECamera2Plugin/main/Resources/Icon128.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/UECamera2Plugin/main/Resources/Icon128.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/UECamera2Plugin",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_uemcpbridge",
+      "category": "open_source",
+      "title": "UE MCP bridge",
+      "short": "an Unreal Engine 5.5 C++ bridge exposing more than 185 editor operations through MCP.",
+      "long": "A plugin-only WebSocket integration that packages UE-MCP for an Unreal Engine 5.5 workflow. It connects MCP clients to editor tooling across actors, assets, materials, Blueprints, animation, Niagara, PCG, UI, audio, cinematics and gameplay systems.",
+      "presentation": "text",
+      "links": [
+        {
+          "href": "https://github.com/sudotman/UE_MCP_Bridge",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_winhopper",
+      "category": "open_source",
+      "title": "winhopper",
+      "short": "a fast Windows sidebar for switching, grouping, searching and pinning open windows.",
+      "long": "A portable .NET window switcher inspired by Arc's sidebar. It can be summoned by hotkey or screen edge, groups windows into workspaces, keeps favourite apps pinned and supports keyboard-first filtering and selection.",
+      "image": "https://raw.githubusercontent.com/sudotman/winhopper/main/img/howItLooks.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/winhopper/main/img/howItLooks.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/winhopper",
+          "label": "github repo"
+        },
+        {
+          "href": "https://github.com/sudotman/winhopper/releases/latest",
+          "label": "latest release"
+        }
+      ]
+    },
+    {
+      "id": "p_dumbex",
+      "category": "open_source",
+      "title": "dumbex",
+      "short": "streaming literal or regex extraction for logs too large to inspect comfortably.",
+      "long": "A Python CLI and Textual TUI for extracting matching lines or trigger-led blocks from multi-million-line logs. The core streams input rather than loading it into memory and supports reusable JSON rule sets.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/dumbex/Log_Extractor_2026-02-17T18_16_00_370093.svg",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/dumbex/Log_Extractor_2026-02-17T18_16_00_370093.svg"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/dumbex",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_exportjustdiff",
+      "category": "open_source",
+      "title": "export just diff",
+      "short": "a PowerShell utility for exporting only the files changed across recent Git history.",
+      "long": "A small hand-off tool that collects files changed over the last N commits or since a chosen commit, preserving repository-relative paths in a clean output directory.",
+      "presentation": "text",
+      "links": [
+        {
+          "href": "https://github.com/sudotman/exportjustdiff",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_betterunreal",
+      "category": "open_source",
+      "title": "better unreal",
+      "short": "a compact collection of Unreal Engine Blueprint and C++ workflow utilities.",
+      "long": "Reusable Unreal helpers for file IO, hexadecimal and floating-point conversion, CRC-16 checksums and practical Blueprint calculations. The repository is organised as small pieces that can be copied into an existing project independently.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnreal/FileHandling.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterUnreal/FileHandling.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/BetterUnreal",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_betterwindows",
+      "category": "open_source",
+      "title": "better windows",
+      "short": "a PowerShell front end for setting up a fresh Windows installation safely and quickly.",
+      "long": "A utility for installing development, gaming and media essentials, fetching ffmpeg and yt-dlp, adding useful shell integrations and removing optional preinstalled applications without overwriting the existing PATH.",
+      "image": "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterWindows/overall.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterWindows/overall.png",
+        "https://raw.githubusercontent.com/sudotman/sudotman/main/demos/BetterWindows/ffmpeg.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/BetterWindows",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_unrealunitycommunication",
+      "category": "open_source",
+      "title": "unreal–unity communication",
+      "short": "paired Unreal and Unity projects configured for direct TCP and UDP communication.",
+      "long": "A practical reference bundle for exchanging messages between the two engines. It includes configurable server and client components, editor-facing status controls and small Windows command-line helpers for testing packets outside either runtime.",
+      "image": "https://raw.githubusercontent.com/sudotman/UnrealUnityCommunication/main/Demo/1_TCPServer.png",
+      "gallery": [
+        "https://raw.githubusercontent.com/sudotman/UnrealUnityCommunication/main/Demo/1_TCPServer.png",
+        "https://raw.githubusercontent.com/sudotman/UnrealUnityCommunication/main/Demo/1_UnrealRecieving.png",
+        "https://raw.githubusercontent.com/sudotman/UnrealUnityCommunication/main/Demo/2_UDPSender.png"
+      ],
+      "links": [
+        {
+          "href": "https://github.com/sudotman/UnrealUnityCommunication",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_unitystandardassets",
+      "category": "open_source",
+      "title": "Unity Standard Assets ported",
+      "short": "a preserved, modular download of Unity's retired Standard Assets packages.",
+      "long": "An archival split of the Unity 2017 Standard Assets into independent .unitypackage files for 2D, cameras, characters, cross-platform input, effects, environments, particles, prototyping, utilities and vehicles.",
+      "presentation": "text",
+      "links": [
+        {
+          "href": "https://github.com/sudotman/UnityStandardAssetsPorted",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
+      "id": "p_seek",
+      "category": "art",
+      "title": "seek",
+      "short": "an infinitely navigable inspiration canvas built from a changing public image index.",
+      "long": "A spatial image browser that scatters a shuffled collection across an expanding canvas. A small Flask service discovers and caches the source index, while an allow-listed proxy lets the static front end explore and download images without leaking arbitrary fetch access. The former custom-domain deployment is currently offline; the source remains public.",
+      "presentation": "text",
+      "links": [
+        {
+          "href": "https://github.com/sudotman/wipeyourself",
+          "label": "github repo"
+        }
+      ]
+    },
+    {
       "id": "p_betterUnity",
       "category": "open_source",
       "title": "better unity",
@@ -19,7 +284,7 @@
           "label": "github repo"
         },
         {
-          "href": "https://www.satyamkashyap.com/BetterUnity/",
+          "href": "https://sudotman.github.io/BetterUnity/",
           "label": "project docs"
         }
       ]
@@ -36,10 +301,6 @@
         {
           "href": "https://github.com/sudotman/cbfc-cutlists-2018-2022",
           "label": "github repo"
-        },
-        {
-          "href": "https://cbfc.satyamkashyap.com/",
-          "label": "online hosted instance"
         }
       ]
     },
@@ -76,7 +337,7 @@
           "label": "github repo"
         },
         {
-          "href": "https://www.satyamkashyap.com/renderbuddy/",
+          "href": "https://sudotman.github.io/renderbuddy/",
           "label": "project docs"
         }
       ]
@@ -208,7 +469,7 @@
       "gallery": ["images/opengl.jpg"],
       "links": [
         {
-          "href": "https://github.com/sudotman/opengl-experiments",
+          "href": "https://github.com/sudotman/OpenGl-Experiments",
           "label": "github repo"
         }
       ]
@@ -227,7 +488,7 @@
           "label": "github repo"
         },
         {
-          "href": "https://satyamkashyap.com/BlenderOpenRenderQueue/",
+          "href": "https://sudotman.github.io/BlenderOpenRenderQueue/",
           "label": "project docs"
         }
       ]
@@ -250,15 +511,27 @@
     {
       "id": "p_tidbits",
       "category": "open_source",
-      "title": "tidbits",
-      "short": "a collection of small projects and experiments.",
-      "long": "A diverse collection of programming experiments and utility projects:<br><br><strong>1. Facial Expression Recognition:</strong> Keras/CNN model recognising seven basic emotions using OpenCV face detection with lightweight CNN trained on FER-2013 dataset.<br><br><strong>2. Discord Bot:</strong> Node.js bot providing role management and music playback that watches chat and responds with helpful tools and custom commands.<br><br><strong>3. Self-Driving Car (Genetic Algorithms):</strong> Unity simulation that evolves cars to drive autonomously using genetic algorithm that mutates sensor weights, improving navigation each generation.<br><br><strong>4. Custom TradingView Indicators:</strong> Scripts supporting various trading strategies including volume-weighted EMA combiner and range premium visualiser.<br><br><strong>5. CoinSentience:</strong> Cryptocurrency data suite for analysis and trading with historical price scraping, custom indicators and exchange order execution.",
+      "title": "small tools & early experiments",
+      "short": "the useful fragments, learning projects and archives that do not need a full portfolio case study.",
+      "long": "The longer tail of the public repository archive: a Keras/OpenCV facial-expression recogniser; a genetic-algorithm self-driving simulation; CoinSentience and TradingView studies; Python 202020's screen-break reminders; an online-results change notifier; IndiaBlock filter rules; colour detection and colour-data formatters; ADB transfer helpers; Unity and Unreal starter projects; interaction research; 360 projection test content; small networking prototypes; and early C, Java, web and cryptography exercises. They remain public as working notes and historical snapshots rather than being inflated into standalone case studies.",
       "image": "images/facialRec.png",
       "gallery": ["images/facialRec.png", "images/discord.jpg", "images/selfdriving.png", "images/Premium1.png", "images/Backtester1.png"],
       "links": [
         {
-          "href": "https://github.com/sudotman/",
-          "label": "github profile"
+          "href": "https://github.com/sudotman?tab=repositories",
+          "label": "complete repository archive"
+        },
+        {
+          "href": "https://github.com/sudotman/facial-expression-recognition",
+          "label": "facial expression recognition"
+        },
+        {
+          "href": "https://github.com/sudotman/coinsentience",
+          "label": "coinsentience"
+        },
+        {
+          "href": "https://github.com/sudotman/indianadblock",
+          "label": "indiablock filter"
         }
       ]
     },
@@ -270,13 +543,7 @@
       "short": "a fully-fledged simulator - with accurate physics and realistic ballistics - multi-user training",
       "long": "deployed at several infantry schools. featuers are immense and encapsulate every facet of a mortar platoon. there are several other QoL features and a robust error-free mathematical foundation for all calculations.",
       "image": "images/c_mortar.png",
-      "gallery": ["images/c_mortar.png","images/c_mortar_2.png","images/c_mortar_3.png"],
-      "links": [
-        {
-          "href": "https://github.com/sudotman/mortar-simulator",
-          "label": "website link"
-        }
-      ]
+      "gallery": ["images/c_mortar.png","images/c_mortar_2.png","images/c_mortar_3.png"]
     },
     {
       "id": "g_shiva",

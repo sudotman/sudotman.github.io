@@ -6,7 +6,9 @@ tags: [internet, zeitgeist]
 legacyUrl: https://blog.satyam.lol/2025/07/carcinization-on-internet.html
 ---
 
-![Schematic representation of stages of carcinization starting ...](https://www.researchgate.net/publication/51565889/figure/fig3/AS:393984510840836@1470944635916/Schematic-representation-of-stages-of-carcinization-starting-from-a-symmetrical-hermit.png)
+![A crab's body plan set beside a lobster's, with the wide flat carapace, sideways legs and tucked-under tail labelled](/images/blog/carcinization-on-the-internet-01.png "the crab body plan, with a lobster alongside it for comparison")
+
+*illustration by [Chiswick Chap](https://commons.wikimedia.org/wiki/User:Chiswick_Chap) via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Crab_vs_lobster_body_plan.svg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)*
 
 there is this natural phenomenon in the world which is called "carcinization" which essentially is this evolution philosophy where overtime through different lineages, different species end up evolving into a crab. the evolution converges into crab-like features - independently and of massively disconnected species. this happens because, very colloquially and reductively \[and for the sake of what I am trying to convey\] is the peak body form. the most optimized evolutionary type ensuring the greatest survival and thriving benefits. from having more protection to having more wiggle room in the way they eat their food - a lot of factors affect this eventual evolution. this convergent evolution is also very much present in the digital world.
 

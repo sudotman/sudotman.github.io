@@ -24,17 +24,17 @@
     }
   ],
   "featured": [
-    "p_martes",
-    "film_chhoti_gold",
-    "film_blue_dogs",
     "p_hear",
-    "p_pahari",
     "p_openpiano",
     "p_openworkout",
+    "p_martes",
+    "film_chhoti_gold",
+    "p_pahari",
     "p_closet",
     "p_isro",
     "p_betterUnity",
     "g_unwind",
+    "film_blue_dogs",
     "r_cbfc",
     "p_renderbuddy",
     "p_blenderqueue"
@@ -74,7 +74,7 @@
       "medium": "research & development",
       "year": "current",
       "summary": "A full-fledged mission rehearsal and tactical engagement simulator, built by the XR team I lead at Parallax Labs.",
-      "body": "I lead the team developing MaRTES at Parallax Labs. Public detail is intentionally limited; the work centres on mission rehearsal and tactical engagement simulation.",
+      "body": "MaRTES is the largest thing I work on and the least I can show. I lead the XR team at Parallax Labs that builds it: a mission rehearsal and tactical engagement simulator, where a plan gets walked through in a virtual space before anyone has to walk it for real.\n\nThe hard problems are the ordinary ones at scale. Keeping several headsets agreeing on where the world is, holding frame rate while the scene keeps growing, and making sure the debrief afterwards says something honest about what actually happened in the run.\n\nSector and client constraints require that the specifics stay off this page. Write to me if you need to know more than that.",
       "links": {
         "contact": "mailto:hello@satyam.lol"
       }
@@ -82,10 +82,10 @@
     {
       "id": "p_hear",
       "title": "Hear",
-      "medium": "built in public",
+      "medium": "fully open, offline, private",
       "year": "ongoing",
       "summary": "A private browser listening library for Wikipedia, public-domain books and DRM-free EPUBs, spoken with local voices.",
-      "body": "Hear cleans written material for narration, remembers progress and keeps its cached library on the device.",
+      "body": "Somehow, all 'better TTS' solutions were all either paywalled or require super convuluted steps to setup so this is Hear. Hear is a private, browser-based listening library for web articles, public-domain books, DRM-free EPUBs and text-based PDFs. It cleans a text for narration, remembers where you stopped, and keeps every imported document, generated clip and preference on your own device. Think Amazon Audible without having to pay Bezos.\n\nReading material comes from wherever you already read. Browse the Standard Ebooks and Project Gutenberg catalogs, open a Wikipedia article stripped of citation markers and navigation furniture, paste in most public article URLs, or pull an open research paper from arXiv or Europe PMC. Import your own EPUB 2 and EPUB 3 files and they arrive with metadata, covers, reading order, chapters etc. Selectable-text PDFs import too, with two-column reading order handled and reference sections dropped; scanned PDFs still need OCR first.\n\nThe voices run on your machine. The instant option is the browser's own speech engine, and there are several neural voices e.g. Kitten Nano and Kokoro 82M, download once and then generate locally. Nothing you import and nothing it speaks is sent to a speech service.\n\nCatalog metadata comes from the public sources. Standard Ebooks supplies its own compatible EPUB editions, and Project Gutenberg text loads from the matching Gitenberg mirror with the original edition still credited and linked.",
       "images": [
         "https://raw.githubusercontent.com/sudotman/hear/main/docs/images/hear.png"
       ],
@@ -100,9 +100,11 @@
       "medium": "language archive",
       "year": "ongoing",
       "summary": "A living digital archive for preserving Outer Siraji Pahari language, vocabulary and memory.",
-      "body": "A searchable archive built from a 1909 Pahari dialect dictionary, with room for history, written work and community contributions.",
+      "body": "This began as an attempt to preserve Outer Siraji, the Pahari dialect spoken around my hometown, and grew into an archive for Pahari more broadly. Pahari is classified as definitely endangered, and yet there is almost nothing about it online that you can actually search.\n\nNearly all of it rests on one book: A Dictionary of Pahari Dialects, published in 1909 by the Himachal Academy of Arts, Culture and Languages, and scanned onto archive.org. Automatic OCR on those pages returned garbled words, so the entries were rebuilt through a mix of machine passes and manual correction. At this size some errors will have survived and some words will have been missed entirely. Corrections are welcome, and so is help.\n\nThe site itself is deliberately small. No database and no backend: the dictionary lives as a CSV in the repository, a build step turns it into a prebuilt index, and search runs in the browser. It ignores diacritics, so you can find a word without hunting for the right accented character. Alongside the dictionary sit a history section, the 1909 appendices of folklore, proverbs, riddles and songs, and a works section that embeds Pahari audio and video hosted elsewhere.",
       "images": [
-        "https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/art/assets/pahari-painting.jpg"
+        "https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/art/assets/pahari-painting.jpg",
+        "https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/docs/images/outer-siraji-repo-overview.jpg",
+        "https://raw.githubusercontent.com/sudotman/outer-siraji-repo/main/content/research/outer-siraji/assets/outerSirajiSelection.jpeg"
       ],
       "links": {
         "live": "https://pahadi.satyam.lol/",
@@ -115,11 +117,14 @@
       "medium": "learning tool",
       "year": "ongoing",
       "summary": "A browser piano teacher with real Web MIDI, lessons, a songbook and MIDI import.",
-      "body": "A practical piano-learning surface with notation, falling tiles, wait and flow modes, and local learner profiles.",
+      "body": "There are some great free piano lessons online and some great 'midi playbacks' but a gradual, step-by-step, guided midi learning platform doesn't really exist anywhere which isn't behind a subscription and so OpenPiano was born. OpenPiano teaches piano in the browser with your actual keyboard plugged in. Web MIDI carries the note-on and note-off messages. On-screen keys are there for anyone without hardware.\n\nThe curriculum runs 32 lessons across 8 units, from finding middle C to counterpoint, rubato and a capstone performance, with 14 arrangements in the songbook to practise against. Watch falling tiles, read a grand staff, or show both at once. Wait mode holds the timeline until every note in a chord is down. Flow mode keeps moving and scores timing, misses, accuracy and streak.\n\nAny .mid file can be imported. It picks the pitched tracks, drops percussion, infers the hands, normalises the start time and engraves the result into readable notation.\n\nThe piano voice is modelled rather than sampled: hammer attack, inharmonic string partials, stereo placement across the keyboard, natural decay and a little room behind it. Keyboard presets cover 49, 61, 76 and 88 keys, including a Yamaha PSR-E383 profile because that is the keyboard I own, two-note calibration for anything else, and a toggle between Yamaha C3 and scientific C4 octave naming.\n\nLearner profiles are local and password-free. Progress, songs, theory scores and practice history live in your browser and nowhere else.",
       "links": {
         "live": "https://www.satyam.lol/openpiano/",
         "source": "https://github.com/sudotman/openpiano"
-      }
+      },
+      "images": [
+        "https://raw.githubusercontent.com/sudotman/openpiano/main/docs/images/openpiano-overview.jpg"
+      ]
     },
     {
       "id": "p_openworkout",
@@ -127,9 +132,9 @@
       "medium": "local-first tool",
       "year": "ongoing",
       "summary": "A local-first, private workout tracker for training with intent instead of feeding another platform.",
-      "body": "A mobile-first PWA with routines, measurements, progress photos and portable exports — without accounts, analytics or an API.",
+      "body": "Either there are heavy blaoted apps or paywalled 'services' to do something as simple as track your workouts, your PRs and have a sane UI to it and hence OpenWorkout was made as a PWA. OpenWorkout is a workout tracker that runs entirely in the browser and keeps everything there. No account, no server, no analytics, and no third-party requests while you train. It is built mobile-first because a gym is where you actually use it, logging sets between sets [though, it's responsive for any freaks using their laptop at the gym] .\n\nIt holds routines, workout history, custom exercises, body measurements and progress photos. Every exercise detail draws a front and back muscle map, with primary and assisting regions coming from the exercise library and rendered locally from the MIT-licensed react-muscle-highlighter paths. A finished session can be turned into a Strava-like 1080 by 1920 story shareable card if you want to post one.\n\nBecause there is no server, the data is genuinely yours and genuinely fragile, so export is a first-class feature: JSON for a full backup including routines and private records, flat CSV for a spreadsheet. Take a backup before clearing site data or moving to a new phone. An active workout survives a reload, and the installable shell works offline. There is also a full fledged meal/protein tracker to track nutrient goals throughout the day plus get some fun recommendations.",
       "images": [
-        "https://raw.githubusercontent.com/sudotman/openworkout/main/public/training-hero.jpg"
+        "https://raw.githubusercontent.com/sudotman/openworkout/main/docs/images/openworkout-overview.jpg"
       ],
       "links": {
         "live": "https://workout.satyam.lol/",
@@ -142,8 +147,9 @@
       "medium": "interactive archive",
       "year": "ongoing",
       "summary": "A draggable, drifting personal archive for the things kept close.",
-      "body": "A spatial web archive that resists the neat list and lets fragments of a life drift into view.",
+      "body": "The closet holds the things that do not belong in a portfolio. A photo, a note or anything that I just want to keep in front of me, think digital wall? It is one canvas you drag around rather than a list you scroll.\n\nRefusing the list is the point. A feed sorts a life by date and flattens everything to the same size. Here things sit near other things, at whatever scale they deserve, and you find them by wandering or by typing. Search filters as you type and Enter jumps to the top result. Tags narrow the canvas, shuffle rearranges it, and there is a grid view for when you want the tidy version after all.\n\nUnderneath it is about as simple as a site gets. Entries live in one JSON file with a type, a position and a handful of fields, images sit in a folder beside it, and the whole thing is static pages on GitHub Pages.",
       "images": [
+        "https://raw.githubusercontent.com/sudotman/closet/main/docs/images/closet-overview.jpg",
         "https://closet.satyam.lol/uploads/outer_siraji_satyam_image.jpeg"
       ],
       "links": {
@@ -157,7 +163,7 @@
       "medium": "community experiment",
       "year": "archived",
       "summary": "An anonymous missed-connections board for the fleeting encounters of Mumbai.",
-      "body": "A small public noticeboard for describing a person, place and moment that passed before contact could be made — part city diary, part hopeful message in a bottle. The static shell remains online, but its original Supabase message archive is no longer available.",
+      "body": "Inspired by missedyounyc, an anonymous noticeboard for the encounters that end before they begin. You describe a person, a place and a moment, and hope the other person is also the kind of person who goes looking. Part city diary, part message in a bottle addressed to a train carriage.\n\nMumbai is THE city for it, you stand close to thousands of people a day and speak to almost none of them, and the one you noticed is gone by the next station.\n\n.",
       "links": {
         "live": "https://missedyoumumbai.com/"
       }
@@ -168,7 +174,7 @@
       "medium": "film",
       "year": "2025",
       "summary": "A 26-minute absurd and surreal short about two people whose lives change after they meet.",
-      "body": "A mystery, horror and romance told in English and Hindi, moving through the aftermath of a chance meeting. Written, directed and edited by Satyam Kashyap.",
+      "body": "Two people meet, and neither life settles back into the shape it had. Chhoti Gold follows the aftermath of that meeting across 26 minutes in English and Hindi, moving between mystery, horror and romance without committing to any of them for long. The absurdity is deliberate.\n\nWritten, directed and edited by Satyam Kashyap, 2025.",
       "images": [
         "https://image.tmdb.org/t/p/w600_and_h900_face/rnjIzlHQAi27x5cdgRHuS4z3UvI.jpg"
       ],
@@ -182,9 +188,11 @@
       "medium": "film",
       "year": "2023",
       "summary": "A 15-minute Hindi crime drama about two men in Mumbai caught in bigotry, paranoia and delusion.",
-      "body": "Two men linked to Mumbai's underworld become entangled in the consequences of bigotry and the stories they tell themselves. Directed by Satyam Kashyap and written with Shreya Mishra.",
+      "body": "Two men work as muscle for a Mumbai mobster who may or may not be as big as everyone says. They keep watch and they stay loyal, and across fifteen minutes their ordinary criminal week gets tangled up in bigotry, paranoia and the stories they have been telling themselves for too long.\n\nIn Hindi, shot mostly as night exteriors on Mumbai streets. Directed by Satyam Kashyap and written with Shreya Mishra, 2023.",
       "images": [
-        "https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg"
+        "https://image.tmdb.org/t/p/w600_and_h900_face/nUZxNAdI4eAgUzySwffR01YjID6.jpg",
+        "https://image.tmdb.org/t/p/w1280/2cIEXsBD4r56OmcfrwDLlOt0htr.jpg",
+        "https://image.tmdb.org/t/p/w1280/4GdfksrUIciuxypKRKjPvZKX8bz.jpg"
       ],
       "links": {
         "record": "https://letterboxd.com/film/blue-dogs/"
@@ -196,7 +204,7 @@
       "medium": "writing",
       "year": "2025",
       "summary": "An essay about how the internet keeps evolving toward the same handful of forms.",
-      "body": "A web essay on convergent evolution, platform sameness and why so much of the internet keeps becoming the same crab.",
+      "body": "Carcinization is the habit evolution has of turning unrelated species into crabs. Separate lineages, no shared plan, the same body at the end of it, because that shape happens to survive.\n\nThe essay argues the internet does the same thing. Read the full excerpt below.",
       "links": {
         "read": "/blog/carcinization-on-the-internet/"
       }

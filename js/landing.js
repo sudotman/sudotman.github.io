@@ -291,7 +291,7 @@
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="More portfolio visualizations">
-          ${branchLinks(home.branches)} ${copyEmailMarkup(identity.email, "[email]")}
+            ${branchLinks(home.branches)} ${copyEmailMarkup(identity.email, "[email]")}
         </nav>
 
         <header class="hyper-intro">

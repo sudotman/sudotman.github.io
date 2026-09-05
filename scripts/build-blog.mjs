@@ -197,7 +197,7 @@ ${chrome()}
 
     <header class="blog-masthead">
       <h1>writing</h1>
-      <p class="blog-masthead__lead">Essays and notes, written here rather than rented from somewhere else. ${posts.length} post${posts.length === 1 ? '' : 's'}, ${years.at(-1) ? `${escapeHtml(years.at(-1))}–${escapeHtml(years[0])}` : 'so far'}.</p>
+      <p class="blog-masthead__lead">Varying essays and notes</p>
       <p class="blog-masthead__note"><a href="/blog/feed.xml">subscribe by rss</a> · <a href="/write/">writer</a></p>
     </header>
 

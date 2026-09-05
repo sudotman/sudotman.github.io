@@ -417,7 +417,7 @@ function initColorSampler() {
   let asciiCanvas = null;
   let asciiCtx = null;
   let isFrontCamera = true;
-  let lastColour = '#245E51';
+  let lastColour = '#52695f';
   let lastSampleAt = 0;
   let sampleTimer = null;
   let asciiSupported = false;
@@ -651,7 +651,7 @@ function initColorSampler() {
       field.pointer.active = false;
     }
 
-    applyColour('#245E51');
+    applyColour('#52695f');
   }
 
   function fallbackSample() {
@@ -661,7 +661,7 @@ function initColorSampler() {
     btn.classList.add('active');
     asciiBtn.classList.remove('active');
     syncAsciiButtonVisibility();
-    const computed = getComputedStyle(document.body).backgroundColor || '#245E51';
+    const computed = getComputedStyle(document.body).backgroundColor || '#52695f';
     applyColour(computed);
   }
 }

@@ -11,6 +11,7 @@ function revealProjects() {
     centerIcon.disabled = true;
     centerIcon.setAttribute('aria-hidden', 'true');
     document.body.classList.add('deck-open');
+    document.querySelector('.station-intro')?.setAttribute('inert', '');
     if (tldrButton) tldrButton.hidden = true;
     projectsContent.setAttribute('aria-hidden', 'false');
     // Animate dots to disperse
@@ -43,6 +44,7 @@ function returnToDots() {
     projectsContent.classList.remove('revealed');
     projectsContent.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('deck-open');
+    document.querySelector('.station-intro')?.removeAttribute('inert');
     if (tldrButton) tldrButton.hidden = false;
     
     // Animate dots back to normal
@@ -64,7 +66,7 @@ function animateDotsDisperse() {
   const field = getPrimaryDotField();
   if (!field) return;
 
-  if (typeof gsap !== 'undefined') {
+  if (typeof gsap !== 'undefined' && !PERF.prefersReducedMotion) {
     gsap.to(field, {
       disperse: 1,
       duration: 0.75,
@@ -80,7 +82,7 @@ function animateDotsReturn() {
   const field = getPrimaryDotField();
   if (!field) return;
 
-  if (typeof gsap !== 'undefined') {
+  if (typeof gsap !== 'undefined' && !PERF.prefersReducedMotion) {
     gsap.to(field, {
       disperse: 0,
       duration: 0.6,

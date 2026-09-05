@@ -4,10 +4,10 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>satyam's inferno</title>
+  <title>ononline — Satyam's personal workstation</title>
   <meta content="width=device-width, initial-scale=1" name="viewport" />
   <meta name="description" content="The portfolio of Satyam Kashyap: programming, immersive systems, games, film, and art." />
-  <meta name="theme-color" content="#071411" />
+  <meta name="theme-color" content="#c4bba6" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://satyam.lol/tech.html" />
   <link href="vendor/css/vendor-base.css" rel="stylesheet" type="text/css" />
@@ -15,20 +15,20 @@
   <link href="cardIcon.svg" rel="icon" type="image/svg+xml" />
   <link href="centralButton.webp" rel="preload" as="image" type="image/webp" fetchpriority="high" />
   <link rel="stylesheet" href="css/copy-email.css?v=20260821a">
-  <link rel="stylesheet" href="css/modules/base.css?v=20260821a">
-  <link rel="stylesheet" href="css/modules/sections.css?v=20260713k">
-  <link rel="stylesheet" href="css/modules/project-ui.css?v=20260713k">
-  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260830b">
-  <link rel="stylesheet" href="css/modules/mobile.css?v=20260830b">
+  <link rel="stylesheet" href="css/modules/base.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/sections.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/project-ui.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/mobile.css?v=20260905a">
   <script src="vendor/js/gsap.min.js" defer></script>
   <script src="js/copy-email.js?v=20260821a" defer></script>
-  <script src="js/modules/core.js?v=20260830b" defer></script>
-  <script src="js/modules/interface.js?v=20260830b" defer></script>
-  <script src="js/modules/content.js?v=20260830b" defer></script>
+  <script src="js/modules/core.js?v=20260905a" defer></script>
+  <script src="js/modules/interface.js?v=20260905a" defer></script>
+  <script src="js/modules/content.js?v=20260905a" defer></script>
   <script src="js/modules/heatmap.js?v=20260713k" defer></script>
 </head>
 
-<body class="body is--cursor is--dark">
+<body class="body is--cursor is--dark workstation">
   <a class="skip-link" href="#archive-entry">skip to portfolio entry</a>
   <div class="osmo-ui">
     <header class="header">
@@ -36,7 +36,7 @@
         <nav class="nav-row" aria-label="Primary"><button aria-label="Open Satyam's other sites" aria-haspopup="dialog" aria-controls="sites-modal" class="nav-logo-row w-inline-block" type="button" id="sites-btn"><img src="text.svg" class="nav-logo__wordmark" width="160" height="33" alt="satyam"/>
           <img src="cardIcon.svg" class="nav-logo__icon" width="40" alt="logo icon"/>
         </button>
-          <div class="nav-row__right"><button class="website-link is--alt w-inline-block" type="button"
+          <span class="station-label">ononline <span>/ personal workstation</span></span><div class="nav-row__right"><button class="website-link is--alt w-inline-block" type="button"
               id="tldr-btn" aria-haspopup="dialog" aria-controls="tldr-modal">
               <div class="website-link__arrow"><svg class="website-link__arrow-svg" fill="none" viewbox="0 0 18 18"
                   width="100%" xmlns="http://www.w3.org/2000/svg">
@@ -199,7 +199,7 @@
         <div class="footer-row">
           <button class="cloneable-title" type="button" aria-label="Shift the site's colour omen">
             <p class="cloneable-title__nr">dante's digital inferno</p>
-            <h1 class="cloneable-title__h1">everything is what it truly is</h1>
+            <p class="cloneable-title__h1">everything is what it truly is</p>
           </button>
         </div>
       </div>
@@ -211,8 +211,8 @@
     <main class="projects-content" id="projects-content" aria-label="Portfolio archive" aria-hidden="true" tabindex="-1">
       <div class="projects-header">
         <div class="projects-heading">
-          <p class="projects-kicker">archive // systems, images, peculiar signals</p>
-          <h1 class="projects-title">my digital deck</h1>
+          <p class="projects-kicker">ononline / archive</p>
+          <h1 class="projects-title">the digital deck</h1>
           <p class="projects-intro">software, games, immersive systems, and—soon—the films and art made beside them.</p>
         </div>
         <div class="projects-tabs">
@@ -336,16 +336,36 @@
     </main>
     
     <div class="dots-wrap">
+      <div class="station-intro">
+        <p class="station-eyebrow"><span aria-hidden="true">●</span> a personal computer, of sorts</p>
+        <h1 class="station-title">on<span>online</span><i aria-hidden="true">_</i></h1>
+        <p class="station-description">Satyam's corner of the machine.<br>Software, games &amp; experiments in<br class="station-linebreak"> being a little more human.</p>
+        <button class="station-enter" type="button">load the archive <span aria-hidden="true">↵</span></button>
+        <p class="station-hint">or draw the card. curiosity is a feature.</p>
+      </div>
+      <div class="station-object" aria-hidden="true">
+        <svg class="station-orbit" viewBox="0 0 480 480" fill="none">
+          <g stroke="currentColor" stroke-width="0.7">
+            <circle cx="240" cy="240" r="184"/>
+            <ellipse cx="240" cy="240" rx="184" ry="66" transform="rotate(-28 240 240)"/>
+            <ellipse cx="240" cy="240" rx="184" ry="120" transform="rotate(-28 240 240)"/>
+            <ellipse cx="240" cy="240" rx="66" ry="184" transform="rotate(-28 240 240)"/>
+            <ellipse cx="240" cy="240" rx="120" ry="184" transform="rotate(-28 240 240)"/>
+            <path d="M78 327L402 153M153 78L327 402"/>
+          </g>
+        </svg>
+        <span class="station-object-label">FIG. A &nbsp; / &nbsp; THE WILD CARD</span>
+      </div>
       <div class="dots-container" data-dots-container-init="">
         <div class="dot" id="w-node-cac0fb2e-5df5-96c6-f149-770ce5116f9f-9d2c12da"></div>
       </div>
-      <button class="osmo-icon__link w-inline-block" id="archive-entry" type="button" aria-label="Enter the portfolio archive">
+      <button class="osmo-icon__link w-inline-block" id="archive-entry" type="button" aria-label="Draw the card and enter the portfolio archive">
         <img src="centralButton.webp" class="osmo-icon-svg" width="384" height="576" alt="" decoding="async" fetchpriority="high"/>
       </button>
     </div>
   </section>
   <div class="crt-chassis" aria-hidden="true">
-    <span class="crt-chassis__model"></span>
+    <span class="crt-chassis__model">ononline <b>personal systems</b></span><span class="crt-chassis__vents"></span><span class="crt-chassis__serial">S.K. / made of curiosity</span>
     <span class="crt-chassis__power"></span>
   </div>
 </body>

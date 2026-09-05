@@ -303,7 +303,7 @@ function createDotField(container) {
   container.appendChild(canvas);
 
   const ctx = canvas.getContext('2d', { alpha: true });
-  const colors = { base: '#245E51', active: '#A8FF51' };
+  const colors = { base: '#52695f', active: '#EFBB73' };
   window.__DOT_GRIDS = window.__DOT_GRIDS || [];
   window.__DOT_GRIDS.push(colors);
 
@@ -373,7 +373,7 @@ function createDotField(container) {
     const startRow = Math.floor((rows - holeRows) / 2);
     const stepX = width / cols;
     const stepY = height / rows;
-    const size = Math.max(4, Math.min(stepX, stepY) * 0.42);
+    const size = Math.max(4, Math.min(stepX, stepY) * 0.16);
 
     field.cells = [];
     field.stepX = stepX;
@@ -568,6 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initScrollBasedDotAnimation();
   initColorSampler();
   initThemeToggle();
+  document.querySelector('.station-enter')?.addEventListener('click', revealProjects);
 });
 // Theme toggle: footer title click switches to pink theme and back
 function initThemeToggle() {
@@ -587,7 +588,7 @@ function initThemeToggle() {
     } else {
       titleLine1.textContent = "dante's digital inferno";
       titleLine2.textContent = "everything is what it truly is";
-      document.documentElement.style.setProperty('--accent-default', '#A8FF51');
+      document.documentElement.style.setProperty('--accent-default', '#EFBB73');
     }
 
     if (field) {

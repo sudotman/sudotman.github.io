@@ -274,8 +274,17 @@ button {
 
 /* ---------- post ---------- */
 
+/* A post keeps the same rail as the index and the front door, so the nav does
+   not jump inward when you open one. Only the prose narrows to a readable
+   measure. */
 .blog-page--post {
-  width: min(100% - 52px, 820px);
+  width: min(100% - 52px, 1080px);
+}
+
+.blog-page--post > *:not(.blog-nav) {
+  width: min(100%, 820px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .post-header {

@@ -186,13 +186,6 @@
   const projectHref = (work) => `#project=${encodeURIComponent(work.id)}`;
   const reviewHref = (review) => `#review=${encodeURIComponent(review.id)}`;
 
-  function branchLinks(branches) {
-    return Object.entries(branches || {}).map(([name, branch]) => {
-      const href = safeHref(branch.href);
-      return `<a href="${escapeHtml(href)}">[${escapeHtml(name)}]</a>`;
-    }).join(" ");
-  }
-
   const workLink = (work) => `href="${escapeHtml(projectHref(work))}" data-project-id="${escapeHtml(work.id)}" aria-haspopup="dialog"`;
 
   function leadRegister(works) {
@@ -290,8 +283,8 @@
     const initialReviews = reviews.slice(0, REVIEW_BATCH_SIZE);
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
-        <nav class="hyper-entry-nav" aria-label="More portfolio visualizations">
-            ${branchLinks(home.branches)} ${copyEmailMarkup(identity.email, "[email]")}
+        <nav class="hyper-entry-nav" aria-label="Primary">
+          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")}
         </nav>
 
         <header class="hyper-intro">

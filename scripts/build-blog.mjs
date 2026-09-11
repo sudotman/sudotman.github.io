@@ -130,7 +130,7 @@ function layout({ title, description, canonical, image, head = '', body, bodyCla
   <link rel="alternate" type="application/rss+xml" title="satyam kashyap — writing" href="${SITE}/blog/feed.xml">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/copy-email.css?v=20260821a">
-  <link rel="stylesheet" href="/css/blog.css?v=20260829a">
+  <link rel="stylesheet" href="/css/blog.css?v=20260911a">
 ${head}</head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
 ${body}
@@ -139,12 +139,17 @@ ${body}
 `;
 }
 
-function chrome() {
+// The writing index does not link to itself; [writing] is the way back up
+// from inside a post.
+function chrome({ writingLink = true } = {}) {
+  const links = [
+    '        <a href="/">[home]</a>',
+    writingLink ? '        <a href="/blog/">[writing]</a>' : '',
+    '        <a href="/blog/feed.xml">[rss]</a>',
+    '        <a href="/tech.html">[ononline]</a>'
+  ].filter(Boolean).join('\n');
   return `      <nav class="blog-nav" aria-label="Site">
-        <a href="/">[home]</a>
-        <a href="/blog/">[writing]</a>
-        <a href="/blog/feed.xml">[rss]</a>
-        <a href="/tech.html">[ononline]</a>
+${links}
       </nav>`;
 }
 
@@ -193,7 +198,7 @@ function indexPage(posts, identity) {
 
   const body = `  <a class="skip-link" href="#writing-index">Skip to the writing index</a>
   <div class="blog-page">
-${chrome()}
+${chrome({ writingLink: false })}
 
     <header class="blog-masthead">
       <h1>writing</h1>

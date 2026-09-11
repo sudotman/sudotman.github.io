@@ -164,7 +164,7 @@
         <footer class="living-footer">
           <p>${escapeHtml(content.profile.statement)}</p>
           ${copyEmailMarkup(content.profile.email)}
-          <p>Content lives in content/creative.json.</p>
+          <p>alive!</p>
         </footer>
       </main>`;
 

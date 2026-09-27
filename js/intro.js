@@ -618,16 +618,21 @@
 
   // ─────────────────────────────────────────────────────────── the website overture
   const root = document.documentElement;
-  if (!root.classList.contains("intro") || window.__introCancelled) return;
-  window.__introStarted = true;
 
-  // Browsers only let sound start from a gesture, so the reel begins silent (unless the
-  // browser already allows it) and the first click or tap brings the soundtrack in like
-  // tape spinning up, landing in sync; from then on the picture follows the audio clock.
+  // Browsers only let sound start from a gesture. On a first visit the reel begins silent
+  // (unless the browser already allows sound) and the first click or tap brings the
+  // soundtrack in like tape spinning up, landing in sync. [reel] on the front door opens
+  // the audio context inside its own click and passes it here, so the reel holds its first
+  // frame until the soundtrack is ready and both start together. Either way, once sound
+  // plays the picture follows the audio clock.
   const SOUND = "/sounds/intro.mp3?v=20260927b";
-  const TAPE = 0.35, TAPE_FROM = 0.35;
+  const TAPE = 0.35, TAPE_FROM = 0.35, HOLD = 1.2;
+  let running = false;
 
-  function start() {
+  function play({ ctx: given = null } = {}) {
+    if (running) return;
+    running = true; window.__introStarted = true;
+    root.classList.add("intro");
     const vw = root.clientWidth, vh = root.clientHeight;
     const body = document.body.getBoundingClientRect();
     const narrow = matchMedia("(max-width: 700px)").matches, coarse = matchMedia("(pointer: coarse)").matches;
@@ -640,15 +645,16 @@
     try {
       reel = createReel(host, { orient: vw / vh < 1 ? "v" : "h", vw, vh, web: true, stripe });
     } catch (error) {
-      host.remove(); root.classList.remove("intro"); console.error(error); return;
+      host.remove(); root.classList.remove("intro"); running = false; console.error(error); return;
     }
     root.classList.add("intro-live");
     const hint = document.createElement("div");
     Object.assign(hint.style, { position: "absolute", right: narrow ? "22px" : "34px", bottom: "16px", font: `700 11px/1 ${MONO}`, letterSpacing: "0.06em", color: "#fff", mixBlendMode: "difference", pointerEvents: "none", transition: "opacity .3s", opacity: 0 });
     host.appendChild(hint);
 
-    let T = 0, last = 0, raf = 0, leaving = 0, done = false;
-    let buffer = null, noSound = !(window.AudioContext || window.webkitAudioContext), want = false, ctx = null, src = null, gain = null, meter = null, sound = null, lvl = 0;
+    let T = 0, last = 0, raf = 0, leaving = 0, done = false, waiting = !!given;
+    let buffer = null, noSound = !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, src = null, gain = null, meter = null, sound = null, lvl = 0;
+    const began = performance.now();
     const setHint = () => {
       const offer = !want && !noSound;
       hint.textContent = coarse ? (offer ? "tap for sound · swipe to skip" : "tap to skip") : (offer ? "click for sound · any key to skip" : "any key to skip");
@@ -657,21 +663,26 @@
 
     const startSound = () => {
       if (sound || !ctx || !buffer || done || leaving) return;
+      if (ctx.state !== "running") { ctx.resume().then(startSound, () => {}); return; }
       const lat = ctx.outputLatency || ctx.baseLatency || 0.02, now = ctx.currentTime + 0.03;
-      // start ahead by what the spin-up loses, so audio and picture meet as it reaches speed
-      const offset = T + 0.03 + lat + TAPE * (1 - TAPE_FROM) / 2;
+      // Held on the first frame, sound and picture start together. Joining mid-reel, the
+      // tape spins up and starts ahead by what the spin-up loses, so the two meet at speed.
+      const tape = !waiting, offset = tape ? T + 0.03 + lat + TAPE * (1 - TAPE_FROM) / 2 : 0;
       src = ctx.createBufferSource(); src.buffer = buffer;
       gain = ctx.createGain(); meter = ctx.createAnalyser(); meter.fftSize = 1024;
       src.connect(gain); gain.connect(meter); meter.connect(ctx.destination);
-      src.playbackRate.setValueAtTime(TAPE_FROM, now); src.playbackRate.linearRampToValueAtTime(1, now + TAPE);
-      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1, now + 0.22);
+      if (tape) {
+        src.playbackRate.setValueAtTime(TAPE_FROM, now); src.playbackRate.linearRampToValueAtTime(1, now + TAPE);
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1, now + 0.22);
+      }
       src.onended = () => { if (done) ctx.close().catch(() => {}); };
       src.start(now, offset);
-      sound = { now, lat, offset };
+      sound = { now, lat, offset, tape }; waiting = false;
     };
-    // where the listener is in the soundtrack, once it has spun up
-    const heard = () => sound.offset + TAPE * (1 + TAPE_FROM) / 2 + (ctx.currentTime - sound.lat - sound.now - TAPE);
-    const locked = () => sound && ctx.currentTime - sound.lat - sound.now > TAPE;
+    // where the listener is in the soundtrack
+    const since = () => ctx.currentTime - sound.lat - sound.now;
+    const heard = () => sound.tape ? sound.offset + TAPE * (1 + TAPE_FROM) / 2 + (since() - TAPE) : Math.max(0, sound.offset + since());
+    const locked = () => sound && (!sound.tape || since() > TAPE);
     const enableSound = () => {
       if (want || noSound) return;
       want = true; setHint();
@@ -690,11 +701,12 @@
         .then(data => new OAC(2, 48000, 48000).decodeAudioData(data))
         .then(b => { buffer = b; startSound(); })
         .catch(() => { noSound = true; setHint(); });
-      if (navigator.getAutoplayPolicy?.("audiocontext") === "allowed") enableSound();
+      if (!given && navigator.getAutoplayPolicy?.("audiocontext") === "allowed") enableSound();
     } else noSound = true;
+    if (noSound) waiting = false;
 
     const finish = () => {
-      if (done) return; done = true;
+      if (done) return; done = true; running = false;
       cancelAnimationFrame(raf); host.remove(); root.classList.remove("intro", "intro-live");
       removeEventListener("keydown", skip, true); removeEventListener("wheel", skip, true); removeEventListener("touchmove", skip, true);
       removeEventListener("click", onClick, true); removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", onVisibility);
@@ -713,7 +725,8 @@
     const wave = new Uint8Array(1024);
     const frame = now => {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 0; last = now;
-      T = Math.min(DUR, locked() ? heard() : T + dt);
+      if (waiting && (noSound || now - began > HOLD * 1000)) waiting = false;
+      T = Math.min(DUR, locked() ? heard() : waiting ? 0 : T + dt);
       const { fade } = reel.seek(T);
       hint.style.opacity = T > 0.6 && reel.lastScene() < 5 ? 0.75 : 0;
       if (meter) {
@@ -736,5 +749,9 @@
     document.addEventListener("visibilitychange", onVisibility);
     raf = requestAnimationFrame(frame);
   }
-  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start, { once: true });
+  window.SatyamIntro = { play };
+  // index.html marks a first visit it wants the intro for
+  if (window.__introAuto && !window.__introCancelled) {
+    if (document.body) play(); else document.addEventListener("DOMContentLoaded", () => play(), { once: true });
+  }
 })();

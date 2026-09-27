@@ -284,7 +284,7 @@
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="Primary">
-          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")}
+          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a>
         </nav>
 
         <header class="hyper-intro">
@@ -616,8 +616,52 @@
     }
   }
 
+  /* ---------------------------------------------------------------------- */
+  /* The reel                                                                */
+  /* ---------------------------------------------------------------------- */
+
+  const INTRO_SRC = "/js/intro.js?v=20260927b";
+
+  // [reel] replays the intro with sound. Browsers only allow sound from a gesture, so the
+  // audio context is opened inside this click and handed to the intro, and the cover goes
+  // up at once; the reel then starts from its first frame with the soundtrack unlocked.
+  function playReel() {
+    const root = document.documentElement;
+    if (root.classList.contains("intro")) return;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let ctx = null;
+    try {
+      ctx = AudioContextClass ? new AudioContextClass({ latencyHint: "interactive" }) : null;
+      ctx?.resume().catch(() => {});
+    } catch {
+      ctx = null;
+    }
+    root.classList.add("intro");
+    window.scrollTo({ top: 0, behavior: "instant" });
+    const ready = window.SatyamIntro ? Promise.resolve() : new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = INTRO_SRC;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    ready
+      .then(() => window.SatyamIntro.play({ ctx }))
+      .catch((error) => {
+        console.error(error);
+        root.classList.remove("intro");
+        ctx?.close().catch(() => {});
+      });
+  }
+
   function bindInteractions(portfolio) {
     app.addEventListener("click", (event) => {
+      if (event.target.closest("[data-reel]")) {
+        event.preventDefault();
+        playReel();
+        return;
+      }
+
       const projectLink = event.target.closest(".project-link");
       if (projectLink) {
         const id = projectLink.dataset.projectId;

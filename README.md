@@ -78,7 +78,7 @@ This controls the detailed ononline profile:
 - `index.html`: accessible shell, SEO metadata, and no-script fallback
 - `css/landing.css`: the responsive Hypertext visual system, the work register, and the record dialogs
 - `js/landing.js`: compact data loading, the two-tier work register, branch register, and native project records
-- `js/intro.js`: the 15-second showreel that opens the front door once per tab, then sets the name down on the page's own heading; the same engine renders the video cuts. `index.html` decides whether it plays; `?intro` forces it. Its soundtrack, `sounds/intro.mp3`, is rendered by the showreel kit to the engine's timing and comes in on the first click or tap
+- `js/intro.js`: the 15-second showreel that opens the front door once per tab, then sets the name down on the page's own heading; the same engine renders the video cuts. `index.html` decides whether it plays; `?intro` forces it. Its soundtrack, `sounds/intro.mp3`, is rendered by the showreel kit to the engine's timing and comes in on the first click or tap. `[reel]` in the entry nav replays it with sound from the first frame
 
 The front page exposes identity, current work, one two-tier work register, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches.
 

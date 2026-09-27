@@ -32,16 +32,17 @@
         return;
       }
       root.classList.add("intro");
+      window.__introAuto = true;
       const giveUp = () => { if (!window.__introStarted) { window.__introCancelled = true; root.classList.remove("intro"); } };
       const script = document.createElement("script");
-      script.src = "/js/intro.js?v=20260927a";
+      script.src = "/js/intro.js?v=20260927b";
       script.onerror = giveUp;
       document.head.appendChild(script);
       setTimeout(giveUp, 1500);
     })();
   </script>
   <script src="/js/copy-email.js?v=20260830a" defer></script>
-  <script src="/js/landing.js?v=20260830a" defer></script>
+  <script src="/js/landing.js?v=20260927a" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to the work index</a>

@@ -16,7 +16,30 @@
   <link rel="canonical" href="https://satyam.lol/">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/copy-email.css?v=20260830a">
-  <link rel="stylesheet" href="/css/landing.css?v=20260830a">
+  <link rel="stylesheet" href="/css/landing.css?v=20260927a">
+  <script>
+    // The showreel plays once per tab, before the front door. It stays out of the way of
+    // deep links, back-navigation, reduced motion and automation, and gives up rather than
+    // hold the page if its script is slow to arrive. ?intro forces it.
+    (() => {
+      const root = document.documentElement;
+      try {
+        const forced = new URLSearchParams(location.search).has("intro");
+        const nav = performance.getEntriesByType?.("navigation")[0];
+        if (!forced && (sessionStorage.getItem("intro:seen") || location.hash || nav?.type === "back_forward" || navigator.webdriver || matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+        sessionStorage.setItem("intro:seen", "1");
+      } catch {
+        return;
+      }
+      root.classList.add("intro");
+      const giveUp = () => { if (!window.__introStarted) { window.__introCancelled = true; root.classList.remove("intro"); } };
+      const script = document.createElement("script");
+      script.src = "/js/intro.js?v=20260927a";
+      script.onerror = giveUp;
+      document.head.appendChild(script);
+      setTimeout(giveUp, 1500);
+    })();
+  </script>
   <script src="/js/copy-email.js?v=20260830a" defer></script>
   <script src="/js/landing.js?v=20260830a" defer></script>
 </head>

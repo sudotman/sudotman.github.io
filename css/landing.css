@@ -97,6 +97,26 @@ button {
   transform: translateY(0);
 }
 
+/* The intro (js/intro.js). Until its script arrives, paint the reel's first
+   frame — white and the stripe — so the page never flashes beneath it. */
+html.intro {
+  overflow: hidden;
+}
+
+html.intro body::after {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, transparent calc(100% - 22px), var(--yellow) calc(100% - 22px) calc(100% - 16px), transparent calc(100% - 16px)),
+    var(--white);
+}
+
+html.intro-live body::after {
+  content: none;
+}
+
 .landing-loading,
 .landing-error,
 .landing-noscript {
@@ -741,7 +761,8 @@ button {
 }
 
 @media (max-width: 700px) {
-  body {
+  body,
+  html.intro body::after {
     background:
       linear-gradient(90deg, transparent calc(100% - 13px), var(--yellow) calc(100% - 13px) calc(100% - 8px), transparent calc(100% - 8px)),
       var(--white);

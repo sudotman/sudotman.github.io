@@ -394,10 +394,12 @@ function getColorAtPixel(x, y) {
 /* ------------------- Real-Time Colour Sampler ------------------- */
 function initColorSampler() {
   const supportsMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if (!supportsMedia) return;
   const field = getPrimaryDotField();
   const btn = document.createElement('button');
   btn.className = 'color-sampler-btn';
-  btn.title = 'Enable real-time colour mood';
+  btn.title = 'Use the camera to colour the dot field';
+  btn.setAttribute('aria-label', 'Use the camera to colour the dot field');
   btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 640" style="enable-background:new 0 0 512 512;" xml:space="preserve"><g><path fill="currentColor" d="M471.6,250.8c-3.9-3.9-97.7-95-215.6-95s-211.6,91.1-215.6,95c-1.4,1.4-2.2,3.2-2.2,5.2s0.8,3.8,2.2,5.2   c3.9,3.9,97.7,95,215.6,95s211.6-91.1,215.6-95c1.4-1.4,2.2-3.2,2.2-5.2S473,252.2,471.6,250.8z M256,341.6   c-96,0-177.9-66.3-199.7-85.6c2.4-2.1,5.5-4.8,9.2-7.9c0.8-0.7,1.6-1.3,2.5-2c0.3-0.2,0.6-0.5,0.9-0.7c0.6-0.5,1.2-1,1.8-1.4   c0.3-0.2,0.6-0.5,0.9-0.7c0.6-0.5,1.3-1,1.9-1.5c3.6-2.8,7.6-5.8,11.9-8.9c0.8-0.6,1.6-1.1,2.4-1.7c1.2-0.9,2.5-1.7,3.7-2.6   c0.4-0.3,0.9-0.6,1.3-0.9c1.7-1.2,3.5-2.4,5.3-3.6c1.4-0.9,2.7-1.8,4.1-2.7c0.9-0.6,1.9-1.2,2.8-1.8c2.9-1.8,5.8-3.6,8.9-5.5   c1-0.6,2-1.2,3.1-1.8c1-0.6,2.1-1.2,3.1-1.8c0.5-0.3,1.1-0.6,1.6-0.9c1.1-0.6,2.1-1.2,3.2-1.8c35.7-19.7,81.4-37.4,131-37.4   s95.3,17.6,131,37.4c1.1,0.6,2.2,1.2,3.2,1.8c0.5,0.3,1.1,0.6,1.6,0.9c1,0.6,2.1,1.2,3.1,1.8c1,0.6,2.1,1.2,3.1,1.8   c3,1.8,6,3.6,8.9,5.5c1,0.6,1.9,1.2,2.8,1.8c1.4,0.9,2.8,1.8,4.1,2.7c1.8,1.2,3.6,2.4,5.3,3.6c0.4,0.3,0.9,0.6,1.3,0.9   c1.3,0.9,2.5,1.7,3.7,2.6c0.8,0.6,1.6,1.1,2.4,1.7c4.3,3.1,8.3,6.1,11.9,8.9c0.6,0.5,1.3,1,1.9,1.5c0.3,0.2,0.6,0.5,0.9,0.7   c0.6,0.5,1.2,1,1.8,1.4c0.3,0.2,0.6,0.5,0.9,0.7c0.9,0.7,1.7,1.4,2.5,2c3.8,3.1,6.9,5.8,9.2,7.9C433.9,275.3,352,341.6,256,341.6z"/><ellipse cx="256" cy="256" rx="54.5" ry="54.5" fill="currentColor"/></g></svg><span>mood</span>';
   document.body.appendChild(btn);
 
@@ -433,18 +435,18 @@ function initColorSampler() {
     let stream = null;
     let usedCamera = false;
 
-    if (supportsMedia) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'user' },
-            width: { ideal: 640 },
-            height: { ideal: 360 }
-          }
-        });
-        isFrontCamera = true;
-        usedCamera = true;
-      } catch (errFront) {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'user' },
+          width: { ideal: 640 },
+          height: { ideal: 360 }
+        }
+      });
+      isFrontCamera = true;
+      usedCamera = true;
+    } catch (errFront) {
+      if (errFront.name !== 'NotAllowedError' && errFront.name !== 'SecurityError') {
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: {
@@ -456,17 +458,26 @@ function initColorSampler() {
           isFrontCamera = false;
           usedCamera = true;
         } catch (errEnv) {
-          console.warn('Webcam permission denied or unavailable, using fallback colour', errEnv);
+          console.warn('Camera unavailable', errEnv);
         }
       }
     }
 
+    if (!usedCamera || !stream) {
+      const label = btn.querySelector('span');
+      if (label) label.textContent = 'camera unavailable';
+      btn.title = 'Camera access unavailable';
+      btn.setAttribute('aria-label', 'Camera access unavailable');
+      setTimeout(() => {
+        if (label) label.textContent = 'mood';
+        btn.title = 'Use the camera to colour the dot field';
+        btn.setAttribute('aria-label', 'Use the camera to colour the dot field');
+      }, 3000);
+      return;
+    }
+
     showMoodOracleOverlay(() => {
-      if (usedCamera && stream) {
-        startSampling(stream);
-      } else {
-        fallbackSample();
-      }
+      startSampling(stream);
     });
   });
 
@@ -654,16 +665,6 @@ function initColorSampler() {
     applyColour('#52695f');
   }
 
-  function fallbackSample() {
-    active = true;
-    asciiActive = false;
-    asciiSupported = false;
-    btn.classList.add('active');
-    asciiBtn.classList.remove('active');
-    syncAsciiButtonVisibility();
-    const computed = getComputedStyle(document.body).backgroundColor || '#52695f';
-    applyColour(computed);
-  }
 }
 /* ----------------- End Real-Time Colour Sampler ----------------- */ 
 
@@ -931,8 +932,6 @@ function initCatalogControls() {
     });
   });
 
-  document.querySelector('.stack-cards-btn')?.addEventListener('click', stackProjectCards);
-  document.querySelector('.shuffle-cards-btn')?.addEventListener('click', shuffleProjectCards);
   document.querySelector('.filter-cards-btn')?.addEventListener('click', toggleFilterDropdown);
 
   const dropdown = document.getElementById('filter-dropdown');
@@ -1085,16 +1084,23 @@ function applyProjectFilters({ announce = false, animate = false } = {}) {
     const track = lens.dataset.track;
     const count = catalogState.projects.filter(project => track === 'all' || project.tracks.includes(track)).length;
     lens.style.setProperty('--lens-count', `"${count}"`);
+    lens.hidden = track !== 'all' && (count === 0 || count === catalogState.projects.length);
   });
+  const lenses = document.querySelector('.work-lenses');
+  const visibleLenses = lenses?.querySelectorAll('.work-lens:not([hidden])').length || 0;
+  if (lenses) {
+    lenses.hidden = visibleLenses <= 1;
+    lenses.style.setProperty('--visible-lenses', visibleLenses);
+  }
 
   syncCardActionAvailability();
 
   if (results) {
     const trackLabel = catalogState.track === 'all'
-      ? 'all signals'
-      : (taxonomyItem('tracks', catalogState.track)?.label || catalogState.track);
-    const degraded = catalogState.sourceErrors.length ? ' // one feed is quiet' : '';
-    results.textContent = `${visibleCount} ${visibleCount === 1 ? 'artifact' : 'artifacts'} // ${trackLabel}${degraded}`;
+      ? ''
+      : ` · ${taxonomyItem('tracks', catalogState.track)?.label || catalogState.track}`;
+    const degraded = catalogState.sourceErrors.length ? ' · some work unavailable' : '';
+    results.textContent = `${visibleCount} ${visibleCount === 1 ? 'project' : 'projects'}${trackLabel}${degraded}`;
     if (!announce) results.setAttribute('aria-live', 'off');
     else results.setAttribute('aria-live', 'polite');
   }
@@ -1110,4 +1116,3 @@ document.addEventListener('click', function(event) {
   }
 });
 /* ----------------- End Card Stack & Shuffle Controls ----------------- */ 
-

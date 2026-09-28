@@ -2004,8 +2004,8 @@
     var(--page-gutter)
     calc(6rem + env(safe-area-inset-bottom, 0px));
   background:
-    linear-gradient(180deg, rgba(4, 14, 12, 0.7), rgba(4, 12, 11, 0.88)),
-    radial-gradient(circle at 18% 0%, rgba(168, 255, 81, 0.055), transparent 36%);
+    radial-gradient(circle at 18% 0%, rgba(168, 255, 81, 0.055), transparent 36%),
+    #07120f;
   overscroll-behavior: contain;
   scroll-padding-top: 6rem;
 }
@@ -2167,9 +2167,17 @@
 
 .work-lenses {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--visible-lenses, 3), minmax(0, 1fr));
   gap: 0.5rem;
   max-width: 42rem;
+}
+
+.work-toolbar:has(.work-lenses[hidden]) {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.work-toolbar:has(.work-lenses[hidden]) .project-results {
+  justify-self: end;
 }
 
 .work-lens {
@@ -2340,4 +2348,3 @@
   margin: 0.75rem auto 0;
   color: var(--ink-soft);
 }
-

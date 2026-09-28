@@ -202,9 +202,15 @@ function openTldrModal() {
   }
 }
 
-function closeTldrModal() {
+function closeTldrModal(onClosed) {
   const modal = document.getElementById('tldr-modal');
   if (modal && modal.classList.contains('show')) {
+    const finishClose = () => {
+      modal.classList.remove('show');
+      deactivateDialog(modal, { restoreFocus: !onClosed });
+      setBodyOverlayState('modal-open', false);
+      onClosed?.();
+    };
     // Add smooth animation using GSAP if available
     if (typeof gsap !== 'undefined' && !PERF.prefersReducedMotion) {
       gsap.to(modal.querySelector('.tldr-modal-content'), {
@@ -213,16 +219,10 @@ function closeTldrModal() {
         scale: 0.95,
         duration: 0.25,
         ease: "power2.in",
-        onComplete: () => {
-          modal.classList.remove('show');
-          deactivateDialog(modal);
-          setBodyOverlayState('modal-open', false);
-        }
+        onComplete: finishClose
       });
     } else {
-      modal.classList.remove('show');
-      deactivateDialog(modal);
-      setBodyOverlayState('modal-open', false);
+      finishClose();
     }
   }
 }
@@ -788,6 +788,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  document.querySelector('.tldr-archive-link')?.addEventListener('click', () => {
+    closeTldrModal(revealProjects);
+  });
+
   // Handle Sites modal clicks
   const sitesModal = document.getElementById('sites-modal');
   if (sitesModal) {
@@ -868,4 +872,3 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.hash.startsWith('#work/')) openProjectFromHash();
   });
 }); 
-

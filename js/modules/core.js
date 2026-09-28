@@ -568,9 +568,8 @@ document.addEventListener('DOMContentLoaded', function() {
   initScrollBasedDotAnimation();
   initColorSampler();
   initThemeToggle();
-  document.querySelector('.station-enter')?.addEventListener('click', revealProjects);
 });
-// Theme toggle: footer title click switches to pink theme and back
+// Theme toggle: keep the palette choice quiet and persistent.
 function initThemeToggle() {
   const titleContainer = document.querySelector('.cloneable-title');
   const titleLine1 = document.querySelector('.cloneable-title__nr');
@@ -582,12 +581,12 @@ function initThemeToggle() {
     const field = getPrimaryDotField();
 
     if (isPink) {
-      titleLine1.textContent = "nothing ever happens";
-      titleLine2.textContent = "we are so back";
+      titleLine1.textContent = 'palette';
+      titleLine2.textContent = 'pink';
       document.documentElement.style.setProperty('--accent-default', '#F05CEB');
     } else {
-      titleLine1.textContent = "dante's digital inferno";
-      titleLine2.textContent = "everything is what it truly is";
+      titleLine1.textContent = 'palette';
+      titleLine2.textContent = 'amber';
       document.documentElement.style.setProperty('--accent-default', '#EFBB73');
     }
 
@@ -596,6 +595,7 @@ function initThemeToggle() {
     }
 
     titleContainer.setAttribute('aria-pressed', String(isPink));
+    titleContainer.setAttribute('aria-label', `Switch to ${isPink ? 'amber' : 'pink'} colour theme`);
   }
 
   // Restore persisted preference
@@ -609,53 +609,11 @@ function initThemeToggle() {
   } catch (_) { /* ignore */ }
 
   titleContainer.addEventListener('click', () => {
-    // Use consistent oracle animation+sound, custom message
-    showThemeSwitchOracle(() => {
-      const isPink = !document.body.classList.contains('theme-pink');
-      if (isPink) document.body.classList.add('theme-pink'); else document.body.classList.remove('theme-pink');
-      try { localStorage.setItem('themeVariant', isPink ? 'pink' : 'default'); } catch (_) {}
-      applyThemeNow(isPink);
-    });
+    const isPink = !document.body.classList.contains('theme-pink');
+    document.body.classList.toggle('theme-pink', isPink);
+    try { localStorage.setItem('themeVariant', isPink ? 'pink' : 'default'); } catch (_) {}
+    applyThemeNow(isPink);
   });
-}
-
-// Themed oracle overlay for theme switch: reuse style/sound with custom text
-function showThemeSwitchOracle(onFinish) {
-  const id = 'oracle-overlay-theme-switch';
-  let ov = document.getElementById(id);
-  if (!ov) {
-    ov = document.createElement('div');
-    ov.id = id;
-    Object.assign(ov.style, {
-      position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10000, opacity: 0, background: 'transparent'
-    });
-    ov.innerHTML = `<div style="font-family: 'Cinzel', serif; color:#F05CEB; font-size:clamp(1.5rem,4vw,3rem); text-align:center; text-shadow:0 0 18px rgba(240,92,235,0.6); transform: translateY(-25vh);">
-        nothing ever happens...
-      </div>`;
-    document.body.appendChild(ov);
-  }
-
-  // play consistent mystical sound
-  try { playOracleSound(); } catch (_) {}
-
-  if (typeof gsap !== 'undefined') {
-    gsap.killTweensOf(ov);
-    gsap.set(ov, { opacity: 0, pointerEvents: 'auto' });
-    gsap.to(ov, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
-      setTimeout(() => {
-        if (onFinish) onFinish();
-      }, 600);
-      gsap.to(ov, { opacity: 0, duration: 0.8, delay: 0.8, ease: 'power2.in', onComplete: () => {
-        ov.style.pointerEvents = 'none';
-      }});
-    }});
-  } else {
-    // Fallback without GSAP
-    ov.style.transition = 'opacity 0.4s ease';
-    ov.style.opacity = '1';
-    setTimeout(() => { if (onFinish) onFinish(); }, 600);
-    setTimeout(() => { ov.style.opacity = '0'; }, 1200);
-  }
 }
 
 // Tab Switching Functionality
@@ -1258,4 +1216,3 @@ function initCardDragSystem() {
 
   setupCardEvents();
 }
-

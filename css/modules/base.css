@@ -663,6 +663,20 @@ body.lightbox-open {
   color: var(--signal);
 }
 
+.tldr-archive-link {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--signal);
+  cursor: pointer;
+}
+
+.tldr-archive-link:hover {
+  color: var(--ink);
+}
+
 .tldr-link-item,
 .site-card {
   border: 1px solid var(--line);
@@ -690,4 +704,3 @@ body.lightbox-open {
     transition-duration: 0.01ms !important;
   }
 }
-

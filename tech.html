@@ -15,16 +15,16 @@
   <link href="cardIcon.svg" rel="icon" type="image/svg+xml" />
   <link href="centralButton.webp" rel="preload" as="image" type="image/webp" fetchpriority="high" />
   <link rel="stylesheet" href="css/copy-email.css?v=20260821a">
-  <link rel="stylesheet" href="css/modules/base.css?v=20260905a">
-  <link rel="stylesheet" href="css/modules/sections.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/base.css?v=20260928a">
+  <link rel="stylesheet" href="css/modules/sections.css?v=20260928a">
   <link rel="stylesheet" href="css/modules/project-ui.css?v=20260905a">
-  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260905a">
-  <link rel="stylesheet" href="css/modules/mobile.css?v=20260905a">
+  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260928a">
+  <link rel="stylesheet" href="css/modules/mobile.css?v=20260928a">
   <script src="vendor/js/gsap.min.js" defer></script>
   <script src="js/copy-email.js?v=20260821a" defer></script>
-  <script src="js/modules/core.js?v=20260905a" defer></script>
-  <script src="js/modules/interface.js?v=20260905a" defer></script>
-  <script src="js/modules/content.js?v=20260905a" defer></script>
+  <script src="js/modules/core.js?v=20260928a" defer></script>
+  <script src="js/modules/interface.js?v=20260928a" defer></script>
+  <script src="js/modules/content.js?v=20260928a" defer></script>
   <script src="js/modules/heatmap.js?v=20260713k" defer></script>
 </head>
 
@@ -36,7 +36,7 @@
         <nav class="nav-row" aria-label="Primary"><button aria-label="Open Satyam's other sites" aria-haspopup="dialog" aria-controls="sites-modal" class="nav-logo-row w-inline-block" type="button" id="sites-btn"><img src="text.svg" class="nav-logo__wordmark" width="160" height="33" alt="satyam"/>
           <img src="cardIcon.svg" class="nav-logo__icon" width="40" alt="logo icon"/>
         </button>
-          <span class="station-label">ononline <span>/ personal workstation</span></span><div class="nav-row__right"><button class="website-link is--alt w-inline-block" type="button"
+          <div class="nav-row__right"><button class="website-link is--alt w-inline-block" type="button"
               id="tldr-btn" aria-haspopup="dialog" aria-controls="tldr-modal">
               <div class="website-link__arrow"><svg class="website-link__arrow-svg" fill="none" viewbox="0 0 18 18"
                   width="100%" xmlns="http://www.w3.org/2000/svg">
@@ -51,7 +51,7 @@
                   <path d="M15.14 8.63989H1.45996" stroke="currentColor" stroke-miterlimit="10" stroke-width="1.5">
                   </path>
                 </svg></div>
-              <p class="inline-link__p">tldr</p>
+              <p class="inline-link__p">about</p>
             </button></div>
         </nav>
       </div>
@@ -62,7 +62,7 @@
       <div class="tldr-modal-backdrop" aria-hidden="true"></div>
       <div class="tldr-modal-content" tabindex="-1">
         <div class="tldr-modal-header">
-          <h1 class="tldr-modal-title" id="tldr-modal-title">hi, my name is satyam</h1>
+          <h1 class="tldr-modal-title" id="tldr-modal-title">about satyam</h1>
           <button class="tldr-modal-close" type="button" aria-label="Close the short introduction">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -71,51 +71,18 @@
           </button>
         </div>
         <div class="tldr-modal-body">
-          <p>hope this website fulfils what you were here for. this is the no-bs minimalist summary.</p>
-          
-          <div class="tldr-section">
-            <h2>about me</h2>
-            <p>i am a programmer with an expertise in immersive technology, currently living in mumbai, india.</p>
-            <p>i can speak and write english, hindi and pahadi. i have two cats. i love all art forms i.e. films, music, books and games.</p>
-          </div>
-
-          <div class="tldr-section">
-            <h2>projects i am the most proud of</h2>
-            <ul>
-              <li><a href="https://github.com/sudotman/BetterUnity/" target="_blank">betterunity</a>: a fully-featured extension/toolkit for the <em>unity editor</em> which almost makes it the perfect game engine for me.</li>
-              <li><a href="https://github.com/sudotman/the-everything-bagel" target="_blank">theeverythingbagel</a>: a website that has several functions but mostly unrelated. allows you to fetch art works from the met or look up the latest usdjpy exhcange rates or fetch any bible verse.</li>
-              <li><a href="#archive-entry">2d-3dfloorplangenerator</a>: takes 2d <em>cad</em> floorplans and converts them into a 3d model within a few minutes.</li>
-              <li><a href="https://sudotman.itch.io/unlearn" target="_blank" rel="noopener noreferrer">unlearn</a>: a 2d platformer that incorporates meta-fictional elements into the mix alongside a fun gimmick.</li>
-            </ul>
-            <p>for other open source projects, check out: <a href="https://github.com/sudotman/" target="_blank">github</a>. for the creative archive: <a href="/">return to the crossing</a></p>
-          </div>
-
+          <p>i'm a programmer in mumbai, working across immersive technology, games and the web.</p>
           <div class="tldr-section">
             <h2>work</h2>
-            <p>i have several years of experience across multiple companies, both as a programmer and in hybrid technical leadership roles.</p>
+            <p>i build XR projects and tools, and lead development at Parallax Labs. <button class="tldr-archive-link" type="button">see the work archive</button></p>
           </div>
-
           <div class="tldr-section">
-            <h2>links</h2>
-            <div class="tldr-links">
-              <div class="tldr-link-item">
-                <a href="https://www.linkedin.com/in/satyam-kashyap-a93657176/" target="_blank">linkedin</a>
-                <span>i am not a huge fan of linkedin as a platform because of the over-abundance of reductive ai-generated posts.</span>
-              </div>
-              <div class="tldr-link-item">
-                <a href="/blog/">blog</a>
-                <span>my blog where i structure peculiar thoughts on various topics that interest me.</span>
-              </div>
-              <div class="tldr-link-item">
-                <a href="https://github.com/sudotman" target="_blank">github</a>
-                <span>open-source and fun work.</span>
-              </div>
-            </div>
+            <h2>elsewhere</h2>
+            <p><a href="/blog/">writing</a> · <a href="https://github.com/sudotman" target="_blank" rel="noopener noreferrer">github</a> · <a href="https://www.linkedin.com/in/satyam-kashyap-a93657176/" target="_blank" rel="noopener noreferrer">linkedin</a> · <a href="/">the crossing</a></p>
           </div>
-
           <div class="tldr-section">
             <h2>contact</h2>
-            <p>quickest way is to send me a mail at <button type="button" class="copy-email" data-copy-email="hello@satyam.lol">hello@satyam.lol</button></p>
+            <p><button type="button" class="copy-email" data-copy-email="hello@satyam.lol">hello@satyam.lol</button></p>
           </div>
         </div>
       </div>
@@ -127,7 +94,7 @@
       <div class="sites-modal-backdrop" aria-hidden="true"></div>
       <div class="sites-modal-content" tabindex="-1">
         <div class="sites-modal-header">
-          <h1 class="sites-modal-title" id="sites-modal-title">branches ebb and flowing</h1>
+          <h1 class="sites-modal-title" id="sites-modal-title">elsewhere</h1>
           <button class="sites-modal-close" type="button" aria-label="Close the sites directory">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -169,10 +136,6 @@
               <div class="site-card__title">openworkout</div>
               <div class="site-card__url">workout.satyam.lol</div>
             </a>
-            <a class="site-card" href="/openpiano/" target="_blank" rel="noopener noreferrer">
-              <div class="site-card__title">openpiano</div>
-              <div class="site-card__url">satyam.lol/openpiano</div>
-            </a>
           </div>
         </div>
       </div>
@@ -197,9 +160,9 @@
     <footer class="footer">
       <div class="container is--full">
         <div class="footer-row">
-          <button class="cloneable-title" type="button" aria-label="Shift the site's colour omen">
-            <p class="cloneable-title__nr">dante's digital inferno</p>
-            <p class="cloneable-title__h1">everything is what it truly is</p>
+          <button class="cloneable-title" type="button" aria-label="Switch to pink colour theme">
+            <p class="cloneable-title__nr">palette</p>
+            <p class="cloneable-title__h1">amber</p>
           </button>
         </div>
       </div>
@@ -211,9 +174,9 @@
     <main class="projects-content" id="projects-content" aria-label="Portfolio archive" aria-hidden="true" tabindex="-1">
       <div class="projects-header">
         <div class="projects-heading">
-          <p class="projects-kicker">ononline / archive</p>
+          <p class="projects-kicker">work archive</p>
           <h1 class="projects-title">the digital deck</h1>
-          <p class="projects-intro">software, games, immersive systems, and—soon—the films and art made beside them.</p>
+          <p class="projects-intro">software, games and immersive systems.</p>
         </div>
         <div class="projects-tabs">
           <div class="constellation-nav" role="tablist" aria-label="Portfolio sections">
@@ -254,13 +217,11 @@
 
       <div class="work-toolbar" id="work-toolbar">
         <div class="work-lenses" role="group" aria-label="Choose a portfolio track">
-          <button class="work-lens active" type="button" data-track="all" aria-pressed="true"><span>all work</span><span class="work-lens__alias">core</span></button>
-          <button class="work-lens" type="button" data-track="programming" aria-pressed="false"><span>programming</span><span class="work-lens__alias">systems</span></button>
-          <button class="work-lens" type="button" data-track="arts" aria-pressed="false"><span>misc</span><span class="work-lens__alias">visions</span></button>
+          <button class="work-lens active" type="button" data-track="all" aria-pressed="true"><span>all work</span></button>
+          <button class="work-lens" type="button" data-track="programming" aria-pressed="false"><span>programming</span></button>
+          <button class="work-lens" type="button" data-track="arts" aria-pressed="false"><span>misc</span></button>
         </div>
-        <div class="cards-actions" aria-label="Deck controls">
-          <button class="cards-action-btn stack-cards-btn" type="button">stack</button>
-          <button class="cards-action-btn shuffle-cards-btn" type="button">shuffle</button>
+        <div class="cards-actions" aria-label="Medium filter">
           <div class="filter-dropdown-container">
             <button class="cards-action-btn filter-cards-btn" type="button" aria-expanded="false" aria-controls="filter-dropdown">
               medium: all
@@ -337,35 +298,18 @@
     
     <div class="dots-wrap">
       <div class="station-intro">
-        <p class="station-eyebrow"><span aria-hidden="true">●</span> a personal computer, of sorts</p>
-        <h1 class="station-title">on<span>online</span><i aria-hidden="true">_</i></h1>
-        <p class="station-description">Satyam's corner of the machine.<br>Software, games &amp; experiments in<br class="station-linebreak"> being a little more human.</p>
-        <button class="station-enter" type="button">load the archive <span aria-hidden="true">↵</span></button>
-        <p class="station-hint">or draw the card. curiosity is a feature.</p>
-      </div>
-      <div class="station-object" aria-hidden="true">
-        <svg class="station-orbit" viewBox="0 0 480 480" fill="none">
-          <g stroke="currentColor" stroke-width="0.7">
-            <circle cx="240" cy="240" r="184"/>
-            <ellipse cx="240" cy="240" rx="184" ry="66" transform="rotate(-28 240 240)"/>
-            <ellipse cx="240" cy="240" rx="184" ry="120" transform="rotate(-28 240 240)"/>
-            <ellipse cx="240" cy="240" rx="66" ry="184" transform="rotate(-28 240 240)"/>
-            <ellipse cx="240" cy="240" rx="120" ry="184" transform="rotate(-28 240 240)"/>
-            <path d="M78 327L402 153M153 78L327 402"/>
-          </g>
-        </svg>
-        <span class="station-object-label">FIG. A &nbsp; / &nbsp; THE WILD CARD</span>
+        <h1 class="station-title">on<span>online</span></h1>
+        <p class="station-description">Satyam Kashyap<br>software, games and immersive systems.</p>
       </div>
       <div class="dots-container" data-dots-container-init="">
         <div class="dot" id="w-node-cac0fb2e-5df5-96c6-f149-770ce5116f9f-9d2c12da"></div>
       </div>
-      <button class="osmo-icon__link w-inline-block" id="archive-entry" type="button" aria-label="Draw the card and enter the portfolio archive">
+      <button class="osmo-icon__link w-inline-block" id="archive-entry" type="button" aria-label="View the work archive">
         <img src="centralButton.webp" class="osmo-icon-svg" width="384" height="576" alt="" decoding="async" fetchpriority="high"/>
       </button>
     </div>
   </section>
   <div class="crt-chassis" aria-hidden="true">
-    <span class="crt-chassis__model">ononline <b>personal systems</b></span><span class="crt-chassis__vents"></span><span class="crt-chassis__serial">S.K. / made of curiosity</span>
     <span class="crt-chassis__power"></span>
   </div>
 </body>

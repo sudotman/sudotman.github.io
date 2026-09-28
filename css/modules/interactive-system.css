@@ -415,6 +415,41 @@
   z-index: 2;
 }
 
+.station-intro {
+  position: absolute;
+  top: clamp(8rem, 18vh, 12rem);
+  left: clamp(3rem, 7vw, 8rem);
+  z-index: 4;
+  max-width: min(28rem, 32vw);
+  pointer-events: none;
+  transition: opacity 240ms ease 350ms, visibility 240ms ease 350ms;
+}
+
+.station-title {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 5.5vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  line-height: 1;
+}
+
+.station-title span { color: var(--signal); }
+
+.station-description {
+  margin: 1.25rem 0 0;
+  color: var(--ink-soft);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.65;
+}
+
+body.deck-open .station-intro {
+  opacity: 0;
+  visibility: hidden;
+  transition-delay: 0ms;
+}
+
 .dots-container {
   transition: all 0.8s ease;
   contain: layout paint;
@@ -1872,7 +1907,7 @@ body::after {
 }
 
 .osmo-icon__link::after {
-  content: "draw / enter archive";
+  content: "view work";
   position: absolute;
   top: calc(100% + 0.6rem);
   left: 50%;

@@ -149,6 +149,26 @@
     height: 100%;
   }
 
+  .station-intro {
+    top: calc(6.5rem + env(safe-area-inset-top, 0px));
+    left: calc(var(--page-gutter) + 0.6rem);
+    right: calc(var(--page-gutter) + 0.6rem);
+    max-width: none;
+  }
+
+  .station-title {
+    font-size: clamp(2.7rem, 11vw, 4.5rem);
+  }
+
+  .station-description {
+    margin-top: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .osmo-icon__link {
+    top: 60%;
+  }
+
   .osmo-icon__link {
     width: clamp(5.5rem, 18vw, 7rem);
   }
@@ -236,6 +256,14 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 0.8rem;
     margin-bottom: 1rem;
+  }
+
+  .work-toolbar:has(.work-lenses[hidden]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .work-toolbar:has(.work-lenses[hidden]) .project-results {
+    justify-self: start;
   }
 
   .work-lenses {

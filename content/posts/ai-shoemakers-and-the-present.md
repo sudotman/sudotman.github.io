@@ -3,7 +3,6 @@ title: ai, shoemakers and the present
 date: 2026-09-28
 summary: engineers and shoemakers are more common than most think
 tags: [ai, art, zeitgeist]
-cover: https://www.sahapedia.org/sites/default/files/styles/sp_page_banner_800x800/public/Banner%20Image_18.jpg?itok=iAHJOnXB
 ---
 
 ![a photo of an old hand painted sign](https://www.sahapedia.org/sites/default/files/styles/sp_page_banner_800x800/public/Banner%20Image_18.jpg?itok=iAHJOnXB "old hand painted sign")

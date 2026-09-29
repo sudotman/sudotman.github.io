@@ -455,8 +455,15 @@ body.theme-pink .signal-orbit {
   will-change: transform;
 }
 
-.signal-orbit__plane--equator { animation: orbit-equator 84s linear infinite; }
-.signal-orbit__plane--meridian { animation: orbit-meridian 110s linear infinite; }
+.signal-orbit__plane--equator {
+  transform: rotate(-27deg);
+  animation: orbit-equator 24s ease-in-out infinite alternate;
+}
+
+.signal-orbit__plane--meridian {
+  transform: rotate(29deg);
+  animation: orbit-meridian 32s ease-in-out infinite alternate;
+}
 
 .signal-orbit__wire {
   stroke: url(#orbit-wire);
@@ -489,13 +496,13 @@ body.theme-pink .signal-orbit {
 .signal-orbit__beacon-halo { fill: var(--orbit-light); opacity: 0.09; }
 
 @keyframes orbit-equator {
-  from { transform: rotate(-23deg); }
-  to { transform: rotate(337deg); }
+  from { transform: rotate(-27deg); }
+  to { transform: rotate(-12deg); }
 }
 
 @keyframes orbit-meridian {
-  from { transform: rotate(27deg); }
-  to { transform: rotate(-333deg); }
+  from { transform: rotate(29deg); }
+  to { transform: rotate(17deg); }
 }
 
 body.deck-open .signal-orbit {

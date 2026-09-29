@@ -457,12 +457,12 @@ body.theme-pink .signal-orbit {
 
 .signal-orbit__plane--equator {
   transform: rotate(-27deg);
-  animation: orbit-equator 24s ease-in-out infinite alternate;
+  animation: orbit-equator 32s linear infinite;
 }
 
 .signal-orbit__plane--meridian {
   transform: rotate(29deg);
-  animation: orbit-meridian 32s ease-in-out infinite alternate;
+  animation: orbit-meridian 42s linear infinite;
 }
 
 .signal-orbit__wire {
@@ -497,12 +497,12 @@ body.theme-pink .signal-orbit {
 
 @keyframes orbit-equator {
   from { transform: rotate(-27deg); }
-  to { transform: rotate(-12deg); }
+  to { transform: rotate(333deg); }
 }
 
 @keyframes orbit-meridian {
   from { transform: rotate(29deg); }
-  to { transform: rotate(17deg); }
+  to { transform: rotate(-331deg); }
 }
 
 body.deck-open .signal-orbit {

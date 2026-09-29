@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initColorSampler();
   initThemeToggle();
 });
-// Theme toggle: keep the palette choice quiet and persistent.
+// Theme toggle: preserve the original footer phrases in both colour states.
 function initThemeToggle() {
   const titleContainer = document.querySelector('.cloneable-title');
   const titleLine1 = document.querySelector('.cloneable-title__nr');
@@ -581,12 +581,12 @@ function initThemeToggle() {
     const field = getPrimaryDotField();
 
     if (isPink) {
-      titleLine1.textContent = 'palette';
-      titleLine2.textContent = 'pink';
+      titleLine1.textContent = 'nothing ever happens';
+      titleLine2.textContent = 'we are so back';
       document.documentElement.style.setProperty('--accent-default', '#F05CEB');
     } else {
-      titleLine1.textContent = 'palette';
-      titleLine2.textContent = 'amber';
+      titleLine1.textContent = "dante's digital inferno";
+      titleLine2.textContent = 'everything is what it truly is';
       document.documentElement.style.setProperty('--accent-default', '#EFBB73');
     }
 

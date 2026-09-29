@@ -149,22 +149,6 @@
     height: 100%;
   }
 
-  .station-intro {
-    top: calc(6.5rem + env(safe-area-inset-top, 0px));
-    left: calc(var(--page-gutter) + 0.6rem);
-    right: calc(var(--page-gutter) + 0.6rem);
-    max-width: none;
-  }
-
-  .station-title {
-    font-size: clamp(2.7rem, 11vw, 4.5rem);
-  }
-
-  .station-description {
-    margin-top: 0.7rem;
-    font-size: 0.9rem;
-  }
-
   .osmo-icon__link {
     top: 60%;
   }

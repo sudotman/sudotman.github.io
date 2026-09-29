@@ -11,7 +11,6 @@ function revealProjects() {
     centerIcon.disabled = true;
     centerIcon.setAttribute('aria-hidden', 'true');
     document.body.classList.add('deck-open');
-    document.querySelector('.station-intro')?.setAttribute('inert', '');
     if (tldrButton) tldrButton.hidden = true;
     projectsContent.setAttribute('aria-hidden', 'false');
     // Animate dots to disperse
@@ -44,7 +43,6 @@ function returnToDots() {
     projectsContent.classList.remove('revealed');
     projectsContent.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('deck-open');
-    document.querySelector('.station-intro')?.removeAttribute('inert');
     if (tldrButton) tldrButton.hidden = false;
     
     // Animate dots back to normal

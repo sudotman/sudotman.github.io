@@ -440,6 +440,9 @@ body.theme-pink .signal-orbit {
   display: block;
   width: 100%;
   height: 100%;
+  transform-origin: center;
+  animation: orbit-turn 32s linear infinite;
+  will-change: transform;
 }
 
 .signal-orbit__volume { fill: url(#orbit-volume); }
@@ -452,17 +455,14 @@ body.theme-pink .signal-orbit {
 
 .signal-orbit__plane {
   transform-origin: 280px 280px;
-  will-change: transform;
 }
 
 .signal-orbit__plane--equator {
   transform: rotate(-27deg);
-  animation: orbit-equator 32s linear infinite;
 }
 
 .signal-orbit__plane--meridian {
-  transform: rotate(29deg);
-  animation: orbit-meridian 42s linear infinite;
+  transform: rotate(-9deg);
 }
 
 .signal-orbit__wire {
@@ -495,14 +495,8 @@ body.theme-pink .signal-orbit {
 .signal-orbit__beacon { fill: var(--orbit-light); opacity: 0.7; }
 .signal-orbit__beacon-halo { fill: var(--orbit-light); opacity: 0.09; }
 
-@keyframes orbit-equator {
-  from { transform: rotate(-27deg); }
-  to { transform: rotate(333deg); }
-}
-
-@keyframes orbit-meridian {
-  from { transform: rotate(29deg); }
-  to { transform: rotate(-331deg); }
+@keyframes orbit-turn {
+  to { transform: rotate(360deg); }
 }
 
 body.deck-open .signal-orbit {
@@ -750,7 +744,7 @@ body.theme-pink .cloneable-title:hover .cloneable-title__h1 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .signal-orbit__plane { animation: none !important; }
+  .signal-orbit svg { animation: none !important; }
   /* Disable CRT scan/noise and flicker animations for reduced-motion */
   body::before,
   body::after,

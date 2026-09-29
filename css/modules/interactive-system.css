@@ -443,8 +443,8 @@ body.theme-pink .signal-orbit {
 }
 
 .signal-orbit__volume { fill: url(#orbit-volume); }
-.signal-orbit__volume-core { stop-color: var(--orbit-shadow); stop-opacity: 0.11; }
-.signal-orbit__volume-edge { stop-color: var(--orbit-shadow); stop-opacity: 0.045; }
+.signal-orbit__volume-core { stop-color: var(--orbit-shadow); stop-opacity: 0.15; }
+.signal-orbit__volume-edge { stop-color: var(--orbit-shadow); stop-opacity: 0.06; }
 .signal-orbit__volume-clear { stop-color: var(--orbit-shadow); stop-opacity: 0; }
 .signal-orbit__wire-back { stop-color: var(--orbit-shadow); stop-opacity: 0.13; }
 .signal-orbit__wire-middle { stop-color: var(--orbit-shadow); stop-opacity: 0.42; }
@@ -465,17 +465,24 @@ body.theme-pink .signal-orbit {
 
 .signal-orbit__front {
   stroke: var(--orbit-light);
-  stroke-width: 1.55;
+  stroke-width: 1.8;
   stroke-linecap: round;
-  opacity: 0.65;
+  opacity: 0.78;
 }
 
-.signal-orbit__front--meridian { opacity: 0.42; }
+.signal-orbit__front--meridian { opacity: 0.46; }
+
+.signal-orbit__underside {
+  stroke: var(--orbit-shadow);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.25;
+}
 
 .signal-orbit__bloom {
   stroke: var(--orbit-light);
-  stroke-width: 5;
-  opacity: 0.055;
+  stroke-width: 9;
+  opacity: 0.075;
 }
 
 .signal-orbit__beacon { fill: var(--orbit-light); opacity: 0.7; }

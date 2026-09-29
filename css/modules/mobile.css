@@ -158,16 +158,8 @@
     width: min(88vw, 27rem);
   }
 
-  .signal-orbit__haze,
-  .signal-orbit__rings { filter: none; }
-
   .osmo-icon__link {
     width: clamp(5.5rem, 18vw, 7rem);
-  }
-
-  .osmo-icon__link::after {
-    top: calc(100% + 0.45rem);
-    font-size: 0.56rem;
   }
 
   .projects-content {

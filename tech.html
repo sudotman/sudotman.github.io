@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="css/modules/base.css?v=20260928a">
   <link rel="stylesheet" href="css/modules/sections.css?v=20260928a">
   <link rel="stylesheet" href="css/modules/project-ui.css?v=20260905a">
-  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260929b">
-  <link rel="stylesheet" href="css/modules/mobile.css?v=20260929b">
+  <link rel="stylesheet" href="css/modules/interactive-system.css?v=20260929c">
+  <link rel="stylesheet" href="css/modules/mobile.css?v=20260929c">
   <script src="vendor/js/gsap.min.js" defer></script>
   <script src="js/copy-email.js?v=20260821a" defer></script>
   <script src="js/modules/core.js?v=20260929b" defer></script>
@@ -302,19 +302,30 @@
       </div>
       <div class="signal-orbit" aria-hidden="true">
         <svg viewBox="0 0 560 560" fill="none" focusable="false">
-          <circle class="signal-orbit__haze" cx="280" cy="280" r="205" />
-          <circle class="signal-orbit__rim" cx="280" cy="280" r="218" />
-          <circle class="signal-orbit__rim signal-orbit__rim--inner" cx="280" cy="280" r="163" />
-          <g class="signal-orbit__rings">
-            <ellipse cx="280" cy="280" rx="205" ry="77" transform="rotate(-28 280 280)" />
-            <ellipse cx="280" cy="280" rx="205" ry="135" transform="rotate(-28 280 280)" />
-            <ellipse cx="280" cy="280" rx="77" ry="205" transform="rotate(-28 280 280)" />
+          <defs>
+            <radialGradient id="orbit-volume">
+              <stop class="signal-orbit__volume-core" offset="0" />
+              <stop class="signal-orbit__volume-edge" offset="0.52" />
+              <stop class="signal-orbit__volume-clear" offset="1" />
+            </radialGradient>
+            <linearGradient id="orbit-wire" x1="0" y1="0" x2="0" y2="1">
+              <stop class="signal-orbit__wire-back" offset="0" />
+              <stop class="signal-orbit__wire-middle" offset="0.5" />
+              <stop class="signal-orbit__wire-front" offset="1" />
+            </linearGradient>
+          </defs>
+          <circle class="signal-orbit__volume" cx="280" cy="280" r="244" />
+          <g class="signal-orbit__plane signal-orbit__plane--equator">
+            <ellipse class="signal-orbit__wire" cx="280" cy="280" rx="230" ry="117" />
+            <path class="signal-orbit__bloom" d="M50 280C50 345 153 397 280 397S510 345 510 280" />
+            <path class="signal-orbit__front" d="M50 280C50 345 153 397 280 397S510 345 510 280" />
+            <circle class="signal-orbit__beacon-halo" cx="487" cy="331" r="7" />
+            <circle class="signal-orbit__beacon" cx="487" cy="331" r="2" />
           </g>
-          <g class="signal-orbit__trace">
-            <circle cx="280" cy="280" r="218" pathLength="100" />
-            <circle class="signal-orbit__spark" cx="280" cy="62" r="3" />
+          <g class="signal-orbit__plane signal-orbit__plane--meridian">
+            <ellipse class="signal-orbit__wire" cx="280" cy="280" rx="98" ry="224" />
+            <path class="signal-orbit__front signal-orbit__front--meridian" d="M280 56C334 56 378 156 378 280S334 504 280 504" />
           </g>
-          <circle class="signal-orbit__core" cx="280" cy="280" r="3" />
         </svg>
       </div>
       <button class="osmo-icon__link w-inline-block" id="archive-entry" type="button" aria-label="View the work archive">

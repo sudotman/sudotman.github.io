@@ -415,86 +415,80 @@
   z-index: 2;
 }
 
-/* A slow phosphor instrument behind the card, based on the original orbit. */
+/* Two shaded orbital planes: a small, compositor-friendly armillary silhouette. */
 .signal-orbit {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: min(43vw, 35rem);
+  width: min(45vw, 35rem);
   aspect-ratio: 1;
-  color: var(--signal);
+  --orbit-light: #e3bf8d;
+  --orbit-shadow: #8fb8a7;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  opacity: 0.9;
+  opacity: 0.82;
   transition: opacity 500ms ease, visibility 500ms ease;
+}
+
+body.theme-pink .signal-orbit {
+  --orbit-light: #d7a5cb;
+  --orbit-shadow: #988fbc;
 }
 
 .signal-orbit svg {
   display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
 }
 
-.signal-orbit__haze {
-  fill: rgba(var(--signal-rgb), 0.025);
-  filter: drop-shadow(0 0 38px rgba(var(--signal-rgb), 0.25));
-}
+.signal-orbit__volume { fill: url(#orbit-volume); }
+.signal-orbit__volume-core { stop-color: var(--orbit-shadow); stop-opacity: 0.11; }
+.signal-orbit__volume-edge { stop-color: var(--orbit-shadow); stop-opacity: 0.045; }
+.signal-orbit__volume-clear { stop-color: var(--orbit-shadow); stop-opacity: 0; }
+.signal-orbit__wire-back { stop-color: var(--orbit-shadow); stop-opacity: 0.13; }
+.signal-orbit__wire-middle { stop-color: var(--orbit-shadow); stop-opacity: 0.42; }
+.signal-orbit__wire-front { stop-color: var(--orbit-light); stop-opacity: 0.64; }
 
-.signal-orbit__rim,
-.signal-orbit__rings ellipse {
-  stroke: currentColor;
-  stroke-width: 0.8;
-  vector-effect: non-scaling-stroke;
-}
-
-.signal-orbit__rim {
-  opacity: 0.37;
-  stroke-dasharray: 1 6;
-}
-
-.signal-orbit__rim--inner {
-  opacity: 0.18;
-  stroke-dasharray: 2 11;
-}
-
-.signal-orbit__rings {
+.signal-orbit__plane {
   transform-origin: 280px 280px;
-  animation: signal-orbit-turn 54s linear infinite;
-  filter: drop-shadow(0 0 5px rgba(var(--signal-rgb), 0.48));
+  will-change: transform;
 }
 
-.signal-orbit__rings ellipse:nth-child(1) { opacity: 0.54; }
-.signal-orbit__rings ellipse:nth-child(2) { opacity: 0.31; }
-.signal-orbit__rings ellipse:nth-child(3) { opacity: 0.4; }
+.signal-orbit__plane--equator { animation: orbit-equator 84s linear infinite; }
+.signal-orbit__plane--meridian { animation: orbit-meridian 110s linear infinite; }
 
-.signal-orbit__trace {
-  transform-origin: 280px 280px;
-  animation: signal-orbit-turn 18s linear infinite reverse;
+.signal-orbit__wire {
+  stroke: url(#orbit-wire);
+  stroke-width: 1;
 }
 
-.signal-orbit__trace > circle:first-child {
-  stroke: currentColor;
-  stroke-width: 1.7;
+.signal-orbit__front {
+  stroke: var(--orbit-light);
+  stroke-width: 1.55;
   stroke-linecap: round;
-  stroke-dasharray: 5 95;
-  opacity: 0.72;
-  filter: drop-shadow(0 0 5px currentColor);
+  opacity: 0.65;
 }
 
-.signal-orbit__spark {
-  fill: currentColor;
-  filter: drop-shadow(0 0 6px currentColor);
+.signal-orbit__front--meridian { opacity: 0.42; }
+
+.signal-orbit__bloom {
+  stroke: var(--orbit-light);
+  stroke-width: 5;
+  opacity: 0.055;
 }
 
-.signal-orbit__core {
-  fill: currentColor;
-  opacity: 0.35;
+.signal-orbit__beacon { fill: var(--orbit-light); opacity: 0.7; }
+.signal-orbit__beacon-halo { fill: var(--orbit-light); opacity: 0.09; }
+
+@keyframes orbit-equator {
+  from { transform: rotate(-23deg); }
+  to { transform: rotate(337deg); }
 }
 
-@keyframes signal-orbit-turn {
-  to { transform: rotate(360deg); }
+@keyframes orbit-meridian {
+  from { transform: rotate(27deg); }
+  to { transform: rotate(-333deg); }
 }
 
 body.deck-open .signal-orbit {
@@ -742,8 +736,7 @@ body.theme-pink .cloneable-title:hover .cloneable-title__h1 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .signal-orbit__rings,
-  .signal-orbit__trace { animation: none !important; }
+  .signal-orbit__plane { animation: none !important; }
   /* Disable CRT scan/noise and flicker animations for reduced-motion */
   body::before,
   body::after,
@@ -1958,26 +1951,6 @@ body::after {
   padding: 0.35rem;
   border: 0;
   background: transparent;
-}
-
-.osmo-icon__link::after {
-  content: "view work";
-  position: absolute;
-  top: calc(100% + 0.6rem);
-  left: 50%;
-  width: max-content;
-  color: rgba(218, 255, 181, 0.68);
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
-  transform: translateX(-50%);
-  transition: color 180ms ease, letter-spacing 180ms ease;
-}
-
-.osmo-icon__link:hover::after,
-.osmo-icon__link:focus-visible::after {
-  color: var(--signal);
-  letter-spacing: 0.2em;
 }
 
 .osmo-icon-svg {

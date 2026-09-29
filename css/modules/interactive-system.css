@@ -446,9 +446,9 @@ body.theme-pink .signal-orbit {
 .signal-orbit__volume-core { stop-color: var(--orbit-shadow); stop-opacity: 0.15; }
 .signal-orbit__volume-edge { stop-color: var(--orbit-shadow); stop-opacity: 0.06; }
 .signal-orbit__volume-clear { stop-color: var(--orbit-shadow); stop-opacity: 0; }
-.signal-orbit__wire-back { stop-color: var(--orbit-shadow); stop-opacity: 0.13; }
-.signal-orbit__wire-middle { stop-color: var(--orbit-shadow); stop-opacity: 0.42; }
-.signal-orbit__wire-front { stop-color: var(--orbit-light); stop-opacity: 0.64; }
+.signal-orbit__wire-back { stop-color: var(--orbit-shadow); stop-opacity: 0.25; }
+.signal-orbit__wire-middle { stop-color: var(--orbit-shadow); stop-opacity: 0.48; }
+.signal-orbit__wire-front { stop-color: var(--orbit-light); stop-opacity: 0.7; }
 
 .signal-orbit__plane {
   transform-origin: 280px 280px;
@@ -467,7 +467,7 @@ body.theme-pink .signal-orbit {
 
 .signal-orbit__wire {
   stroke: url(#orbit-wire);
-  stroke-width: 1;
+  stroke-width: 1.15;
 }
 
 .signal-orbit__front {

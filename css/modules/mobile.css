@@ -150,6 +150,18 @@
   }
 
   .osmo-icon__link {
+    top: 60%;
+  }
+
+  .signal-orbit {
+    top: 60%;
+    width: min(88vw, 27rem);
+  }
+
+  .signal-orbit__haze,
+  .signal-orbit__rings { filter: none; }
+
+  .osmo-icon__link {
     width: clamp(5.5rem, 18vw, 7rem);
   }
 
@@ -236,6 +248,14 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 0.8rem;
     margin-bottom: 1rem;
+  }
+
+  .work-toolbar:has(.work-lenses[hidden]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .work-toolbar:has(.work-lenses[hidden]) .project-results {
+    justify-self: start;
   }
 
   .work-lenses {

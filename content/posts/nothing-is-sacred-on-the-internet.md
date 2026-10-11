@@ -1,6 +1,9 @@
 ---
 title: nothing is sacred on the internet
 date: 2026-10-08
+updated: 2026-10-11
+summary: the internet is wizardry and the final frontier is upon us
+tags: [internet, zeitgeist]
 ---
 
 there is this great song by 'clipping.' called 'nothing is safe' where the lyrics go along the lines of 'nothing is sacred, nothing to pray for, nothing is safe' - it's an incredible song and it leads me to sacredness and immutability. 

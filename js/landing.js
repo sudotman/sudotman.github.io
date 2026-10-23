@@ -634,7 +634,7 @@
   /* The reel                                                                */
   /* ---------------------------------------------------------------------- */
 
-  const REEL_SOURCES = ["/js/reel-config.js?v=20261023a", "/js/intro.js?v=20261023a"];
+  const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261023b"];
 
   // [reel] replays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes

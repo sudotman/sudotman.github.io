@@ -1,7 +1,7 @@
 /**
  * The reel's copy, type and palette, laid out as a storyboard.
  *
- * Only what the viewer reads and the type it is read in. The choreography —
+ * Only what the viewer reads and hears, and the type it is read in. The choreography —
  * fifteen seconds, eight holds, a 116 bpm grid — stays in js/intro.js, because
  * it is timing rather than content and an editor for it would be a different
  * tool. Lists the cut is timed against, like the four xr headings, can be
@@ -24,6 +24,7 @@ import {
 import { button, el } from '../dom.js';
 import { field, form } from '../fields.js';
 import { openPreview } from '../preview.js';
+import { soundtrack } from '../soundtrack.js';
 import * as store from '../store.js';
 
 /** Scene fields whose value is a list of records rather than a plain value. */
@@ -151,6 +152,8 @@ function render(main, context) {
   main.append(el('div.reel-board', {},
     REEL_SCENES.map((scene) => sceneCard(scene, context))));
 
+  main.append(soundtrack(context));
+
   main.append(typeAndPalette(context));
 
   main.append(el('p.record-residency__note', {},
@@ -162,7 +165,7 @@ export default {
   id: 'reel',
   label: 'the reel',
   title: 'the reel',
-  lede: 'The fifteen seconds before the front door, scene by scene. Copy, type and palette are editable here; '
+  lede: 'The fifteen seconds before the front door, scene by scene. Copy, sound, type and palette are editable here; '
     + 'the choreography stays in js/intro.js.',
   render
 };

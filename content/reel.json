@@ -14,6 +14,20 @@
     "river": "#173dc4",
     "gold": "#ffb427"
   },
+  "music": {
+    "on": true,
+    "voice": "synth",
+    "volume": 1,
+    "warmth": 0,
+    "spinUp": 0.65,
+    "pulse": 1,
+    "mix": {
+      "drums": 1,
+      "bass": 1,
+      "chords": 1,
+      "effects": 1
+    }
+  },
   "scenes": {
     "front-door": {
       "name": "satyam kashyap",

@@ -5,12 +5,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { normalizePost, parseFrontmatter } from '../js/lib/post.js';
+import { checkReel } from '../js/lib/schema.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
 const HOME_PATH = 'content/home.json';
 const PROFILE_PATH = 'profile.json';
 const CREATIVE_PATH = 'content/creative.json';
+const REEL_PATH = 'content/reel.json';
+const REEL_CONFIG_PATH = 'js/reel-config.js';
 
 const errors = [];
 const warnings = [];
@@ -935,6 +938,40 @@ async function validateLocalAssets() {
   }));
 }
 
+/**
+ * The reel's copy, and the generated script the site actually loads.
+ *
+ * js/intro.js keeps a fallback copy of every word, so a missing config is not
+ * fatal at runtime — but a config that has drifted from content/reel.json
+ * means the site is showing something other than what the repository says, and
+ * that is worth failing the build over.
+ */
+async function validateReel() {
+  const reel = await readJson(REEL_PATH);
+  if (!reel) return;
+
+  if (reel.schemaVersion !== 1) addError(`${REEL_PATH}.schemaVersion`, 'must equal 1');
+  for (const problem of checkReel(reel)) addError(`${REEL_PATH}.${problem.key}`, problem.message);
+
+  const generated = await readFile(path.join(ROOT, REEL_CONFIG_PATH), 'utf8').catch(() => null);
+  if (generated === null) {
+    addError(REEL_CONFIG_PATH, 'is missing; run npm run build');
+    return;
+  }
+  const match = generated.match(/^window\.__REEL = (.*);$/m);
+  if (!match) {
+    addError(REEL_CONFIG_PATH, 'is not in the shape scripts/build-reel.mjs writes; run npm run build');
+    return;
+  }
+  try {
+    if (JSON.stringify(JSON.parse(match[1])) !== JSON.stringify(reel)) {
+      addError(REEL_CONFIG_PATH, `does not match ${REEL_PATH}; run npm run build`);
+    }
+  } catch {
+    addError(REEL_CONFIG_PATH, 'does not hold valid JSON; run npm run build');
+  }
+}
+
 async function main() {
   const manifest = await readJson(MANIFEST_PATH);
   const home = await readJson(HOME_PATH);
@@ -1004,6 +1041,8 @@ async function main() {
   }
 
   if (creativeArchive) validateCreativeArchive(creativeArchive, seenWorkIds);
+
+  await validateReel();
 
   if (hasText(home?.externalFeeds?.blog)) await validateBlog(home.externalFeeds.blog);
 

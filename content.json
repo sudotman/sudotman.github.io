@@ -62,12 +62,16 @@
       {
         "id": "programming",
         "src": "content/programming.json",
-        "defaultTracks": ["programming"]
+        "defaultTracks": [
+          "programming"
+        ]
       },
       {
         "id": "film-art",
         "src": "content/film-art.json",
-        "defaultTracks": ["arts"]
+        "defaultTracks": [
+          "arts"
+        ]
       }
     ]
   }

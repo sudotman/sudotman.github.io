@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /write/
+Disallow: /studio/
 
 Sitemap: https://satyam.lol/sitemap.xml

@@ -6,21 +6,30 @@
  * localStorage on every keystroke; publishing commits the markdown file to the
  * site repository through the GitHub contents API, and CI does the rest.
  *
- * The token never leaves this device except in an Authorization header to
- * api.github.com. Nothing here talks to any other origin.
+ * The GitHub side lives in js/lib/github.js, shared with the studio at
+ * /studio/, so one token scoped to this repository serves both desks. The token
+ * never leaves this device except in an Authorization header to api.github.com.
+ * Nothing here talks to any other origin.
  */
 
+import {
+  forgetToken,
+  hasToken,
+  putFile,
+  readConfig,
+  readFile,
+  readToken,
+  removeFile,
+  verify,
+  writeConfig,
+  writeToken
+} from './lib/github.js';
 import { markdownToHtml, readingMinutes, slugify, wordCount } from './lib/markdown.js';
 import { SITE, substackClipboard } from './lib/substack.js';
 import { parseFrontmatter, serializePost, toIsoDate } from './lib/post.js';
 
-const STORE = {
-  drafts: 'satyam.write.drafts',
-  token: 'satyam.write.token',
-  config: 'satyam.write.config'
-};
+const STORE = { drafts: 'satyam.write.drafts' };
 
-const DEFAULT_CONFIG = { owner: 'sudotman', repo: 'sudotman.github.io', branch: 'master' };
 const POSTS_PATH = 'content/posts';
 const AUTOSAVE_DELAY = 500;
 
@@ -76,8 +85,6 @@ function writeJson(key, value) {
 }
 
 const drafts = () => readJson(STORE.drafts, {});
-const config = () => ({ ...DEFAULT_CONFIG, ...readJson(STORE.config, {}) });
-const token = () => localStorage.getItem(STORE.token) || '';
 
 /* ---------- buffer ---------- */
 
@@ -172,9 +179,7 @@ function onEdit() {
 
 /* ---------- github ---------- */
 
-function githubReady() {
-  return Boolean(token());
-}
+const githubReady = hasToken;
 
 function refreshGithubState() {
   githubButton.dataset.githubState = githubReady() ? 'on' : 'off';
@@ -182,40 +187,8 @@ function refreshGithubState() {
   publishButton.title = githubReady() ? '' : 'Add a GitHub token first — see the github panel.';
 }
 
-async function github(path, options = {}) {
-  const { owner, repo, branch } = config();
-  const base = `https://api.github.com/repos/${owner}/${repo}`;
-  const response = await fetch(path ? `${base}/${path}` : base, {
-    ...options,
-    headers: {
-      accept: 'application/vnd.github+json',
-      authorization: `Bearer ${token()}`,
-      'x-github-api-version': '2022-11-28',
-      ...(options.body ? { 'content-type': 'application/json' } : {}),
-      ...options.headers
-    }
-  });
-
-  if (response.status === 404) return { missing: true, branch };
-  if (!response.ok) {
-    const detail = await response.json().catch(() => ({}));
-    throw new Error(detail.message || `GitHub returned ${response.status}`);
-  }
-  return { ...(await response.json()), branch };
-}
-
-/** btoa only handles latin-1, so UTF-8 has to be widened byte by byte first. */
-function toBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
-
 async function fetchRemote(slug) {
-  const { branch } = config();
-  return github(`contents/${POSTS_PATH}/${slug}.md?ref=${encodeURIComponent(branch)}`);
+  return readFile(`${POSTS_PATH}/${slug}.md`);
 }
 
 async function publish() {
@@ -228,7 +201,7 @@ async function publish() {
   setStatus('Checking the repository…');
 
   try {
-    const { branch } = config();
+    const { branch } = readConfig();
     const remote = await fetchRemote(slug);
     const exists = !remote.missing;
 
@@ -246,14 +219,10 @@ async function publish() {
     const contents = fileContents();
     setStatus('Committing…');
 
-    const result = await github(`contents/${POSTS_PATH}/${slug}.md`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        message: `${exists ? 'post: update' : 'post:'} ${fields.title.value.trim()}`,
-        content: toBase64(contents),
-        branch,
-        ...(exists ? { sha: remote.sha } : {})
-      })
+    const result = await putFile(`${POSTS_PATH}/${slug}.md`, {
+      text: contents,
+      message: `${exists ? 'post: update' : 'post:'} ${fields.title.value.trim()}`,
+      sha: exists ? remote.sha : ''
     });
 
     loadedSlug = slug;
@@ -284,13 +253,12 @@ async function removePost() {
   setStatus('Deleting…');
 
   try {
-    const { branch } = config();
     const remote = await fetchRemote(slug);
     if (remote.missing) throw new Error('that post is not in the repository');
 
-    await github(`contents/${POSTS_PATH}/${slug}.md`, {
-      method: 'DELETE',
-      body: JSON.stringify({ message: `post: remove ${slug}`, sha: remote.sha, branch })
+    await removeFile(`${POSTS_PATH}/${slug}.md`, {
+      message: `post: remove ${slug}`,
+      sha: remote.sha
     });
 
     setStatus(`Deleted ${slug}.md.`, 'ok');
@@ -456,23 +424,20 @@ function insert(kind) {
 /* ---------- settings ---------- */
 
 function loadSettings() {
-  const current = config();
+  const current = readConfig();
   settingInputs.owner.value = current.owner;
   settingInputs.repo.value = current.repo;
   settingInputs.branch.value = current.branch;
-  settingInputs.token.value = token();
+  settingInputs.token.value = readToken();
 }
 
 function saveSettings() {
-  writeJson(STORE.config, {
-    owner: settingInputs.owner.value.trim() || DEFAULT_CONFIG.owner,
-    repo: settingInputs.repo.value.trim() || DEFAULT_CONFIG.repo,
-    branch: settingInputs.branch.value.trim() || DEFAULT_CONFIG.branch
+  writeConfig({
+    owner: settingInputs.owner.value,
+    repo: settingInputs.repo.value,
+    branch: settingInputs.branch.value
   });
-
-  const value = settingInputs.token.value.trim();
-  if (value) localStorage.setItem(STORE.token, value);
-  else localStorage.removeItem(STORE.token);
+  writeToken(settingInputs.token.value);
 
   refreshGithubState();
   deleteButton.hidden = !loadedSlug || !githubReady();
@@ -489,11 +454,8 @@ async function verifyToken() {
 
   setSettingsResult('Checking…');
   try {
-    const { owner, repo, branch } = config();
-    const info = await github('');
-    if (info.missing) throw new Error(`${owner}/${repo} is not reachable with this token`);
-    if (info.permissions && !info.permissions.push) throw new Error('this token cannot write to the repository');
-    setSettingsResult(`Connected to ${info.full_name} — publishing to ${branch}.`, 'ok');
+    const { name, branch } = await verify();
+    setSettingsResult(`Connected to ${name} — publishing to ${branch}.`, 'ok');
   } catch (error) {
     setSettingsResult(`Not connected: ${error.message}`, 'error');
   }
@@ -634,7 +596,7 @@ for (const dialog of [libraryDialog, settingsDialog]) {
 settingsDialog.addEventListener('close', saveSettings);
 document.querySelector('[data-verify-token]').addEventListener('click', verifyToken);
 document.querySelector('[data-forget-token]').addEventListener('click', () => {
-  localStorage.removeItem(STORE.token);
+  forgetToken();
   settingInputs.token.value = '';
   refreshGithubState();
   deleteButton.hidden = true;

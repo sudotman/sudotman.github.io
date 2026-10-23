@@ -13,7 +13,8 @@ Everything is plain HTML, CSS, JavaScript, JSON, and Markdown deployed through G
 - `/blog/`: the native writing archive, built from `content/posts/*.md`
 - `/blog/<slug>/`: a post, rendered to static HTML at build time
 - `/blog/feed.xml`: RSS, with full post content
-- `/write/`: the editor (noindex, and disallowed in `robots.txt`)
+- `/write/`: the writing desk (noindex, and disallowed in `robots.txt`)
+- `/studio/`: the content dashboard (noindex, and disallowed in `robots.txt`)
 - `/tech.html`: the complete ononline field manual and project dossiers
 
 The root is intentionally brief. It establishes Satyam's identity, current practice, films, R&D, public-code products, and writing without duplicating the full dossiers. Living, River, Doors, and ononline remain the deeper entrances.
@@ -208,7 +209,65 @@ Blogger cannot issue a 301 from this repository, so the build emits `docs/blogsp
 paste it into the Blogspot theme's `<head>` (Blogger → Theme → Edit HTML) to canonical and redirect each
 old post to its new home. That file is excluded from the deployed artifact.
 
+## The studio
+
+`/studio/` is a dashboard over everything on the site that is not prose. It exists because a
+single project is spread across four files — its record in `content/home.json` or
+`content/programming.json`, its place on the front door in `home.featured`, its colour pair and
+slug in `content/creative.json`, its medium in `content.json` — and keeping those in step by hand
+is the kind of work a tool should do.
+
+It opens and reads without a token. To publish, add the same fine-grained GitHub token the writing
+desk uses (**Contents: read and write**, scoped to this repository); one token serves both, and it
+is sent to `api.github.com` and nowhere else.
+
+**The works board** is the centre of it. Two bands, laid out the way the front door renders them:
+the featured leads in your order, then everything else alphabetically. Drag a card to reorder,
+drag it down to stop featuring it, or use the `↑ ↓ drop` buttons — which is also how it works on a
+phone. Each card carries three marks: `★` featured, `◆` in the creative archive and tinted with
+its own colours, `●` in the archive feed and so on ononline.
+
+**The record sheet** opens from any card and holds the whole work: its fields, plus a residency row
+naming the file behind each toggle. Moving a record between `content/home.json` and
+`content/programming.json` is one button and translates the shape — `medium ↔ category`,
+`summary ↔ short`, `body ↔ long`, named links ↔ a list of links — telling you what it will gain and
+lose first. Renaming an `id` carries `featured` and the creative archive with it.
+
+**Everything else** gets its own screen: the front door's identity, `now`, branches and feeds; the
+creative archive as colour tiles; ononline's header and taxonomy, with a count of how many works
+each medium still holds; the profile; and the reel.
+
+**Preview** hands the pending changeset to the real site in `sessionStorage` and opens it, so the
+front door or the reel can be seen with uncommitted edits before anything is published.
+
+**Publish** is one screen and one commit. Every changed file is listed with a readable summary —
+*reordered featured — p_openpiano, p_hear, …* rather than forty changed lines — with the raw diff
+behind a toggle. It commits through the git data API, so a change touching four files is one
+commit and one deploy rather than four of each. Before sending, it checks the rules in
+`js/lib/schema.js` and warns if any file being written has moved in the repository since the studio
+read it.
+
+Point the branch at something other than `master` in the github panel to try a change without
+touching the live site.
+
+## The reel
+
+`content/reel.json` holds every word the fifteen-second showreel says, the three font stacks and
+the seven colours. `npm run build` writes `js/reel-config.js` from it, which is what the page
+loads, ahead of `js/intro.js`.
+
+`js/intro.js` keeps a copy of all of it as its own fallback and merges the config over the top, so
+a config that is missing, slow or malformed costs nothing — the reel plays as written. Lists the
+cut is timed against (the four xr headings, the four headline words, the three film cards) are held
+to their length rather than allowed to desynchronise the edit; the tile wall and the sign-off links
+can grow.
+
+The choreography — fifteen seconds, eight holds, a 116 bpm grid — stays in `js/intro.js`. The
+studio's reel screen edits the words and the type, and plays the result.
+
 ## Publishing a work
+
+The studio does all of this from `/studio/`. By hand:
 
 1. Decide whether the record belongs in `content/home.json` or the existing technical feed.
 2. Give it a globally unique, stable `id`.
@@ -243,9 +302,9 @@ Published public code without an explicit license should be described as public 
 npm test
 ```
 
-The validator checks the ononline manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, blog frontmatter, and local assets. It also fails when `content/blog.json` has drifted from `content/posts/`. It has no package dependencies.
+The validator checks the ononline manifest, compact homepage data, profile, registered feeds, taxonomy, unique ids, URLs, creative-archive references, the reel's copy and palette, blog frontmatter, and local assets. It also fails when `content/blog.json` or `js/reel-config.js` has drifted from its source. It has no package dependencies.
 
-Run `node --check` on any changed JavaScript file as well.
+`npm test` runs `node --check` over every script under `js/` and `scripts/`, so a new module is covered the moment it exists.
 
 ## Running locally
 
@@ -256,8 +315,8 @@ server is required:
 npm run serve
 ```
 
-Then open `http://localhost:4173/`, `/blog/`, or `/write/`. It resolves directory URLs to `index.html`
-and falls back to `404.html`, the way Pages does.
+Then open `http://localhost:4173/`, `/blog/`, `/write/`, or `/studio/`. It resolves directory URLs to
+`index.html` and falls back to `404.html`, the way Pages does.
 
 ## Checks
 
@@ -267,8 +326,9 @@ There is still no bundler. The Node scripts only generate and verify content:
 npm test
 ```
 
-That runs `node --check` over every script, the markdown renderer and post-format test suites,
-`npm run build:check` for stale blog output, and then `scripts/validate-content.mjs`.
+That runs `scripts/check-syntax.mjs` over every script, the markdown, post-format, Substack and
+studio test suites, `npm run build:check` for stale blog and reel output, and then
+`scripts/validate-content.mjs`.
 To refresh the Letterboxd feed by hand:
 
 ```sh
@@ -285,9 +345,14 @@ npm run sync
 - Films and art: `content/film-art.json`
 - Creative-archive appearance and order: `content/creative.json`
 - Experience, stack, and interests: `profile.json`
+- Reel copy, type and palette: `content/reel.json` (then `npm run build`)
+- Anything above, without opening a JSON file: `/studio/`
 - Writing: `content/posts/*.md`, through `/write/` or any text editor
 - Blog appearance: `css/blog.css`; blog page structure: `scripts/build-blog.mjs`
-- Editor: `write/index.html`, `css/editor.css`, `js/editor.js`
+- Writing desk: `write/index.html`, `css/editor.css`, `js/editor.js`
+- Studio: `studio/index.html`, `css/studio.css`, `js/studio/`
+- GitHub publishing and the content schema, shared by both desks: `js/lib/github.js`, `js/lib/schema.js`
+- Reel choreography: `js/intro.js`
 - Markdown rendering and the post file format: `js/lib/markdown.js` and `js/lib/post.js`
 - Front-door visuals or behavior: `css/landing.css` and `js/landing.js`
 - Living, River, or Doors: `css/creative-network.css` and `js/creative-network.js`

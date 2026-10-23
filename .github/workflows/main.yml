@@ -46,8 +46,14 @@ jobs:
       - name: Build the blog from content/posts
         run: node scripts/build-blog.mjs
 
+      - name: Build the reel config from content/reel.json
+        run: node scripts/build-reel.mjs
+
       - name: Check the markdown renderer
         run: node scripts/test-markdown.mjs
+
+      - name: Check the studio's libraries
+        run: node scripts/test-studio.mjs
 
       - name: Validate site content
         run: node scripts/validate-content.mjs

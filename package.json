@@ -7,14 +7,14 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/build-blog.mjs",
-    "build:check": "node scripts/build-blog.mjs --check",
+    "build": "node scripts/build-blog.mjs && node scripts/build-reel.mjs",
+    "build:check": "node scripts/build-blog.mjs --check && node scripts/build-reel.mjs --check",
     "serve": "node scripts/serve.mjs",
     "import:blogger": "node scripts/import-blogger.mjs",
     "validate": "node scripts/validate-content.mjs",
     "sync": "node scripts/sync-external-feeds.mjs",
     "sync:rss": "node scripts/sync-external-feeds.mjs --skip-archive",
-    "check": "node --check js/landing.js && node --check js/intro.js && node --check js/creative-network.js && node --check js/copy-email.js && node --check js/blog.js && node --check js/lib/markdown.js && node --check js/lib/post.js && node --check js/lib/substack.js && node --check js/editor.js && node --check js/modules/core.js && node --check js/modules/interface.js && node --check js/modules/content.js && node --check js/modules/heatmap.js && node --check scripts/validate-content.mjs && node --check scripts/sync-external-feeds.mjs && node --check scripts/build-blog.mjs && node --check scripts/import-blogger.mjs && node --check scripts/serve.mjs && node --check scripts/test-markdown.mjs && node --check scripts/test-post.mjs && node --check scripts/test-substack.mjs",
-    "test": "npm run check && node scripts/test-markdown.mjs && node scripts/test-post.mjs && node scripts/test-substack.mjs && npm run build:check && npm run validate"
+    "check": "node scripts/check-syntax.mjs",
+    "test": "npm run check && node scripts/test-markdown.mjs && node scripts/test-post.mjs && node scripts/test-substack.mjs && node scripts/test-studio.mjs && npm run build:check && npm run validate"
   }
 }

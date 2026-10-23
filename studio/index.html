@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>studio — satyam.lol</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f0ede4">
+  <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/studio.css?v=20261023a">
+  <script type="module" src="/js/studio/app.js?v=20261023a"></script>
+</head>
+<body class="studio-body-root">
+  <div class="studio" id="studio" hidden>
+
+    <header class="studio-bar">
+      <div class="studio-bar__left">
+        <span class="studio-brand">satyam.lol<span>/studio</span></span>
+        <span class="studio-bar__where" data-where></span>
+      </div>
+      <div class="studio-bar__right">
+        <span class="studio-pending" data-pending></span>
+        <button type="button" data-open-settings data-github-state="off">github</button>
+      </div>
+    </header>
+
+    <div class="studio-shell">
+      <nav class="studio-rail" data-rail aria-label="Surfaces"></nav>
+      <main class="studio-main" data-main tabindex="-1"></main>
+    </div>
+
+    <p class="studio-status" data-status role="status"></p>
+  </div>
+
+  <noscript>
+    <main class="studio-noscript">
+      <h1>studio</h1>
+      <p>The studio needs JavaScript. Everything it edits is plain JSON in the repository — <code>content/home.json</code>, <code>content/programming.json</code>, <code>content/creative.json</code>, <code>content.json</code>, <code>profile.json</code> and <code>content/reel.json</code> — and a text editor works just as well.</p>
+      <p><a href="/">← back to the front door</a></p>
+    </main>
+  </noscript>
+
+  <dialog class="studio-dialog studio-dialog--wide" data-record>
+    <header>
+      <span data-record-title>record</span>
+      <button type="button" data-close-dialog>close [esc]</button>
+    </header>
+    <div class="studio-dialog__body" data-record-body></div>
+  </dialog>
+
+  <dialog class="studio-dialog" data-settings>
+    <header>
+      <span>github</span>
+      <button type="button" data-close-dialog>close [esc]</button>
+    </header>
+    <div class="studio-dialog__body">
+      <p class="studio-dialog__note">
+        Publishing commits every changed file in one commit. GitHub Actions rebuilds and deploys,
+        usually within a minute. The same token serves <a href="/write/">the writing desk</a>.
+      </p>
+      <label class="studio-setting">
+        <span>fine-grained token</span>
+        <input type="password" data-setting="token" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      </label>
+      <p class="studio-dialog__warn">
+        Stored in this browser's localStorage on this device only, and sent to <code>api.github.com</code> and nowhere
+        else. Scope it to <strong>this repository only</strong> with <strong>Contents: read and write</strong> — nothing
+        more. Anyone with access to this browser profile can read it, so use “forget token” on a shared machine.
+      </p>
+      <div class="studio-setting__row">
+        <label class="studio-setting">
+          <span>owner</span>
+          <input type="text" data-setting="owner" spellcheck="false" autocomplete="off">
+        </label>
+        <label class="studio-setting">
+          <span>repository</span>
+          <input type="text" data-setting="repo" spellcheck="false" autocomplete="off">
+        </label>
+        <label class="studio-setting">
+          <span>branch</span>
+          <input type="text" data-setting="branch" spellcheck="false" autocomplete="off">
+        </label>
+      </div>
+      <p class="studio-dialog__note">
+        Point the branch somewhere else to try a change without touching the live site.
+      </p>
+      <div class="studio-dialog__actions">
+        <button type="button" data-verify-token>check connection</button>
+        <button type="button" class="is-danger" data-forget-token>forget token</button>
+      </div>
+      <p class="studio-dialog__result" data-settings-result role="status"></p>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -19,8 +19,102 @@
   "use strict";
 
   // ─────────────────────────────────────────────────────────── shared utilities
-  const Y = "#ffef00", GREEN = "#00d16f", MINT = "#8affc1", INK = "#141411", PAPER = "#f0ede4", RIVER = "#173dc4", GOLD = "#ffb427";
-  const SANS = "Arial, Helvetica, sans-serif", MONO = '"Courier New", Courier, monospace', SERIF = '"Times New Roman", Times, serif';
+  // ─────────────────────────────────────────────────────── copy, type, palette
+  // Everything the reel says, and the type and colours it says it in, with the
+  // written-down version as the fallback. js/reel-config.js carries whatever
+  // content/reel.json currently holds and is injected ahead of this script;
+  // when it is missing, slow or malformed, the reel plays exactly as below.
+  const REEL_DEFAULTS = {
+    type: { sans: "Arial, Helvetica, sans-serif", mono: '"Courier New", Courier, monospace', serif: '"Times New Roman", Times, serif' },
+    palette: { yellow: "#ffef00", green: "#00d16f", mint: "#8affc1", ink: "#141411", paper: "#f0ede4", river: "#173dc4", gold: "#ffb427" },
+    scenes: {
+      "front-door": {
+        name: "satyam kashyap",
+        chip: "creative technologist and filmmaker — mumbai, india",
+        marquee: "मेरे डिजिटल स्पेस में आपका स्वागत है!   میری ڈیجیٹل دنیا میں خوش آمدید!   ",
+        sentence: [
+          { before: "i lead", word: "xr", style: "box", after: "." },
+          { before: "i make", word: "films", style: "link", after: "." },
+          { before: "i ship", word: "tools", style: "link", after: "." },
+        ],
+      },
+      xr: {
+        label: "02 — xr / parallax labs",
+        headings: ["lead xr", "MaRTES", "gaganyaan", "patents"],
+        subtitles: [
+          "lead xr dev — parallax labs, mumbai",
+          "mission rehearsal & tactical engagement simulator",
+          "an end-to-end vr simulator for isro's gaganyaan",
+          "vr colocation via qr anchors + android gaussian splats",
+        ],
+        pending: "patent-pending × 2",
+      },
+      films: {
+        label: "03 — WRITTEN & DIRECTED",
+        subtitle: "i write and direct films.",
+        director: "SATYAM KASHYAP",
+        cards: [
+          { meta: "FILM · 2025 · 26 MIN", title: "Chhoti Gold", blurb: "an absurd, surreal short about two people whose lives change after they meet." },
+          { meta: "FILM · 2023 · 15 MIN · HINDI", title: "Blue Dogs", blurb: "two men in mumbai, caught in bigotry, paranoia and delusion." },
+          { meta: "IN DEVELOPMENT", title: "film 03", blurb: "the next one, after chhoti gold and blue dogs." },
+        ],
+      },
+      tools: {
+        headline: ["ship", "tools", "in", "public."],
+        chips: ["73 public repos", "31★ better unity", "plethora of domains ;)", "private, local-first <3"],
+        repoCount: 73,
+        works: [
+          { title: "MaRTES", meta: "r&d · current", group: 0 }, { title: "gaganyaan vr", meta: "isro · r&d", group: 0 }, { title: "UE camera2", meta: "quest 3 · c++", group: 0 },
+          { title: "mr hmg simulator", meta: "r&d · ongoing", group: 0 }, { title: "vr fire safety", meta: "training · r&d", group: 0 }, { title: "interaction research", meta: "isdk · c#", group: 0 },
+          { title: "Chhoti Gold", meta: "film · 2025", group: 1 }, { title: "Blue Dogs", meta: "film · 2023", group: 1 }, { title: "film 03", meta: "in development", group: 1 },
+          { title: "cbfc cut lists", meta: "censorship explorer", group: 1 }, { title: "126 reviews", meta: "letterboxd", group: 1 }, { title: "carcinization", meta: "essay · 2025", group: 1 },
+          { title: "Hear", meta: "offline · private", group: 2 }, { title: "OpenPiano", meta: "web midi · lessons", group: 2 }, { title: "OpenWorkout", meta: "local-first", group: 2 },
+          { title: "better unity", meta: "31★ · open source", group: 2 }, { title: "render buddy", meta: "unreal toolkit", group: 2 }, { title: "UE MCP bridge", meta: "unreal editor × mcp", group: 2 },
+          { title: "the closet", meta: "drifting archive", group: 3 }, { title: "Pahari Preservation", meta: "language archive", group: 3 }, { title: "Unlearn", meta: "puzzle-platformer", group: 3 },
+          { title: "artsaver", meta: "passive art", group: 3 }, { title: "wusic", meta: "minimal player", group: 3 }, { title: "the everything bagel", meta: "eeaao, but a site", group: 3 },
+        ],
+      },
+      statement: { quote: "science is only fun if its intersectional!", centre: "satyam", labels: ["xr", "film", "code", "art"] },
+      "sign-off": {
+        url: "satyam.lol",
+        aside: "perpetually curious.",
+        credits: "lead xr dev  ·  filmmaker  ·  toolmaker\nhimalayas → mumbai",
+        links: ["github.com/sudotman", "hello@satyam.lol", "letterboxd.com/satyamkashyap"],
+      },
+    },
+  };
+
+  // A list whose length the cut depends on — four headings are four beats — is
+  // held to that length, so a config can rewrite every word in the reel but
+  // cannot desynchronise it. Only the sign-off's links may grow or shrink.
+  const FLEXIBLE = new Set(["scenes.sign-off.links", "scenes.tools.works"]);
+  const kindOf = v => Array.isArray(v) ? "array" : v === null ? "null" : typeof v;
+  function mergeReel(base, over, path = "") {
+    if (kindOf(over) !== kindOf(base)) return base;
+    if (kindOf(base) === "array") {
+      if (FLEXIBLE.has(path)) return over.length && over.every(e => kindOf(e) === kindOf(base[0])) ? over : base;
+      return base.map((entry, i) => mergeReel(entry, over[i], path + "[]"));
+    }
+    if (kindOf(base) === "object") {
+      const out = {};
+      for (const k of Object.keys(base)) out[k] = mergeReel(base[k], over[k], path ? path + "." + k : k);
+      return out;
+    }
+    return over;
+  }
+
+  // __REEL_PREVIEW is the studio handing over an uncommitted config; __REEL is
+  // the committed one from js/reel-config.js.
+  let REEL = REEL_DEFAULTS;
+  try {
+    REEL = mergeReel(REEL_DEFAULTS, window.__REEL_PREVIEW || window.__REEL);
+  } catch {
+    // Anything at all wrong with the config and the reel keeps its own words.
+  }
+  const SC = REEL.scenes;
+
+  const Y = REEL.palette.yellow, GREEN = REEL.palette.green, MINT = REEL.palette.mint, INK = REEL.palette.ink, PAPER = REEL.palette.paper, RIVER = REEL.palette.river, GOLD = REEL.palette.gold;
+  const SANS = REEL.type.sans, MONO = REEL.type.mono, SERIF = REEL.type.serif;
   const DUR = 15;
   const RATE = 29 / 30, BEAT = 0.5 / RATE, RAMP = 0.16;
   const FREEZE_VIDEO = [[1.49, 1], [3.78, 1], [4.84, 1], [5.2, 1], [5.57, 1], [6.88, 1], [8.13, 1], [9.8, 2]];
@@ -110,18 +204,33 @@
     const s1 = scene(0, 2.0, "#fff");
     const s1cam = content(s1, { transformOrigin: "0 0" });
     const swipe = el("div", s1cam, { position: "absolute", background: Y });
-    const VTXT = "मेरे डिजिटल स्पेस में आपका स्वागत है!   میری ڈیجیٹل دنیا میں خوش آمدید!   ".repeat(5);
+    const VTXT = SC["front-door"].marquee.repeat(5);
     const vtxt = el("div", s1, abs(34, 0, { writingMode: "vertical-rl", font: `400 19px/1 ${SERIF}`, color: "#000", whiteSpace: "nowrap" }));
     vtxt.textContent = VTXT;
     const nameBox = el("div", s1cam, abs(X0, L1.y, { font: `900 ${L1.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: "#000", whiteSpace: "nowrap" }));
-    const N1 = letters(el("div", nameBox), "satyam"), N2 = letters(el("div", nameBox), "kashyap");
-    const CHIP = "creative technologist and filmmaker — mumbai, india";
+    // The name sets as two lines; a name without a space simply keeps one.
+    const NAME = SC["front-door"].name.split(/\s+/);
+    const N1 = letters(el("div", nameBox), NAME[0] || ""), N2 = letters(el("div", nameBox), NAME.slice(1).join(" "));
+    const CHIP = SC["front-door"].chip;
     const chip = el("div", s1cam, abs(X0, L1.chipY, { font: `700 ${L1.chipFs}px/1.2 ${MONO}`, padding: `${L1.chipFs / 6}px ${L1.chipPad}px`, color: "#000", whiteSpace: "pre" }));
     chip.textContent = CHIP;
     const caret = el("span", s1cam, abs(0, L1.chipY + L1.chipFs * 0.27, { width: L1.chipFs * 0.57 + "px", height: L1.chipFs * 1.03 + "px", background: "#000" }));
     const sent = el("div", s1cam, abs(X0, L1.sentY, { font: `400 ${L1.sentFs}px/1.12 ${SERIF}`, color: "#000", whiteSpace: "nowrap" }));
-    const gap = V ? "<br>" : "&nbsp; ";
-    sent.innerHTML = `<span class="w">i</span> <span class="w">lead</span> <span class="w xr">xr</span><span class="w">.</span>${gap}<span class="w">i</span> <span class="w">make</span> <span class="w lk">films</span><span class="w">.</span>${gap}<span class="w">i</span> <span class="w">ship</span> <span class="w lk">tools</span><span class="w">.</span>`;
+    // Built as nodes rather than markup, so the clauses can come from a config
+    // without any of it being parsed as HTML. Each word animates on its own.
+    const CLASS = { box: "w xr", link: "w lk" };
+    SC["front-door"].sentence.forEach((clause, i) => {
+      if (i) {
+        if (V) el("br", sent);
+        else sent.appendChild(document.createTextNode("  "));
+      }
+      for (const word of String(clause.before || "").split(/\s+/).filter(Boolean)) {
+        const s = el("span", sent, {}, "w"); s.textContent = word;
+        sent.appendChild(document.createTextNode(" "));
+      }
+      const mark = el("span", sent, {}, CLASS[clause.style] || "w"); mark.textContent = clause.word;
+      if (clause.after) { const a = el("span", sent, {}, "w"); a.textContent = clause.after; }
+    });
     const words = [...sent.querySelectorAll(".w")];
     const xrBox = sent.querySelector(".xr");
     const s1black = el("div", s1, { ...bleed, background: "#000", opacity: 0 });
@@ -164,12 +273,12 @@
     const cv = el("canvas", s2c, box(DW, DH)); cv.width = DW; cv.height = DH; const g = cv.getContext("2d");
     const s2label = el("div", s2c, abs(X0, L2.lblY, { font: `700 22px/1 ${MONO}`, color: GREEN, whiteSpace: "pre", letterSpacing: "0.02em" }));
     const slot = el("div", s2c, abs(X0 - 14, L2.slotY, { width: "900px", height: L2.slotH + "px", overflow: "hidden" }));
-    const HEADS = ["lead xr", "MaRTES", "gaganyaan", "patents"], WS = [2.0, 2.5, 3.0, 3.5, 4.2];
+    const HEADS = SC.xr.headings, WS = [2.0, 2.5, 3.0, 3.5, 4.2];
     const heads = HEADS.map(w => { const d = el("div", slot, abs(12, 8, { font: `700 ${L2.hFs}px/1 ${SANS}`, letterSpacing: "-0.075em", color: "#eafff3", whiteSpace: "nowrap" })); d.textContent = w; return d; });
-    const SUBS = ["lead xr dev — parallax labs, mumbai", "mission rehearsal & tactical engagement simulator", "an end-to-end vr simulator for isro's gaganyaan", "vr colocation via qr anchors + android gaussian splats"];
+    const SUBS = SC.xr.subtitles;
     const s2sub = el("div", s2c, abs(X0, L2.subY, { font: `400 ${L2.subFs}px/1.3 ${MONO}`, color: MINT, whiteSpace: "pre" }));
     const pend = el("div", s2c, abs(X0, L2.pendY, { font: `700 ${L2.pendFs}px/1 ${MONO}`, background: Y, color: "#000", padding: "8px 14px", transformOrigin: "0 50%", whiteSpace: "pre" }));
-    pend.textContent = "patent-pending × 2";
+    pend.textContent = SC.xr.pending;
     const readout = el("div", s2c, abs(X0, L2.roY, { font: `400 16px/1.7 ${MONO}`, color: "rgba(138,255,193,.72)", whiteSpace: "pre", letterSpacing: "0.04em" }));
     el("div", s2cam, { ...bleed, background: "repeating-linear-gradient(0deg, rgba(0,0,0,.26) 0 2px, rgba(0,0,0,0) 2px 4px)" });
     el("div", s2cam, { ...bleed, background: "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 52%, rgba(0,0,0,.7) 100%)" });
@@ -285,7 +394,7 @@
       const sy = lerp(1.7, 1, zin) * lerp(1, 0.004, c1), sx = lerp(1.7, 1, zin) * lerp(1, 1.1, c1);
       s2cam.style.transform = `scale(${sx}, ${sy})`;
       s2cam.style.filter = c1 > 0 ? `brightness(${1 + 3.5 * c1})` : "none";
-      s2label.textContent = typed("02 — xr / parallax labs", t, 2.04, 2.22);
+      s2label.textContent = typed(SC.xr.label, t, 2.04, 2.22);
       heads.forEach((h, i) => {
         const a = WS[i], b = WS[i + 1], inP = E.outExpo(P(t, a, a + 0.32)), outP = E.inExpo(P(t, b - 0.1, b));
         h.style.display = (t >= a && t < b) ? "block" : "none";
@@ -323,22 +432,29 @@
     const sunClip = el("div", pA.c, abs(0, 0, { width: DW + "px", height: L3.hor + "px", overflow: "hidden" }));
     const sun = el("div", sunClip, abs(sx0 - sr0, sy0 - sr0, { width: 2 * sr0 + "px", height: 2 * sr0 + "px", borderRadius: "50%", background: GOLD }));
     const refl = []; for (let i = 0; i < 8; i++) refl.push(el("div", pA.c, abs(0, L3.reflY + i * L3.reflStep, { height: (12 - i) + "px", background: GOLD, borderRadius: "8px" })));
-    const mA = meta(pA.c, "FILM · 2025 · 26 MIN"), tA = title(pA.c, "Chhoti Gold", 7), bA = blurb(pA.c, "an absurd, surreal short about two people whose lives change after they meet.");
+    const [CARD_A, CARD_B, CARD_C] = SC.films.cards;
+    // The last word of the first title takes the gold, wherever it now starts.
+    const mA = meta(pA.c, CARD_A.meta), tA = title(pA.c, CARD_A.title, CARD_A.title.lastIndexOf(" ") + 1), bA = blurb(pA.c, CARD_A.blurb);
     // B — blue dogs: noir searchlight and a siren wash
     const pB = plate(1);
     el("div", pB.p, { ...box(SW, AH), background: "linear-gradient(180deg, rgba(4,10,40,.55), rgba(4,10,40,.1) 60%, rgba(4,10,40,.5))" });
     const beam = el("div", pB.c, abs(L3.beam[0], L3.beam[1], { width: "900px", height: "1700px", transformOrigin: "450px 0px", background: "linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,0) 85%)", clipPath: "polygon(46% 0, 54% 0, 100% 100%, 0 100%)" }));
     const sirR = el("div", pB.c, abs(L3.sirR[0], L3.sirR[1], { width: "1100px", height: "1100px", borderRadius: "50%", background: "radial-gradient(circle, rgba(243,59,47,.8), rgba(243,59,47,0) 62%)" }));
     const sirB = el("div", pB.c, abs(L3.sirB[0], L3.sirB[1], { width: "1100px", height: "1100px", borderRadius: "50%", background: "radial-gradient(circle, rgba(120,150,255,.9), rgba(120,150,255,0) 62%)" }));
-    meta(pB.c, "FILM · 2023 · 15 MIN · HINDI"); title(pB.c, "Blue Dogs", 0, false); blurb(pB.c, "two men in mumbai, caught in bigotry, paranoia and delusion.");
+    meta(pB.c, CARD_B.meta); title(pB.c, CARD_B.title, 0, false); blurb(pB.c, CARD_B.blurb);
     // C — film 03 and a clapperboard
     const pC = plate(2);
-    const mC = meta(pC.c, "● IN DEVELOPMENT"); title(pC.c, "film 03", 0, false); blurb(pC.c, "the next one, after chhoti gold and blue dogs.");
+    const mC = meta(pC.c, `● ${CARD_C.meta}`); title(pC.c, CARD_C.title, 0, false); blurb(pC.c, CARD_C.blurb);
     const clap = el("div", pC.c, abs(L3.clap[0], L3.clap[1], { width: "600px" }));
     const stick = el("div", clap, abs(0, 0, { width: "600px", height: "74px", background: `repeating-linear-gradient(-58deg, #fff 0 46px, ${INK} 46px 92px)`, border: `5px solid ${INK}`, transformOrigin: "0% 100%" }));
     el("div", clap, abs(0, 78, { width: "600px", height: "60px", background: `repeating-linear-gradient(58deg, #fff 0 46px, ${INK} 46px 92px)`, border: `5px solid ${INK}` }));
     const board = el("div", clap, abs(0, 142, { width: "600px", height: "360px", background: INK, border: `4px solid ${PAPER}`, color: PAPER, font: `700 30px/1 ${MONO}`, padding: "26px 30px", whiteSpace: "pre" }));
-    board.innerHTML = `<div style="border-bottom:2px solid ${PAPER};padding-bottom:18px">PROD.  FILM 03</div><div style="border-bottom:2px solid ${PAPER};padding:18px 0">DIR.   SATYAM KASHYAP</div><div style="border-bottom:2px solid ${PAPER};padding:18px 0">SCENE 01    TAKE 01</div><div style="padding-top:18px">ROLL A      2026</div>`;
+    [
+      [`PROD.  ${CARD_C.title.toUpperCase()}`, "border-bottom:2px solid " + PAPER + ";padding-bottom:18px"],
+      [`DIR.   ${SC.films.director}`, "border-bottom:2px solid " + PAPER + ";padding:18px 0"],
+      ["SCENE 01    TAKE 01", "border-bottom:2px solid " + PAPER + ";padding:18px 0"],
+      ["ROLL A      2026", "padding-top:18px"],
+    ].forEach(([line, css]) => { const d = el("div", board); d.style.cssText = css; d.textContent = line; });
     // viewfinder
     const vf = el("div", apIn, box(SW, AH));
     const vs = sv("svg", vf, { width: SW, height: AH, style: "position:absolute;left:0;top:0" });
@@ -349,7 +465,7 @@
     vfT(92, 66).textContent = "REC   A-CAM";
     vfT(SW - 68 - 600, 66, true).textContent = `24.000 FPS   ${L3.ratio}   ISO 800   T2.0`;
     const vf3 = vfT(68, AH - 82);
-    vfT(SW - 68 - 600, AH - 82, true).textContent = "03 — WRITTEN & DIRECTED";
+    vfT(SW - 68 - 600, AH - 82, true).textContent = SC.films.label;
     const line = el("div", s3, abs(0, SH / 2 - 2, { width: SW + "px", height: "4px", background: "#fff", boxShadow: "0 0 28px 8px rgba(200,255,225,.85)" }));
     const subBar = el("div", s3, abs(0, SH / 2 + AH / 2 + (V ? 70 : 36), { width: SW + "px", textAlign: "center", font: `700 28px/1 ${MONO}`, color: Y, whiteSpace: "pre" }));
     const T_FILM = unwarp(4.0), T_BEAM = [unwarp(4.9), unwarp(5.36)];
@@ -377,14 +493,14 @@
       beam.style.transform = `rotate(${lerp(38, 8, P(T, T_BEAM[0], T_BEAM[1]))}deg)`;
       const fl = Math.floor(T * 11) % 2;
       sirR.style.opacity = (fl ? 0.95 : 0.12) * P(t, 5.0, 5.1); sirB.style.opacity = (fl ? 0.12 : 0.95) * P(t, 5.0, 5.1);
-      mC.textContent = (Math.floor(T * 3) % 2 ? "● " : "  ") + "IN DEVELOPMENT";
+      mC.textContent = (Math.floor(T * 3) % 2 ? "● " : "  ") + CARD_C.meta;
       let ang = -30; if (t > 5.6) ang = lerp(-30, 0, E.inCubic(P(t, 5.6, 5.75)));
       if (t > 5.75) ang = -5 * Math.exp(-(t - 5.75) * 30) * Math.abs(Math.sin((t - 5.75) * 50));
       stick.style.transform = `rotate(${ang}deg)`;
       vf.style.opacity = E.outCubic(P(t, 4.18, 4.32));
       rec.style.opacity = Math.floor(T * 2.5) % 2 ? 1 : 0.15;
       const ft = Math.max(0, Math.floor((T - T_FILM) * 24)) + 24 * 17 + 7; vf3.textContent = `TC 01:00:${pad(Math.floor(ft / 24))}:${pad(ft % 24)}`;
-      subBar.textContent = typed("i write and direct films.", t, 4.3, 4.6);
+      subBar.textContent = typed(SC.films.subtitle, t, 4.3, 4.6);
     }
 
     // ─────────────────────────────────────── 04 tools / living
@@ -403,13 +519,8 @@
     let ROWS = Math.ceil((SH + 2 * L4.pan[1] + 40 + GAP) / (TH + GAP)); while (COLS * ROWS < 24) ROWS++;
     const GX = (SW - (COLS * TW + (COLS - 1) * GAP)) / 2, GY = (SH - (ROWS * TH + (ROWS - 1) * GAP)) / 2;
     const slotXY = k => [GX + (k % COLS) * (TW + GAP), GY + Math.floor(k / COLS) * (TH + GAP)];
-    const WORKS = [
-      // [title, meta, group]  0 xr · 1 film · 2 code · 3 art
-      ["MaRTES", "r&d · current", 0], ["gaganyaan vr", "isro · r&d", 0], ["UE camera2", "quest 3 · c++", 0], ["mr hmg simulator", "r&d · ongoing", 0], ["vr fire safety", "training · r&d", 0], ["interaction research", "isdk · c#", 0],
-      ["Chhoti Gold", "film · 2025", 1], ["Blue Dogs", "film · 2023", 1], ["film 03", "in development", 1], ["cbfc cut lists", "censorship explorer", 1], ["126 reviews", "letterboxd", 1], ["carcinization", "essay · 2025", 1],
-      ["Hear", "offline · private", 2], ["OpenPiano", "web midi · lessons", 2], ["OpenWorkout", "local-first", 2], ["better unity", "31★ · open source", 2], ["render buddy", "unreal toolkit", 2], ["UE MCP bridge", "unreal editor × mcp", 2],
-      ["the closet", "drifting archive", 3], ["Pahari Preservation", "language archive", 3], ["Unlearn", "puzzle-platformer", 3], ["artsaver", "passive art", 3], ["wusic", "minimal player", 3], ["the everything bagel", "eeaao, but a site", 3],
-    ];
+    // group indexes the four circles of scene 05, so it is held to 0–3.
+    const WORKS = SC.tools.works.map(w => ({ title: String(w.title), meta: String(w.meta), group: Math.min(3, Math.max(0, w.group | 0)) }));
     const PAL = ["#f33b2f", "#e5a0aa", "#536a50", "#d7fb34", "#99c4e7", "#3658d8", "#203a8c", "#8ca58e", "#f05a47", "#f4e8c6", "#ffb427", "#6b2c59"];
     const GCOL = ["#d7fb34", "#99c4e7", "#f05a47", "#e5a0aa"];
     const NT = COLS * ROWS, r4 = rng(42);
@@ -426,13 +537,15 @@
       const bar = el("div", d, abs(-80, 40 + r4() * 180, { width: "560px", height: (54 + r4() * 40) + "px", background: r4() < .7 ? "#f4efe4" : "#fff" }));
       const bs = 110 + r4() * 110;
       const blk = el("div", d, abs(TW * 0.45 + r4() * TW * 0.4 - bs / 2, r4() * TH * 0.6 - bs / 2, { width: bs + "px", height: bs + "px", background: INK }));
-      const card = el("div", d, {}, "card"); card.innerHTML = `<b>${wk[0]}</b><i>${wk[1]}</i>`;
-      return { d, circ, bar, blk, card, k, base, grp: wk[2], barR: -28 + r4() * 56, blkR: -30 + r4() * 60 };
+      const card = el("div", d, {}, "card");
+      el("b", card).textContent = wk.title;
+      el("i", card).textContent = wk.meta;
+      return { d, circ, bar, blk, card, k, base, grp: wk.group, barR: -28 + r4() * 56, blkR: -30 + r4() * 60 };
     });
     const s4c = content(s4);
     const hl = el("div", s4c, abs(L4.hx, L4.hy, { width: "1500px", fontSize: L4.hFs + "px" }));
-    const hboxes = ["ship", "tools", "in", "public."].map((w, i) => { if (i === 2) el("br", hl); const b = el("div", hl, {}, "hbox"); const s = el("span", b, { display: "inline-block" }); s.textContent = w; return { b, s }; });
-    const CHIPS = ["73 public repos", "31★ better unity", "plethora of domains ;)", "private, local-first <3"];
+    const hboxes = SC.tools.headline.map((w, i) => { if (i === 2) el("br", hl); const b = el("div", hl, {}, "hbox"); const s = el("span", b, { display: "inline-block" }); s.textContent = w; return { b, s }; });
+    const CHIPS = SC.tools.chips;
     const chips = CHIPS.map((txt, i) => { const [x, y, r] = L4.chips[i]; const c = el("div", s4c, abs(x, y, { transformOrigin: "0% 50%" }), "ychip"); c.textContent = txt; return { c, r }; });
     const T_S4 = [unwarp(5.75), unwarp(7.5)];
 
@@ -476,7 +589,8 @@
         const dt = t - (6.38 + i * 0.09), f = spr(dt, 14, 24), o = 1 - E.inExpo(P(t, 7.08, 7.22));
         c.style.opacity = dt > 0 ? o : 0;
         c.style.transform = `rotate(${r}deg) scale(${f * o})`;
-        if (i === 0) c.textContent = `${Math.round(73 * E.outCubic(P(t, 6.38, 6.75)))} public repos`;
+        // The first chip counts up, so it is written rather than typed out.
+        if (i === 0) c.textContent = CHIPS[0].replace(/^\d+/, String(Math.round(SC.tools.repoCount * E.outCubic(P(t, 6.38, 6.75)))));
       });
     }
 
@@ -491,10 +605,10 @@
     let cg = vg; for (let i = 0; i < 4; i++) cg = sv("g", cg, { "clip-path": `url(#${clipId}${i})` });
     const ydot = sv("circle", cg, { cx: L5.c[0], cy: L5.c[1], r: 0, fill: Y });
     const vstroke = VC.map(([x, y]) => sv("circle", vg, { cx: x, cy: y, r: VR, fill: "none", stroke: INK, "stroke-width": 3 }));
-    const vlabels = [["xr", -248, -220], ["film", 248, -220], ["code", -248, 228], ["art", 248, 228]].map(([s, dx, dy]) => ({ s, tx: sv("text", vg, { x: L5.c[0] + dx, y: L5.c[1] + dy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 34px ${MONO};fill:${INK}` }) }));
-    const me = sv("text", vg, { x: L5.c[0], y: L5.c[1] + 4, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 46px ${SANS};letter-spacing:-0.06em;fill:#000` }); me.textContent = "satyam";
+    const vlabels = SC.statement.labels.map((s, i) => [s, ...[[-248, -220], [248, -220], [-248, 228], [248, 228]][i]]).map(([s, dx, dy]) => ({ s, tx: sv("text", vg, { x: L5.c[0] + dx, y: L5.c[1] + dy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 34px ${MONO};fill:${INK}` }) }));
+    const me = sv("text", vg, { x: L5.c[0], y: L5.c[1] + 4, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 46px ${SANS};letter-spacing:-0.06em;fill:#000` }); me.textContent = SC.statement.centre;
     const quote = el("div", s5cam, abs(0, L5.quoteY, { width: DW + "px", textAlign: "center", font: `400 ${L5.quoteFs}px/1.12 ${SERIF}`, color: INK, whiteSpace: "nowrap" }));
-    const QW = "science is only fun if its intersectional!".split(" ");
+    const QW = SC.statement.quote.split(" ");
     const qspans = QW.map((w, i) => { if (V && i === 4) el("br", quote); const s = el("span", quote, { display: "inline-block", marginRight: "0.25em" }); s.textContent = w; if (i === QW.length - 1) s.style.fontStyle = "italic"; return s; });
     const s5y = el("div", s5, { ...bleed, background: Y, opacity: 0 });
     const T_S5 = [unwarp(7.44), unwarp(8.5)];
@@ -526,16 +640,16 @@
     vtxt6.textContent = VTXT;
     const s6cam = content(s6, { transformOrigin: "50% 50%" });
     const name6 = el("div", s6cam, abs(L6.x, L6.y, { font: `900 ${L6.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: "#000", whiteSpace: "nowrap", transformOrigin: "0 0" }));
-    const K1 = letters(el("div", name6), "satyam"), K2 = letters(el("div", name6), "kashyap");
+    const K1 = letters(el("div", name6), NAME[0] || ""), K2 = letters(el("div", name6), NAME.slice(1).join(" "));
     const url = el("div", s6cam, abs(L6.x, L6.urlY, { background: "#000", color: "#fff", font: `700 ${L6.urlFs}px/0.9 ${SANS}`, letterSpacing: "-0.055em", padding: "6px 24px 16px 16px", whiteSpace: "pre" }));
-    url.textContent = "satyam.lol";
+    url.textContent = SC["sign-off"].url;
     const links = el("div", s6cam, abs(L6.x + 2, L6.linksY, { font: `400 ${L6.linksFs}px/1.7 ${MONO}`, color: "#000", whiteSpace: "pre" }));
-    const LINKS = V ? "github.com/sudotman\nhello@satyam.lol\nletterboxd.com/satyamkashyap" : "github.com/sudotman   ·   hello@satyam.lol   ·   letterboxd.com/satyamkashyap";
+    const LINKS = SC["sign-off"].links.join(V ? "\n" : "   ·   ");
     const tag6 = el("div", s6cam, abs(L6.x, L6.tagY, { font: `700 ${L6.tagFs}px/1.2 ${MONO}`, padding: `${L6.tagFs / 5.2}px ${L6.tagFs / 2.36}px`, background: Y, color: "#000", whiteSpace: "pre", transformOrigin: "0 50%" }));
     tag6.textContent = CHIP;
     const side = el("div", s6cam, abs(L6.side[0], L6.side[1], { color: "#000" }));
-    el("div", side, { font: `italic 400 ${V ? 64 : 58}px/1 ${SERIF}`, whiteSpace: "nowrap" }).textContent = "perpetually curious.";
-    el("div", side, { font: `700 18px/1.5 ${MONO}`, marginTop: "16px", whiteSpace: "pre" }).textContent = "lead xr dev  ·  filmmaker  ·  toolmaker\nhimalayas → mumbai";
+    el("div", side, { font: `italic 400 ${V ? 64 : 58}px/1 ${SERIF}`, whiteSpace: "nowrap" }).textContent = SC["sign-off"].aside;
+    el("div", side, { font: `700 18px/1.5 ${MONO}`, marginTop: "16px", whiteSpace: "pre" }).textContent = SC["sign-off"].credits;
     const T_S6 = unwarp(8.5);
     let land = null, landTried = false;
 

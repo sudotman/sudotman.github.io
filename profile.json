@@ -5,9 +5,18 @@
       "website": "https://parallax.co.in/",
       "period": "2021 - Present",
       "roles": [
-        { "title": "Lead XR Developer", "period": "2023 - Present" },
-        { "title": "Senior XR Developer", "period": "2022 - 2023" },
-        { "title": "Associate XR Developer", "period": "2021 - 2022" }
+        {
+          "title": "Lead XR Developer",
+          "period": "2023 - Present"
+        },
+        {
+          "title": "Senior XR Developer",
+          "period": "2022 - 2023"
+        },
+        {
+          "title": "Associate XR Developer",
+          "period": "2021 - 2022"
+        }
       ],
       "summary": "Developed and shipped XR projects for defence, pharma and manufacturing sectors, built training solutions, managed a team of developers and handled client interactions."
     },
@@ -16,7 +25,10 @@
       "website": "https://codecrust.com/",
       "period": "2020 - 2021",
       "roles": [
-        { "title": "Unity Developer", "period": "2020 - 2021" }
+        {
+          "title": "Unity Developer",
+          "period": "2020 - 2021"
+        }
       ],
       "summary": "Developed various levels and mini-games for an online multiplayer party game using miniscript-based multiplayer coding and rnd."
     },
@@ -25,16 +37,30 @@
       "website": "https://github.com/sudotman",
       "period": "2018 - 2022",
       "roles": [
-        { "title": "Android Developer", "period": "2018 - 2019" },
-        { "title": "Unity Developer", "period": "2018 - 2021" },
-        { "title": "Unreal Developer", "period": "2020 - 2022" },
-        { "title": "Video Editor", "period": "2018 - 2022" },
-        { "title": "Pinescript Coder", "period": "2020 - 2022" }
+        {
+          "title": "Android Developer",
+          "period": "2018 - 2019"
+        },
+        {
+          "title": "Unity Developer",
+          "period": "2018 - 2021"
+        },
+        {
+          "title": "Unreal Developer",
+          "period": "2020 - 2022"
+        },
+        {
+          "title": "Video Editor",
+          "period": "2018 - 2022"
+        },
+        {
+          "title": "Pinescript Coder",
+          "period": "2020 - 2022"
+        }
       ],
       "summary": "Delivered Android apps, Unity & Unreal projects, video edits and Pinescript indicators/strategies for various clients."
     }
   ],
-
   "education": [
     {
       "degree": "B.Tech in Computer Science (Graphics & Gaming)",
@@ -49,12 +75,19 @@
       "summary": "Studied Maths, Physics and Chemistry; received 'Best Student' certificate."
     }
   ],
-
   "techStack": {
-    "gameEngines": ["unity", "unreal"],
-    "languages": ["C++", "C", "C#", "python", "Pinescript"]
+    "gameEngines": [
+      "unity",
+      "unreal"
+    ],
+    "languages": [
+      "C++",
+      "C",
+      "C#",
+      "python",
+      "Pinescript"
+    ]
   },
-
   "interests": {
     "cinema": {
       "letterboxd": "https://letterboxd.com/satyamkashyap/",

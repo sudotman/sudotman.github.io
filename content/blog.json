@@ -1,8 +1,40 @@
 {
   "schemaVersion": 1,
   "source": "content/posts",
-  "count": 5,
+  "count": 7,
   "posts": [
+    {
+      "id": "nothing-is-sacred-on-the-internet",
+      "slug": "nothing-is-sacred-on-the-internet",
+      "title": "nothing is sacred on the internet",
+      "href": "/blog/nothing-is-sacred-on-the-internet/",
+      "published": "2026-10-08T00:00:00.000Z",
+      "updated": "2026-10-11T00:00:00.000Z",
+      "year": "2026",
+      "summary": "the internet is wizardry and the final frontier is upon us",
+      "tags": [
+        "internet",
+        "zeitgeist"
+      ],
+      "minutes": 18,
+      "words": 4059
+    },
+    {
+      "id": "ai-shoemakers-and-the-present",
+      "slug": "ai-shoemakers-and-the-present",
+      "title": "ai, shoemakers and the present",
+      "href": "/blog/ai-shoemakers-and-the-present/",
+      "published": "2026-09-28T00:00:00.000Z",
+      "year": "2026",
+      "summary": "engineers and shoemakers are more common than most think",
+      "tags": [
+        "ai",
+        "art",
+        "zeitgeist"
+      ],
+      "minutes": 13,
+      "words": 2860
+    },
     {
       "id": "carcinization-on-the-internet",
       "slug": "carcinization-on-the-internet",

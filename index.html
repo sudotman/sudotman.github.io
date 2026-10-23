@@ -33,11 +33,24 @@
       }
       root.classList.add("intro");
       window.__introAuto = true;
+      // The studio previewing an uncommitted reel config, this tab only.
+      try {
+        if (new URLSearchParams(location.search).has("studio-preview")) {
+          const preview = JSON.parse(sessionStorage.getItem("satyam.studio.preview") || "");
+          if (preview?.reel) window.__REEL_PREVIEW = preview.reel;
+        }
+      } catch {}
       const giveUp = () => { if (!window.__introStarted) { window.__introCancelled = true; root.classList.remove("intro"); } };
-      const script = document.createElement("script");
-      script.src = "/js/intro.js?v=20260927b";
-      script.onerror = giveUp;
-      document.head.appendChild(script);
+      // The config holds what the reel says; intro.js falls back to its own
+      // copy without it. async = false keeps them in that order, since a
+      // script created here is async by default.
+      for (const src of ["/js/reel-config.js?v=20261023a", "/js/intro.js?v=20261023a"]) {
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = false;
+        if (src.includes("intro.js")) script.onerror = giveUp;
+        document.head.appendChild(script);
+      }
       setTimeout(giveUp, 1500);
     })();
   </script>

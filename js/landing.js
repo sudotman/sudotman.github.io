@@ -46,7 +46,21 @@
     }
   };
 
+  // The studio hands its uncommitted changeset over in sessionStorage, so the
+  // front door can be seen with pending edits before any of it is committed.
+  // Same origin, this tab only, and only when the studio asked for it.
+  const previewDocs = (() => {
+    try {
+      if (!new URLSearchParams(location.search).has("studio-preview")) return null;
+      return JSON.parse(sessionStorage.getItem("satyam.studio.preview") || "")?.docs || null;
+    } catch {
+      return null;
+    }
+  })();
+
   const fetchJson = async (path) => {
+    const key = String(path).replace(/^\/+/, "");
+    if (previewDocs && key in previewDocs) return previewDocs[key];
     const response = await fetch(path, { cache: "no-cache" });
     if (!response.ok) throw new Error(`${path} returned ${response.status}`);
     return response.json();
@@ -620,7 +634,7 @@
   /* The reel                                                                */
   /* ---------------------------------------------------------------------- */
 
-  const INTRO_SRC = "/js/intro.js?v=20260927b";
+  const REEL_SOURCES = ["/js/reel-config.js?v=20261023a", "/js/intro.js?v=20261023a"];
 
   // [reel] replays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes
@@ -638,13 +652,18 @@
     }
     root.classList.add("intro");
     window.scrollTo({ top: 0, behavior: "instant" });
-    const ready = window.SatyamIntro ? Promise.resolve() : new Promise((resolve, reject) => {
+    // The config carries what the reel says and has to run first; a script made
+    // here is async by default, so the order is set explicitly. A config that
+    // fails to load is survivable — intro.js keeps its own copy — so only the
+    // reel itself rejects.
+    const ready = window.SatyamIntro ? Promise.resolve() : Promise.all(REEL_SOURCES.map((src) => new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = INTRO_SRC;
+      script.src = src;
+      script.async = false;
       script.onload = resolve;
-      script.onerror = reject;
+      script.onerror = src.includes("intro.js") ? reject : resolve;
       document.head.appendChild(script);
-    });
+    })));
     ready
       .then(() => window.SatyamIntro.play({ ctx }))
       .catch((error) => {

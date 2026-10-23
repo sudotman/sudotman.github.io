@@ -37,6 +37,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://satyam.lol/blog/nothing-is-sacred-on-the-internet/</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://satyam.lol/blog/ai-shoemakers-and-the-present/</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://satyam.lol/blog/carcinization-on-the-internet/</loc>
     <lastmod>2025-07-27</lastmod>
     <changefreq>yearly</changefreq>

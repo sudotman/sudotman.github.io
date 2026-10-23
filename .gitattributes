@@ -1,0 +1,12 @@
+# Every generator here writes LF and several tests assert byte-identity, so
+# the working copy has to match the blobs on every platform.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.gif binary
+*.ico binary
+*.mp3 binary
+*.woff2 binary

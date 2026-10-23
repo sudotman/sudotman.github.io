@@ -27,6 +27,9 @@
   const REEL_DEFAULTS = {
     type: { sans: "Arial, Helvetica, sans-serif", mono: '"Courier New", Courier, monospace', serif: '"Times New Roman", Times, serif' },
     palette: { yellow: "#ffef00", green: "#00d16f", mint: "#8affc1", ink: "#141411", paper: "#f0ede4", river: "#173dc4", gold: "#ffb427" },
+    // how the soundtrack sounds: warmth closes a low-pass, spinUp is how much speed the
+    // tape gains as it starts, pulse is how hard the stripe breathes with it
+    music: { on: true, volume: 1, warmth: 0, spinUp: 0.65, pulse: 1 },
     scenes: {
       "front-door": {
         name: "satyam kashyap",
@@ -740,7 +743,11 @@
   // frame until the soundtrack is ready and both start together. Either way, once sound
   // plays the picture follows the audio clock.
   const SOUND = "/sounds/intro.mp3?v=20260927b";
-  const TAPE = 0.35, TAPE_FROM = 0.35, HOLD = 1.2;
+  // The config's levels are clamped here rather than trusted: mergeReel checks types, not ranges.
+  const MUSIC = REEL.music;
+  const VOLUME = clamp(MUSIC.volume), PULSE = clamp(MUSIC.pulse, 0, 2);
+  const TONE = MUSIC.warmth > 0 ? 20000 * Math.pow(450 / 20000, clamp(MUSIC.warmth)) : 0;
+  const TAPE = 0.35, TAPE_FROM = 1 - clamp(MUSIC.spinUp, 0, 0.9), HOLD = 1.2;
   let running = false;
 
   function play({ ctx: given = null } = {}) {
@@ -767,7 +774,7 @@
     host.appendChild(hint);
 
     let T = 0, last = 0, raf = 0, leaving = 0, done = false, waiting = !!given;
-    let buffer = null, noSound = !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, src = null, gain = null, meter = null, sound = null, lvl = 0;
+    let buffer = null, noSound = !MUSIC.on || !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, src = null, gain = null, meter = null, sound = null, lvl = 0;
     const began = performance.now();
     const setHint = () => {
       const offer = !want && !noSound;
@@ -784,11 +791,14 @@
       const tape = !waiting, offset = tape ? T + 0.03 + lat + TAPE * (1 - TAPE_FROM) / 2 : 0;
       src = ctx.createBufferSource(); src.buffer = buffer;
       gain = ctx.createGain(); meter = ctx.createAnalyser(); meter.fftSize = 1024;
-      src.connect(gain); gain.connect(meter); meter.connect(ctx.destination);
+      // the meter listens before the fader, so a quieter reel still moves the stripe
+      let tail = src;
+      if (TONE) { const tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = TONE; src.connect(tone); tail = tone; }
+      tail.connect(meter); meter.connect(gain); gain.connect(ctx.destination);
       if (tape) {
         src.playbackRate.setValueAtTime(TAPE_FROM, now); src.playbackRate.linearRampToValueAtTime(1, now + TAPE);
-        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1, now + 0.22);
-      }
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(VOLUME, now + 0.22);
+      } else gain.gain.setValueAtTime(VOLUME, now);
       src.onended = () => { if (done) ctx.close().catch(() => {}); };
       src.start(now, offset);
       sound = { now, lat, offset, tape }; waiting = false;
@@ -850,7 +860,7 @@
         lvl += (target - lvl) * (target > lvl ? 0.55 : 0.12);
       }
       const out = leaving ? 1 - clamp((now - leaving) / 320) : 1;
-      reel.level(lvl * 1.3 * Math.min(fade, out));
+      reel.level(lvl * 1.3 * PULSE * Math.min(fade, out));
       host.style.opacity = Math.min(fade, out);
       if (fade <= 0 || out <= 0 || T >= DUR) return finish();
       raf = requestAnimationFrame(frame);

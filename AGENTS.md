@@ -13,7 +13,7 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - Treat `content.json` and `profile.json` as the source of truth for ononline (`tech.html`) content and taxonomy.
 - Treat `content/creative.json` as presentation-only for the creative archive. It references a canonical `workId`; identity, summaries, links, and media resolve from `content/home.json` and its registered feed.
 - Treat `content/posts/*.md` as the source of truth for the blog. One file is one post; the filename is the slug.
-- Treat `content/reel.json` as the source of truth for everything the showreel says, and for the type and palette it says it in. The choreography stays in `js/intro.js`.
+- Treat `content/reel.json` as the source of truth for everything the showreel says, for the type and palette it says it in, and for how its soundtrack sounds (`music`: on/off, volume, warmth, tape spin-up, stripe pulse). The choreography and the track itself stay in `js/intro.js` and `sounds/intro.mp3`.
 - Treat `blog/`, `content/blog.json`, `js/reel-config.js`, the `blog:start`/`blog:end` block in `sitemap.xml`, and `docs/` as generated. Never hand-edit them; run `npm run build`.
 - Treat `content/external-feeds.json` as generated. Never hand-edit it; run `npm run sync`. It carries Letterboxd reviews only — writing is native now, and the Blogger feed was retired.
 - Treat `js/lib/markdown.js` and `js/lib/post.js` as shared by the build script, the validator and the browser editor. A change to either affects all three; run `npm test`.
@@ -47,6 +47,8 @@ changeset as one commit through the git data API. Prose keeps its own desk at `/
 - `js/studio/diff.js`: the readable change list and the raw line diff
 - `js/studio/preview.js`: hands the changeset to the live site in sessionStorage
 - `js/studio/views/*.js`: one screen each; `works.js` and `record.js` are the centre of it
+- `js/studio/soundtrack.js`: the cassette deck on the reel screen. It auditions `sounds/intro.mp3` through the
+  same low-pass → meter → fader chain `js/intro.js` builds; change one and change the other
 
 Files are written as `JSON.stringify(value, null, 2)` with a trailing newline, which is exactly
 how they are committed today. Keep them that way: reformatting one by hand turns the next

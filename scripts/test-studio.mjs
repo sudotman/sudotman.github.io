@@ -232,6 +232,17 @@ try {
   const reel = await readJson('content/reel.json');
   const { checkReel } = await import('../js/lib/schema.js');
   report('content/reel.json passes the schema', checkReel(reel));
+
+  // The music block is levels, held to their ranges, and a switch.
+  const musicProblems = (music) => checkReel({ ...reel, music: { ...reel.music, ...music } })
+    .filter((problem) => problem.key.startsWith('music.'))
+    .map((problem) => problem.key);
+  check('a volume above 1 is refused', musicProblems({ volume: 1.2 }).includes('music.volume'));
+  check('a volume given as text is refused', musicProblems({ volume: '0.5' }).includes('music.volume'));
+  check('a spin-up past 0.9 is refused', musicProblems({ spinUp: 1 }).includes('music.spinUp'));
+  check('sound must be a boolean', musicProblems({ on: 'yes' }).includes('music.on'));
+  check('sound off and every level at zero is fine', musicProblems({ on: false, volume: 0, warmth: 0, spinUp: 0, pulse: 0 }).length === 0);
+  check('a reel without a music block is refused', checkReel({ ...reel, music: undefined }).some((problem) => problem.key === 'music.on'));
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }

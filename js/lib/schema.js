@@ -117,6 +117,16 @@ export function fieldProblem(descriptor, value, context = {}) {
       }
       return '';
     }
+    case 'level': {
+      const { min = 0, max = 1 } = descriptor;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
+        return `must be a number from ${min} to ${max}`;
+      }
+      return '';
+    }
+    case 'toggle':
+      if (typeof value !== 'boolean') return 'must be true or false';
+      return '';
     case 'href':
       return hrefProblem(value);
     case 'asset':
@@ -391,6 +401,19 @@ export const REEL_PALETTE = [
   field('gold', 'gold', 'color')
 ];
 
+/**
+ * How the soundtrack sounds, not what it is: sounds/intro.mp3 is cut to the
+ * 116 bpm grid, so the track stays with the choreography. Every level is
+ * clamped again by js/intro.js, which keeps its own defaults.
+ */
+export const REEL_MUSIC = [
+  field('on', 'sound', 'toggle', { hint: 'off, the reel plays silent and the first click skips' }),
+  field('volume', 'volume', 'level', { min: 0, max: 1, step: 0.05, ends: ['hush', 'loud'] }),
+  field('warmth', 'warmth', 'level', { min: 0, max: 1, step: 0.05, ends: ['clear', 'through a wall'] }),
+  field('spinUp', 'tape spin-up', 'level', { min: 0, max: 0.9, step: 0.05, ends: ['instant', 'lazy'] }),
+  field('pulse', 'stripe pulse', 'level', { min: 0, max: 2, step: 0.1, ends: ['still', 'bouncy'] })
+];
+
 /** One tile on the drifting wall of scene 04. */
 export const REEL_TILE = [
   field('title', 'title'),
@@ -433,5 +456,6 @@ export function checkReel(reel, context = {}) {
 
   problems.push(...at('type', checkRecord(REEL_TYPE, reel?.type || {}, context)));
   problems.push(...at('palette', checkRecord(REEL_PALETTE, reel?.palette || {}, context)));
+  problems.push(...at('music', checkRecord(REEL_MUSIC, reel?.music || {}, context)));
   return problems;
 }

@@ -243,6 +243,17 @@ try {
   check('sound must be a boolean', musicProblems({ on: 'yes' }).includes('music.on'));
   check('sound off and every level at zero is fine', musicProblems({ on: false, volume: 0, warmth: 0, spinUp: 0, pulse: 0 }).length === 0);
   check('a reel without a music block is refused', checkReel({ ...reel, music: undefined }).some((problem) => problem.key === 'music.on'));
+  check('a voice with no stems is refused', musicProblems({ voice: 'kazoo' }).includes('music.voice'));
+  check('a fader past 1.5 is refused', musicProblems({ mix: { ...reel.music.mix, drums: 1.6 } }).includes('music.mix.drums'));
+  check('a missing fader is refused', musicProblems({ mix: { drums: 1, bass: 1, chords: 1 } }).includes('music.mix.effects'));
+  check('every fader at zero is fine', musicProblems({ mix: { drums: 0, bass: 0, chords: 0, effects: 0 } }).length === 0);
+
+  // The voices the studio offers are the voices render.py renders.
+  const { REEL_VOICES } = await import('../js/lib/schema.js');
+  const render = await readFile(path.join(ROOT, 'scripts/soundtrack/render.py'), 'utf8');
+  const rendered = JSON.parse(render.match(/^VOICES = (\[.*?\])/m)[1].replaceAll("'", '"'));
+  check('schema voices match scripts/soundtrack/render.py', JSON.stringify(rendered) === JSON.stringify(REEL_VOICES),
+    `${rendered} vs ${REEL_VOICES}`);
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }

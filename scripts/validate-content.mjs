@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { normalizePost, parseFrontmatter } from '../js/lib/post.js';
-import { checkReel } from '../js/lib/schema.js';
+import { REEL_VOICES, checkReel } from '../js/lib/schema.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
@@ -14,6 +14,7 @@ const PROFILE_PATH = 'profile.json';
 const CREATIVE_PATH = 'content/creative.json';
 const REEL_PATH = 'content/reel.json';
 const REEL_CONFIG_PATH = 'js/reel-config.js';
+const STEMS_PATH = 'sounds/reel/stems.json';
 
 const errors = [];
 const warnings = [];
@@ -969,6 +970,36 @@ async function validateReel() {
     }
   } catch {
     addError(REEL_CONFIG_PATH, 'does not hold valid JSON; run npm run build');
+  }
+
+  await validateStems(reel);
+}
+
+/**
+ * The soundtrack's stems, rendered by npm run soundtrack. A voice the config or
+ * the studio can choose has to have its chords stem, or the reel quietly falls
+ * back to sounds/intro.mp3 and the choice does nothing.
+ */
+async function validateStems(reel) {
+  const kit = await readJson(STEMS_PATH);
+  if (!kit) return;
+  for (const voice of REEL_VOICES) {
+    if (!kit.voices?.includes(voice)) addError(STEMS_PATH, `has no ${voice} voice; run npm run soundtrack`);
+  }
+  if (reel.music?.voice && !kit.voices?.includes(reel.music.voice)) {
+    addError(`${REEL_PATH}.music.voice`, `"${reel.music.voice}" has no rendered stems`);
+  }
+  const files = [...(kit.shared || []), ...(kit.voices || []).map((voice) => `chords-${voice}`)];
+  for (const name of files) {
+    const file = `sounds/reel/${name}.mp3`;
+    if (!(await stat(path.join(ROOT, file)).catch(() => null))) addError(STEMS_PATH, `lists ${file}, which is missing`);
+  }
+
+  const generated = await readFile(path.join(ROOT, REEL_CONFIG_PATH), 'utf8').catch(() => '');
+  const match = generated.match(/^window\.__REEL_STEMS = (.*);$/m);
+  const { note, ...embedded } = kit;
+  if (!match || match[1] !== JSON.stringify(embedded)) {
+    addError(REEL_CONFIG_PATH, `does not carry ${STEMS_PATH}; run npm run build`);
   }
 }
 

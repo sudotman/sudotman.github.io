@@ -402,16 +402,29 @@ export const REEL_PALETTE = [
 ];
 
 /**
- * How the soundtrack sounds, not what it is: sounds/intro.mp3 is cut to the
- * 116 bpm grid, so the track stays with the choreography. Every level is
- * clamped again by js/intro.js, which keeps its own defaults.
+ * How the soundtrack sounds. The arrangement is written to the 116 bpm grid and
+ * stays with the choreography; who plays the chords and how loud each stem sits
+ * is editable. Every level is clamped again by js/intro.js, which keeps its own
+ * defaults.
  */
+/** Who plays the chords. Keep in step with VOICES in scripts/soundtrack/render.py. */
+export const REEL_VOICES = ['synth', 'rhodes', 'mallets', 'sitar', 'strings'];
+
 export const REEL_MUSIC = [
   field('on', 'sound', 'toggle', { hint: 'off, the reel plays silent and the first click skips' }),
+  field('voice', 'voice', 'select', { options: REEL_VOICES }),
   field('volume', 'volume', 'level', { min: 0, max: 1, step: 0.05, ends: ['hush', 'loud'] }),
   field('warmth', 'warmth', 'level', { min: 0, max: 1, step: 0.05, ends: ['clear', 'through a wall'] }),
   field('spinUp', 'tape spin-up', 'level', { min: 0, max: 0.9, step: 0.05, ends: ['instant', 'lazy'] }),
   field('pulse', 'stripe pulse', 'level', { min: 0, max: 2, step: 0.1, ends: ['still', 'bouncy'] })
+];
+
+/** A fader per stem. 1.5 is the top render.py leaves headroom for. */
+export const REEL_MIX = [
+  field('drums', 'drums', 'level', { min: 0, max: 1.5, step: 0.05 }),
+  field('bass', 'bass', 'level', { min: 0, max: 1.5, step: 0.05 }),
+  field('chords', 'chords', 'level', { min: 0, max: 1.5, step: 0.05, hint: 'the voice: pad, arpeggio, the closing sparkle' }),
+  field('effects', 'effects', 'level', { min: 0, max: 1.5, step: 0.05, hint: 'whooshes, ticks and pops, placed on the picture' })
 ];
 
 /** One tile on the drifting wall of scene 04. */
@@ -457,5 +470,6 @@ export function checkReel(reel, context = {}) {
   problems.push(...at('type', checkRecord(REEL_TYPE, reel?.type || {}, context)));
   problems.push(...at('palette', checkRecord(REEL_PALETTE, reel?.palette || {}, context)));
   problems.push(...at('music', checkRecord(REEL_MUSIC, reel?.music || {}, context)));
+  problems.push(...at('music.mix', checkRecord(REEL_MIX, reel?.music?.mix || {}, context)));
   return problems;
 }

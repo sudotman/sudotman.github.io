@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Turns content/reel.json into js/reel-config.js.
+ * Turns content/reel.json into js/reel-config.js, with the soundtrack's stem
+ * manifest (sounds/reel/stems.json, written by npm run soundtrack) beside it.
  *
  * The reel is injected by an inline script in index.html and has to be on
  * screen immediately, so it cannot wait on a fetch for its own copy. The config
@@ -21,6 +22,7 @@ import { checkReel } from '../js/lib/schema.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE = path.join(ROOT, 'content/reel.json');
+const STEMS = path.join(ROOT, 'sounds/reel/stems.json');
 const TARGET = path.join(ROOT, 'js/reel-config.js');
 const CHECK = process.argv.includes('--check');
 
@@ -35,7 +37,12 @@ if (problems.length) {
   process.exit(1);
 }
 
-const output = `${HEADER}window.__REEL = ${JSON.stringify(reel)};\n`;
+// Without a manifest the reel plays sounds/intro.mp3, so a missing one is not an error here.
+const stems = JSON.parse(await readFile(STEMS, 'utf8').catch(() => 'null'));
+const { note, ...kit } = stems || {};
+
+const output = `${HEADER}window.__REEL = ${JSON.stringify(reel)};\n`
+  + (stems ? `window.__REEL_STEMS = ${JSON.stringify(kit)};\n` : '');
 const existing = await readFile(TARGET, 'utf8').catch(() => '');
 
 if (existing === output) {

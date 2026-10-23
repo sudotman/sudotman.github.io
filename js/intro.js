@@ -27,9 +27,10 @@
   const REEL_DEFAULTS = {
     type: { sans: "Arial, Helvetica, sans-serif", mono: '"Courier New", Courier, monospace', serif: '"Times New Roman", Times, serif' },
     palette: { yellow: "#ffef00", green: "#00d16f", mint: "#8affc1", ink: "#141411", paper: "#f0ede4", river: "#173dc4", gold: "#ffb427" },
-    // how the soundtrack sounds: warmth closes a low-pass, spinUp is how much speed the
-    // tape gains as it starts, pulse is how hard the stripe breathes with it
-    music: { on: true, volume: 1, warmth: 0, spinUp: 0.65, pulse: 1 },
+    // how the soundtrack sounds: voice plays the chords, mix is a fader per stem, warmth closes
+    // a low-pass, spinUp is how much speed the tape gains as it starts, pulse is how hard the
+    // stripe breathes with it
+    music: { on: true, voice: "synth", volume: 1, warmth: 0, spinUp: 0.65, pulse: 1, mix: { drums: 1, bass: 1, chords: 1, effects: 1 } },
     scenes: {
       "front-door": {
         name: "satyam kashyap",
@@ -731,7 +732,74 @@
     return { seek, level, W: warp, R: unwarp, DUR, lastScene: () => lastScene };
   }
 
-  window.SatyamReel = { create: createReel, DUR, RATE, BEAT, RAMP, FREEZE_VIDEO };
+  // ─────────────────────────────────────────────────────────── the soundtrack
+  // scripts/soundtrack/render.py renders the soundtrack as stems into sounds/reel/: drums, bass,
+  // effects, and the chords once per voice. Each plays through its own fader, and the sum goes
+  // through the master's soft clip — the curve the render measured, carried here in
+  // window.__REEL_STEMS by js/reel-config.js — then the warmth low-pass, the meter and the
+  // fader the overture fades with. When the manifest or a stem is missing, sounds/intro.mp3,
+  // the default mix already mastered, plays on its own. The studio auditions through this too.
+  const SOUND = "/sounds/intro.mp3?v=20261023b";
+  const STEMS = ["drums", "bass", "chords", "effects"];
+  const MIX_TOP = 1.5;   // render.py leaves headroom for every fader at this
+  const cutoff = (warmth, ctx) => warmth > 0 ? 20000 * Math.pow(450 / 20000, clamp(warmth)) : ctx.sampleRate / 2;
+  const kitOk = k => !!k && Array.isArray(k.voices) && k.voices.length > 0 && k.voices.every(v => /^[a-z]+$/.test(v))
+    && typeof k.version === "string" && Number.isFinite(k.drive) && Number.isFinite(k.makeup);
+
+  function decode(url, priority) {
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC) return Promise.reject(new Error("no audio decoding here"));
+    return fetch(url, { priority })
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error(`${url} returned ${r.status}`)))
+      .then(data => new OAC(2, 48000, 48000).decodeAudioData(data));
+  }
+
+  // → { stems: { drums, bass, chords, effects }, kit, voice } or { single }
+  function loadSound(voice, { kit = window.__REEL_STEMS, priority = "auto" } = {}) {
+    const single = () => decode(SOUND, priority).then(buffer => ({ single: buffer }));
+    if (!kitOk(kit)) return single();
+    const v = kit.voices.includes(voice) ? voice : kit.voices[0];
+    const file = name => `/sounds/reel/${name === "chords" ? "chords-" + v : name}.mp3?v=${kit.version}`;
+    return Promise.all(STEMS.map(name => decode(file(name), priority)))
+      .then(list => ({ stems: Object.fromEntries(STEMS.map((name, i) => [name, list[i]])), kit, voice: v }), single);
+  }
+
+  function soundboard(ctx, track, levels) {
+    const tone = ctx.createBiquadFilter(), meter = ctx.createAnalyser(), out = ctx.createGain();
+    tone.type = "lowpass"; meter.fftSize = 1024;
+    tone.connect(meter); meter.connect(out); out.connect(ctx.destination);
+    const sources = [], faders = {};
+    const source = buffer => { const src = ctx.createBufferSource(); src.buffer = buffer; sources.push(src); return src; };
+    if (track.stems) {
+      const shaper = ctx.createWaveShaper(), curve = new Float32Array(4097), { drive, makeup } = track.kit;
+      for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(drive * (i / 2048 - 1)) * makeup;
+      shaper.curve = curve; shaper.connect(tone);
+      for (const name of STEMS) { faders[name] = ctx.createGain(); source(track.stems[name]).connect(faders[name]); faders[name].connect(shaper); }
+    } else source(track.single).connect(tone);
+    const board = {
+      out, tone, meter, faders,
+      // glide > 0 eases into the new levels, for faders moved while it plays
+      set(next, glide = 0) {
+        const at = ctx.currentTime, to = (param, v) => glide ? param.setTargetAtTime(v, at, glide) : param.setValueAtTime(v, at);
+        to(tone.frequency, cutoff(next.warmth, ctx));
+        for (const name in faders) to(faders[name].gain, clamp(next.mix?.[name] ?? 1, 0, MIX_TOP));
+      },
+      // every stem from the same instant and offset, spun up together
+      start(when, offset, from = 1, ramp = 0) {
+        for (const src of sources) {
+          src.playbackRate.setValueAtTime(from, when);
+          if (ramp) src.playbackRate.linearRampToValueAtTime(1, when + ramp);
+          src.start(when, offset);
+        }
+      },
+      stop(at) { for (const src of sources) try { src.stop(at); } catch { /* not started */ } },
+      set onended(fn) { sources[0].onended = fn; },
+    };
+    board.set(levels);
+    return board;
+  }
+
+  window.SatyamReel = { create: createReel, DUR, RATE, BEAT, RAMP, FREEZE_VIDEO, sound: { load: loadSound, board: soundboard, cutoff, stems: STEMS, MIX_TOP } };
 
   // ─────────────────────────────────────────────────────────── the website overture
   const root = document.documentElement;
@@ -742,11 +810,9 @@
   // the audio context inside its own click and passes it here, so the reel holds its first
   // frame until the soundtrack is ready and both start together. Either way, once sound
   // plays the picture follows the audio clock.
-  const SOUND = "/sounds/intro.mp3?v=20260927b";
   // The config's levels are clamped here rather than trusted: mergeReel checks types, not ranges.
   const MUSIC = REEL.music;
   const VOLUME = clamp(MUSIC.volume), PULSE = clamp(MUSIC.pulse, 0, 2);
-  const TONE = MUSIC.warmth > 0 ? 20000 * Math.pow(450 / 20000, clamp(MUSIC.warmth)) : 0;
   const TAPE = 0.35, TAPE_FROM = 1 - clamp(MUSIC.spinUp, 0, 0.9), HOLD = 1.2;
   let running = false;
 
@@ -774,7 +840,7 @@
     host.appendChild(hint);
 
     let T = 0, last = 0, raf = 0, leaving = 0, done = false, waiting = !!given;
-    let buffer = null, noSound = !MUSIC.on || !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, src = null, gain = null, meter = null, sound = null, lvl = 0;
+    let track = null, board = null, noSound = !MUSIC.on || !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, gain = null, meter = null, sound = null, lvl = 0;
     const began = performance.now();
     const setHint = () => {
       const offer = !want && !noSound;
@@ -783,24 +849,18 @@
     setHint();
 
     const startSound = () => {
-      if (sound || !ctx || !buffer || done || leaving) return;
+      if (sound || !ctx || !track || done || leaving) return;
       if (ctx.state !== "running") { ctx.resume().then(startSound, () => {}); return; }
       const lat = ctx.outputLatency || ctx.baseLatency || 0.02, now = ctx.currentTime + 0.03;
       // Held on the first frame, sound and picture start together. Joining mid-reel, the
       // tape spins up and starts ahead by what the spin-up loses, so the two meet at speed.
       const tape = !waiting, offset = tape ? T + 0.03 + lat + TAPE * (1 - TAPE_FROM) / 2 : 0;
-      src = ctx.createBufferSource(); src.buffer = buffer;
-      gain = ctx.createGain(); meter = ctx.createAnalyser(); meter.fftSize = 1024;
       // the meter listens before the fader, so a quieter reel still moves the stripe
-      let tail = src;
-      if (TONE) { const tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = TONE; src.connect(tone); tail = tone; }
-      tail.connect(meter); meter.connect(gain); gain.connect(ctx.destination);
-      if (tape) {
-        src.playbackRate.setValueAtTime(TAPE_FROM, now); src.playbackRate.linearRampToValueAtTime(1, now + TAPE);
-        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(VOLUME, now + 0.22);
-      } else gain.gain.setValueAtTime(VOLUME, now);
-      src.onended = () => { if (done) ctx.close().catch(() => {}); };
-      src.start(now, offset);
+      board = soundboard(ctx, track, MUSIC); gain = board.out; meter = board.meter;
+      if (tape) { gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(VOLUME, now + 0.22); }
+      else gain.gain.setValueAtTime(VOLUME, now);
+      board.onended = () => { if (done) ctx.close().catch(() => {}); };
+      board.start(now, offset, tape ? TAPE_FROM : 1, tape ? TAPE : 0);
       sound = { now, lat, offset, tape }; waiting = false;
     };
     // where the listener is in the soundtrack
@@ -818,15 +878,14 @@
       }
       startSound();
     };
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-    if (!noSound && OAC) {
-      fetch(SOUND)
-        .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error(`${SOUND} returned ${r.status}`)))
-        .then(data => new OAC(2, 48000, 48000).decodeAudioData(data))
-        .then(b => { buffer = b; startSound(); })
+    if (!noSound) {
+      // Nothing on screen waits for this: a first visit starts silent, so its stems queue behind
+      // the page; [reel] holds its first frame for at most HOLD, so its stems go first.
+      loadSound(MUSIC.voice, { priority: given ? "high" : "low" })
+        .then(t => { track = t; startSound(); })
         .catch(() => { noSound = true; setHint(); });
       if (!given && navigator.getAutoplayPolicy?.("audiocontext") === "allowed") enableSound();
-    } else noSound = true;
+    }
     if (noSound) waiting = false;
 
     const finish = () => {
@@ -839,7 +898,7 @@
     const skip = () => {
       if (leaving || done) return;
       leaving = performance.now();
-      if (gain) { const c = ctx.currentTime; gain.gain.cancelScheduledValues(c); gain.gain.setValueAtTime(gain.gain.value, c); gain.gain.linearRampToValueAtTime(0, c + 0.4); src.stop(c + 0.45); }
+      if (gain) { const c = ctx.currentTime; gain.gain.cancelScheduledValues(c); gain.gain.setValueAtTime(gain.gain.value, c); gain.gain.linearRampToValueAtTime(0, c + 0.4); board.stop(c + 0.45); }
     };
     const onClick = () => { if (!want && !noSound) enableSound(); else skip(); };
     // A real resize (not a mobile toolbar sliding away) invalidates the layout.

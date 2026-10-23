@@ -20,14 +20,34 @@
       "chip": "creative technologist and filmmaker — mumbai, india",
       "marquee": "मेरे डिजिटल स्पेस में आपका स्वागत है!   میری ڈیجیٹل دنیا میں خوش آمدید!   ",
       "sentence": [
-        { "before": "i lead", "word": "xr", "style": "box", "after": "." },
-        { "before": "i make", "word": "films", "style": "link", "after": "." },
-        { "before": "i ship", "word": "tools", "style": "link", "after": "." }
+        {
+          "before": "i lead",
+          "word": "xr",
+          "style": "box",
+          "after": "."
+        },
+        {
+          "before": "i make",
+          "word": "films",
+          "style": "link",
+          "after": "."
+        },
+        {
+          "before": "i ship",
+          "word": "tools",
+          "style": "link",
+          "after": "."
+        }
       ]
     },
     "xr": {
       "label": "02 — xr / parallax labs",
-      "headings": ["lead xr", "MaRTES", "gaganyaan", "patents"],
+      "headings": [
+        "lead xr",
+        "[redacted]",
+        "gaganyaan",
+        "patents"
+      ],
       "subtitles": [
         "lead xr dev — parallax labs, mumbai",
         "mission rehearsal & tactical engagement simulator",
@@ -59,46 +79,161 @@
       ]
     },
     "tools": {
-      "headline": ["ship", "tools", "in", "public."],
-      "chips": ["73 public repos", "31★ better unity", "plethora of domains ;)", "private, local-first <3"],
+      "headline": [
+        "ship",
+        "tools",
+        "in",
+        "public."
+      ],
+      "chips": [
+        "73 public repos",
+        "31★ better unity",
+        "plethora of domains ;)",
+        "private, local-first <3"
+      ],
       "repoCount": 73,
       "works": [
-        { "title": "MaRTES", "meta": "r&d · current", "group": 0 },
-        { "title": "gaganyaan vr", "meta": "isro · r&d", "group": 0 },
-        { "title": "UE camera2", "meta": "quest 3 · c++", "group": 0 },
-        { "title": "mr hmg simulator", "meta": "r&d · ongoing", "group": 0 },
-        { "title": "vr fire safety", "meta": "training · r&d", "group": 0 },
-        { "title": "interaction research", "meta": "isdk · c#", "group": 0 },
-        { "title": "Chhoti Gold", "meta": "film · 2025", "group": 1 },
-        { "title": "Blue Dogs", "meta": "film · 2023", "group": 1 },
-        { "title": "film 03", "meta": "in development", "group": 1 },
-        { "title": "cbfc cut lists", "meta": "censorship explorer", "group": 1 },
-        { "title": "126 reviews", "meta": "letterboxd", "group": 1 },
-        { "title": "carcinization", "meta": "essay · 2025", "group": 1 },
-        { "title": "Hear", "meta": "offline · private", "group": 2 },
-        { "title": "OpenPiano", "meta": "web midi · lessons", "group": 2 },
-        { "title": "OpenWorkout", "meta": "local-first", "group": 2 },
-        { "title": "better unity", "meta": "31★ · open source", "group": 2 },
-        { "title": "render buddy", "meta": "unreal toolkit", "group": 2 },
-        { "title": "UE MCP bridge", "meta": "unreal editor × mcp", "group": 2 },
-        { "title": "the closet", "meta": "drifting archive", "group": 3 },
-        { "title": "Pahari Preservation", "meta": "language archive", "group": 3 },
-        { "title": "Unlearn", "meta": "puzzle-platformer", "group": 3 },
-        { "title": "artsaver", "meta": "passive art", "group": 3 },
-        { "title": "wusic", "meta": "minimal player", "group": 3 },
-        { "title": "the everything bagel", "meta": "eeaao, but a site", "group": 3 }
+        {
+          "title": "[redacted]",
+          "meta": "r&d · current",
+          "group": 0
+        },
+        {
+          "title": "gaganyaan vr",
+          "meta": "isro · r&d",
+          "group": 0
+        },
+        {
+          "title": "UE camera2",
+          "meta": "quest 3 · c++",
+          "group": 0
+        },
+        {
+          "title": "mr hmg simulator",
+          "meta": "r&d · ongoing",
+          "group": 0
+        },
+        {
+          "title": "vr fire safety",
+          "meta": "training · r&d",
+          "group": 0
+        },
+        {
+          "title": "interaction research",
+          "meta": "isdk · c#",
+          "group": 0
+        },
+        {
+          "title": "Chhoti Gold",
+          "meta": "film · 2025",
+          "group": 1
+        },
+        {
+          "title": "Blue Dogs",
+          "meta": "film · 2023",
+          "group": 1
+        },
+        {
+          "title": "film 03",
+          "meta": "in development",
+          "group": 1
+        },
+        {
+          "title": "cbfc cut lists",
+          "meta": "censorship explorer",
+          "group": 1
+        },
+        {
+          "title": "126 reviews",
+          "meta": "letterboxd",
+          "group": 1
+        },
+        {
+          "title": "carcinization",
+          "meta": "essay · 2025",
+          "group": 1
+        },
+        {
+          "title": "Hear",
+          "meta": "offline · private",
+          "group": 2
+        },
+        {
+          "title": "OpenPiano",
+          "meta": "web midi · lessons",
+          "group": 2
+        },
+        {
+          "title": "OpenWorkout",
+          "meta": "local-first",
+          "group": 2
+        },
+        {
+          "title": "better unity",
+          "meta": "31★ · open source",
+          "group": 2
+        },
+        {
+          "title": "render buddy",
+          "meta": "unreal toolkit",
+          "group": 2
+        },
+        {
+          "title": "UE MCP bridge",
+          "meta": "unreal editor × mcp",
+          "group": 2
+        },
+        {
+          "title": "the closet",
+          "meta": "drifting archive",
+          "group": 3
+        },
+        {
+          "title": "Pahari Preservation",
+          "meta": "language archive",
+          "group": 3
+        },
+        {
+          "title": "Unlearn",
+          "meta": "puzzle-platformer",
+          "group": 3
+        },
+        {
+          "title": "artsaver",
+          "meta": "passive art",
+          "group": 3
+        },
+        {
+          "title": "wusic",
+          "meta": "minimal player",
+          "group": 3
+        },
+        {
+          "title": "the everything bagel",
+          "meta": "eeaao, but a site",
+          "group": 3
+        }
       ]
     },
     "statement": {
       "quote": "science is only fun if its intersectional!",
       "centre": "satyam",
-      "labels": ["xr", "film", "code", "art"]
+      "labels": [
+        "xr",
+        "film",
+        "code",
+        "art"
+      ]
     },
     "sign-off": {
       "url": "satyam.lol",
       "aside": "perpetually curious.",
       "credits": "lead xr dev  ·  filmmaker  ·  toolmaker\nhimalayas → mumbai",
-      "links": ["github.com/sudotman", "hello@satyam.lol", "letterboxd.com/satyamkashyap"]
+      "links": [
+        "github.com/sudotman",
+        "hello@satyam.lol",
+        "letterboxd.com/satyamkashyap"
+      ]
     }
   }
 }

@@ -27,7 +27,7 @@
     "p_hear",
     "p_openpiano",
     "p_openworkout",
-    "p_martes",
+    "p",
     "film_chhoti_gold",
     "p_pahari",
     "p_closet",
@@ -69,8 +69,8 @@
   ],
   "works": [
     {
-      "id": "p_martes",
-      "title": "MaRTES",
+      "id": "p",
+      "title": "[redacted] office work!",
       "medium": "research & development",
       "year": "current",
       "summary": "A full-fledged mission rehearsal and tactical engagement simulator, built by the XR team I lead at Parallax Labs.",

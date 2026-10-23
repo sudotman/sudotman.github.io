@@ -11,6 +11,7 @@
  */
 
 import { markdownToHtml, readingMinutes, slugify, wordCount } from './lib/markdown.js';
+import { SITE, substackClipboard } from './lib/substack.js';
 import { parseFrontmatter, serializePost, toIsoDate } from './lib/post.js';
 
 const STORE = {
@@ -521,6 +522,71 @@ async function copyToClipboard() {
   }
 }
 
+/**
+ * Puts both flavours on the clipboard, so a rich editor takes the HTML and
+ * anything else falls back to the markdown.
+ *
+ * The modern path needs a permission the browser can refuse, so a refusal
+ * falls through to the old trick rather than failing: select real nodes and
+ * let the copy command carry the formatting across.
+ */
+async function writeRichText(html, text) {
+  if (navigator.clipboard?.write && window.ClipboardItem) {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([text], { type: 'text/plain' })
+        })
+      ]);
+      return;
+    } catch {
+      // Permission refused or no user activation. Try the selection instead.
+    }
+  }
+
+  const holder = document.createElement('div');
+  holder.setAttribute('contenteditable', 'true');
+  holder.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:normal';
+  // The site's own renderer produced this, the same way the preview pane does.
+  holder.innerHTML = html;
+  document.body.append(holder);
+
+  const range = document.createRange();
+  range.selectNodeContents(holder);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  const copied = document.execCommand('copy');
+  selection.removeAllRanges();
+  holder.remove();
+  if (!copied) throw new Error('this browser would not copy rich text');
+}
+
+/**
+ * Substack's editor reads the HTML flavour of a paste, so a post crosses over
+ * looking like itself without anything here touching Substack's servers.
+ */
+async function copyForSubstack() {
+  const buffer = readBuffer();
+  if (!buffer.body.trim()) return setStatus('There is nothing to copy yet.', 'error');
+
+  const slug = currentSlug();
+  const { html, text } = substackClipboard(buffer.body, {
+    canonical: slug ? `${SITE}/blog/${slug}/` : ''
+  });
+
+  try {
+    await writeRichText(html, text);
+    setStatus(slug
+      ? 'Copied as rich text. Paste it into a new Substack post — the title and subtitle are their own fields there.'
+      : 'Copied as rich text, without a link back: give the post a title or slug first if you want one.', 'ok');
+  } catch (error) {
+    setStatus(`Could not copy: ${error.message}`, 'error');
+  }
+}
+
 /* ---------- wiring ---------- */
 
 for (const element of Object.values(fields)) {
@@ -579,6 +645,7 @@ publishButton.addEventListener('click', publish);
 deleteButton.addEventListener('click', removePost);
 document.querySelector('[data-download]').addEventListener('click', download);
 document.querySelector('[data-copy]').addEventListener('click', copyToClipboard);
+document.querySelector('[data-copy-substack]').addEventListener('click', copyForSubstack);
 
 document.addEventListener('keydown', (event) => {
   if (!(event.metaKey || event.ctrlKey)) return;

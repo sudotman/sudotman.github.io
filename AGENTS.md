@@ -16,6 +16,7 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - Treat `blog/`, `content/blog.json`, the `blog:start`/`blog:end` block in `sitemap.xml`, and `docs/` as generated. Never hand-edit them; run `npm run build`.
 - Treat `content/external-feeds.json` as generated. Never hand-edit it; run `npm run sync`. It carries Letterboxd reviews only — writing is native now, and the Blogger feed was retired.
 - Treat `js/lib/markdown.js` and `js/lib/post.js` as shared by the build script, the validator and the browser editor. A change to either affects all three; run `npm test`.
+- Treat `js/lib/substack.js` as the Substack paste format, used only by the editor's copy button. Nothing in this repository talks to Substack over the network, and nothing should start to: its write endpoints are private and undocumented.
 - Treat `minimalist.html` and `terminal/` as standalone surfaces unless explicitly asked to merge them into the main architecture.
 
 ## Blog Map
@@ -26,6 +27,7 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 - `js/lib/post.js`: frontmatter parse/serialise and post normalisation
 - `css/blog.css`, `js/blog.js`: the writing index and post pages
 - `write/index.html`, `css/editor.css`, `js/editor.js`: the editor, which commits posts via the GitHub contents API
+- `js/lib/substack.js`: the Substack paste format, shared by the editor's copy button and its tests
 
 ## ononline Module Map
 

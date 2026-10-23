@@ -176,6 +176,28 @@ so the live site cannot serve stale HTML.
 Rendering is shared code: `js/lib/markdown.js` and `js/lib/post.js` are imported by the build script,
 the validator and the browser editor alike. Raw HTML in a post is escaped rather than passed through.
 
+### Mirroring to Substack
+
+satyam.lol stays the original. `/write/` has a **copy for substack** button: it renders the open post
+with the same `js/lib/markdown.js` the site uses, adjusts it for someone else's editor, and puts it on
+the clipboard as rich text. Open a new Substack post and paste — headings, bold, links, quotes, lists,
+code blocks and images all land as themselves, because Substack's editor reads the `text/html` flavour
+of a paste.
+
+Three adjustments happen on the way out, all in `js/lib/substack.js`:
+
+- relative targets become absolute, since `/images/blog/a.png` means nothing on Substack
+- figures unwrap into an image followed by its caption in italics, which pastes more reliably
+- the post ends with a line linking back to its canonical page on satyam.lol
+
+The clipboard also carries a plain-text flavour, which is the markdown source with absolute targets, for
+anywhere the rich paste does not land. Title and subtitle are separate fields in Substack, so they are
+deliberately not part of the copy.
+
+Nothing here talks to Substack. There is no API, no session cookie and no scheduled job — Substack
+publishes no write API, and the endpoints its own editor uses are private and change without notice.
+Pasting is the part that is allowed to be manual.
+
 ### Migrating from Blogspot
 
 `scripts/import-blogger.mjs` converted the six Blogspot posts to Markdown, pulling the author's own

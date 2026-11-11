@@ -1,6 +1,6 @@
 /*
- * The front door's overture: a 15-second showreel that plays once per visit and
- * lands on the page beneath it. The same engine renders the video cuts, so the
+ * The front door's overture: a 15-second showreel that plays when it is asked
+ * for and lands on the page beneath it. The same engine renders the video cuts, so the
  * reel on the site and the reel in the files never drift apart.
  *
  * Time runs on two clocks. `t` is the choreography (authored as a 10-second
@@ -10,10 +10,16 @@
  * drift) keeps running on `T`. Holds are whole beats, so every cut stays on the
  * 116 bpm grid of the soundtrack.
  *
- * index.html decides whether to play (first visit in a tab, no deep link, no
- * reduced motion) and adds `html.intro`, which paints a matching cover until
- * this script takes over. Any key or scroll skips; the first click or tap brings
- * the soundtrack in (sounds/intro.mp3), the next one skips.
+ * Nothing plays unasked. [reel] on the front door plays it with sound from the
+ * first frame; arriving at /?intro plays it silent, and index.html adds
+ * `html.intro` there, which paints a matching cover until this script takes
+ * over. Any key or scroll skips; on a silent start the first click or tap
+ * brings the soundtrack in (sounds/intro.mp3), the next one skips.
+ *
+ * The reel opens and closes on the front door, so on the site it wears the
+ * page's theme: in the dark one, the scenes drawn in the page's colours take
+ * them from css/theme.css. The xr and film scenes are rooms of their own and
+ * look the same in either. The video cuts are always the light cut.
  */
 (() => {
   "use strict";
@@ -176,6 +182,36 @@
     const { W: warp, R: unwarp } = makeWarp(WEB ? FREEZE_WEB : FREEZE_VIDEO);
     const X0 = V ? 80 : 150;
 
+    // The colours of the page the reel opens and closes on, and of the sheets in
+    // between that are drawn in them (01, 04, 05, 06, the stripe, the flash).
+    // LIGHT is the reel as it was cut. In the dark theme, on the site only, the
+    // same roles are read off the page's own tokens (css/theme.css), so the
+    // reel lands on exactly the page beneath it; the literals are what those
+    // tokens hold, for a page that has not loaded them. 02 and 03 keep their own
+    // colours in either theme.
+    const LIGHT = {
+      paper: "#ffffff", ink: "#000000", strong: "#000000", block: "#000000", blockInk: "#ffffff", link: "#0000e7",
+      yellow: Y, onYellow: "#000000", flash: "#ffffff",
+      ground: INK, sheet: PAPER, card: PAPER, cardEdge: INK, cardInk: INK, head: INK, headInk: "#ffffff", blk: INK, bars: ["#f4efe4", "#fff"],
+      tiles: ["#f33b2f", "#e5a0aa", "#536a50", "#d7fb34", "#99c4e7", "#3658d8", "#203a8c", "#8ca58e", "#f05a47", "#f4e8c6", "#ffb427", "#6b2c59"],
+      groups: ["#d7fb34", "#99c4e7", "#f05a47", "#e5a0aa"], blend: "multiply", line: INK, label: INK, quote: INK,
+    };
+    const C = WEB && o.dark ? (() => {
+      const css = getComputedStyle(document.documentElement);
+      const token = (name, fallback) => { const v = css.getPropertyValue(name).trim(); return /^#[0-9a-f]{6}$/i.test(v) ? v : fallback; };
+      const paper = token("--paper", "#002b36"), ink = token("--ink", "#93a1a1"), strong = token("--strong", "#eee8d5");
+      return {
+        paper, ink, strong, block: token("--block", "#93a1a1"), blockInk: token("--block-ink", "#002b36"), link: token("--link", "#268bd2"),
+        yellow: token("--yellow", "#b58900"), onYellow: token("--on-accent", "#002b36"), flash: ink,   // a softer cut than white in a dark room
+        ground: token("--well", "#00212b"), sheet: paper, card: paper, cardEdge: paper, cardInk: strong, head: paper, headInk: strong, blk: paper, bars: [strong, "#fdf6e3"],
+        // the Solarized accents and neutrals, in the places the light cut keeps its poster colours
+        tiles: ["#dc322f", "#d33682", "#586e75", "#859900", "#2aa198", "#268bd2", "#073642", "#657b83", "#cb4b16", "#839496", "#b58900", "#6c71c4"],
+        // on a dark sheet the four circles add up where they cross, rather than multiply down
+        groups: ["#859900", "#268bd2", "#cb4b16", "#d33682"], blend: "screen", line: strong, label: paper, quote: strong,
+      };
+    })() : LIGHT;
+    const blend = (a, b, x) => "#" + hex(a).map((v, i) => Math.round(lerp(v, hex(b)[i], x)).toString(16).padStart(2, "0")).join("");
+
     const el = (tag, parent, css = {}, cls = "") => { const e = document.createElement(tag); if (cls) e.className = cls; Object.assign(e.style, css); parent.appendChild(e); return e; };
     const NS = "http://www.w3.org/2000/svg";
     const sv = (tag, parent, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
@@ -189,14 +225,14 @@
       .sk-reel, .sk-reel * { box-sizing: border-box; margin: 0; padding: 0; }
       .sk-reel { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; font-kerning: normal; }
       .sk-reel .w { display: inline-block; }
-      .sk-reel .xr { display: inline-block; background: #000; color: #fff; font: 700 0.9em/0.9 ${SANS}; letter-spacing: -0.05em; padding: 0.04em 0.16em 0.1em 0.12em; vertical-align: 0.02em; }
-      .sk-reel .lk { color: #0000e7; text-decoration: underline; text-decoration-thickness: 0.05em; text-underline-offset: 0.13em; }
-      .sk-reel .card { position: absolute; left: 16px; bottom: 16px; max-width: 300px; background: ${PAPER}; border: 1px solid ${INK}; padding: 8px 12px 9px; color: ${INK}; }
+      .sk-reel .xr { display: inline-block; background: ${C.block}; color: ${C.blockInk}; font: 700 0.9em/0.9 ${SANS}; letter-spacing: -0.05em; padding: 0.04em 0.16em 0.1em 0.12em; vertical-align: 0.02em; }
+      .sk-reel .lk { color: ${C.link}; text-decoration: underline; text-decoration-thickness: 0.05em; text-underline-offset: 0.13em; }
+      .sk-reel .card { position: absolute; left: 16px; bottom: 16px; max-width: 300px; background: ${C.card}; border: 1px solid ${C.cardEdge}; padding: 8px 12px 9px; color: ${C.cardInk}; }
       .sk-reel .card b { display: block; font: 400 31px/1.02 ${SERIF}; letter-spacing: -0.01em; }
       .sk-reel .card i { display: block; margin-top: 5px; font: normal 400 12px/1.3 ${MONO}; text-transform: uppercase; letter-spacing: 0.08em; }
-      .sk-reel .hbox { display: inline-block; background: ${INK}; color: #fff; font: 700 1em/0.9 ${SANS}; letter-spacing: -0.055em; padding: 0.03em 0.23em 0.12em 0.09em; margin: 0 0 14px 0; }
-      .sk-reel .ychip { position: absolute; background: ${Y}; color: #000; font: 700 28px/1 ${MONO}; padding: 8px 12px; white-space: pre; }`;
-    const stage = el("div", host, { ...bleed, overflow: "hidden", background: "#fff", transformOrigin: "0 0" }, "sk-reel");
+      .sk-reel .hbox { display: inline-block; background: ${C.head}; color: ${C.headInk}; font: 700 1em/0.9 ${SANS}; letter-spacing: -0.055em; padding: 0.03em 0.23em 0.12em 0.09em; margin: 0 0 14px 0; }
+      .sk-reel .ychip { position: absolute; background: ${C.yellow}; color: ${C.onYellow}; font: 700 28px/1 ${MONO}; padding: 8px 12px; white-space: pre; }`;
+    const stage = el("div", host, { ...bleed, overflow: "hidden", background: C.paper, transformOrigin: "0 0" }, "sk-reel");
     const scenes = [];
     const scene = (a, b, bg) => { const s = el("div", stage, { ...bleed, overflow: "hidden", background: bg, display: "none" }); scenes.push({ s, a, b }); return s; };
     const content = (parent, css = {}) => el("div", parent, { ...box(DW, DH), left: OX + "px", top: OY + "px", ...css });
@@ -205,21 +241,21 @@
     const L1 = V
       ? { fs: 250, y: 620, slabL: 56, slabT: 578, slabB: 1052, chipY: 1092, chipFs: 24, chipPad: 10, sentY: 1172, sentFs: 76 }
       : { fs: 400, y: 140, slabL: 112, slabT: 100, slabB: 800, chipY: 822, chipFs: 30, chipPad: 12, sentY: 900, sentFs: 62 };
-    const s1 = scene(0, 2.0, "#fff");
+    const s1 = scene(0, 2.0, C.paper);
     const s1cam = content(s1, { transformOrigin: "0 0" });
-    const swipe = el("div", s1cam, { position: "absolute", background: Y });
+    const swipe = el("div", s1cam, { position: "absolute", background: C.yellow });
     const VTXT = SC["front-door"].marquee.repeat(5);
-    const vtxt = el("div", s1, abs(34, 0, { writingMode: "vertical-rl", font: `400 19px/1 ${SERIF}`, color: "#000", whiteSpace: "nowrap" }));
+    const vtxt = el("div", s1, abs(34, 0, { writingMode: "vertical-rl", font: `400 19px/1 ${SERIF}`, color: C.ink, whiteSpace: "nowrap" }));
     vtxt.textContent = VTXT;
-    const nameBox = el("div", s1cam, abs(X0, L1.y, { font: `900 ${L1.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: "#000", whiteSpace: "nowrap" }));
+    const nameBox = el("div", s1cam, abs(X0, L1.y, { font: `900 ${L1.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: C.onYellow, whiteSpace: "nowrap" }));
     // The name sets as two lines; a name without a space simply keeps one.
     const NAME = SC["front-door"].name.split(/\s+/);
     const N1 = letters(el("div", nameBox), NAME[0] || ""), N2 = letters(el("div", nameBox), NAME.slice(1).join(" "));
     const CHIP = SC["front-door"].chip;
-    const chip = el("div", s1cam, abs(X0, L1.chipY, { font: `700 ${L1.chipFs}px/1.2 ${MONO}`, padding: `${L1.chipFs / 6}px ${L1.chipPad}px`, color: "#000", whiteSpace: "pre" }));
+    const chip = el("div", s1cam, abs(X0, L1.chipY, { font: `700 ${L1.chipFs}px/1.2 ${MONO}`, padding: `${L1.chipFs / 6}px ${L1.chipPad}px`, color: C.onYellow, whiteSpace: "pre" }));
     chip.textContent = CHIP;
-    const caret = el("span", s1cam, abs(0, L1.chipY + L1.chipFs * 0.27, { width: L1.chipFs * 0.57 + "px", height: L1.chipFs * 1.03 + "px", background: "#000" }));
-    const sent = el("div", s1cam, abs(X0, L1.sentY, { font: `400 ${L1.sentFs}px/1.12 ${SERIF}`, color: "#000", whiteSpace: "nowrap" }));
+    const caret = el("span", s1cam, abs(0, L1.chipY + L1.chipFs * 0.27, { width: L1.chipFs * 0.57 + "px", height: L1.chipFs * 1.03 + "px", background: C.onYellow }));
+    const sent = el("div", s1cam, abs(X0, L1.sentY, { font: `400 ${L1.sentFs}px/1.12 ${SERIF}`, color: C.ink, whiteSpace: "nowrap" }));
     // Built as nodes rather than markup, so the clauses can come from a config
     // without any of it being parsed as HTML. Each word animates on its own.
     const CLASS = { box: "w xr", link: "w lk" };
@@ -246,6 +282,8 @@
       const m = E.inOutExpo(P(t, 0.58, 0.9));
       l = lerp(l, chipR.l, m); r = lerp(r, chipR.r, m); tp = lerp(tp, chipR.t, m); bt = lerp(bt, chipR.b, m);
       Object.assign(swipe.style, { left: l + "px", top: tp + "px", width: (r - l) + "px", height: (bt - tp) + "px", transform: `skewX(${Math.sin(Math.PI * m) * -6}deg)` });
+      // the name is set on the slab, then stands on the page once the slab has folded into the chip
+      nameBox.style.color = mix(C.onYellow, C.strong, m);
       const jump = L1.fs * 0.6;
       N1.forEach((s, i) => { const dt = t - (0.1 + i * 0.032), f = spr(dt, 13, 20); s.style.opacity = clamp(dt / 0.05); s.style.transform = `translateY(${(1 - f) * jump}px) rotate(${(1 - f) * -12}deg) scaleY(${1 + (1 - f) * 0.35})`; });
       N2.forEach((s, i) => { const dt = t - (0.2 + i * 0.03), f = spr(dt, 13, 20); s.style.opacity = clamp(dt / 0.05); s.style.transform = `translateY(${(1 - f) * -jump}px) rotate(${(1 - f) * 12}deg) scaleY(${1 + (1 - f) * 0.35})`; });
@@ -256,7 +294,10 @@
       words.forEach((w, i) => { const e = E.outExpo(P(t, 0.96 + i * 0.03, 1.32 + i * 0.03)); w.style.opacity = e; w.style.transform = `translateY(${(1 - e) * 46}px)`; });
       const xe = spr(t - (0.96 + 2 * 0.03), 12, 20);
       xrBox.style.transform = `translateY(${(1 - clamp(xe)) * 30}px) scale(${lerp(0.4, 1, xe)})`;
-      xrBox.style.color = mix("#ffffff", "#000000", P(t, 1.76, 1.9));
+      // the label melts into its box, and the box into the dark of the room it opens on
+      const room = blend(C.block, "#000000", P(t, 1.8, 1.96));
+      xrBox.style.background = room;
+      xrBox.style.color = mix(C.blockInk, room, P(t, 1.76, 1.9));
       vtxt.style.opacity = E.outCubic(P(t, 0.3, 0.7)) * 0.9;
       vtxt.style.transform = `translateY(${-120 - T * 60}px)`;
       // drift, then dive into the [xr] label
@@ -515,8 +556,8 @@
     const L4 = V
       ? { hx: 80, hy: 540, hFs: 128, pan: [30, 120], chips: [[560, 396, -2], [600, 880, 2.5], [80, 1016, -1.5], [300, 1320, 1.5]] }
       : { hx: 150, hy: 318, hFs: 150, pan: [46, 30], chips: [[1180, 196, -2], [1236, 690, 2.5], [150, 690, -1.5], [690, 850, 1.5]] };
-    const s4 = scene(5.75, 7.52, INK);
-    const iris = el("div", s4, { ...bleed, background: PAPER });
+    const s4 = scene(5.75, 7.52, C.ground);
+    const iris = el("div", s4, { ...bleed, background: C.sheet });
     const grid = el("div", s4, { ...bleed, transformOrigin: "50% 50%" });
     const TW = 392, TH = 324, GAP = 12;
     const COLS = Math.max(3, Math.ceil((SW + 2 * L4.pan[0] + 40 + GAP) / (TW + GAP)));
@@ -525,8 +566,7 @@
     const slotXY = k => [GX + (k % COLS) * (TW + GAP), GY + Math.floor(k / COLS) * (TH + GAP)];
     // group indexes the four circles of scene 05, so it is held to 0–3.
     const WORKS = SC.tools.works.map(w => ({ title: String(w.title), meta: String(w.meta), group: Math.min(3, Math.max(0, w.group | 0)) }));
-    const PAL = ["#f33b2f", "#e5a0aa", "#536a50", "#d7fb34", "#99c4e7", "#3658d8", "#203a8c", "#8ca58e", "#f05a47", "#f4e8c6", "#ffb427", "#6b2c59"];
-    const GCOL = ["#d7fb34", "#99c4e7", "#f05a47", "#e5a0aa"];
+    const PAL = C.tiles, GCOL = C.groups;
     const NT = COLS * ROWS, r4 = rng(42);
     const order = [...Array(NT).keys()].sort(() => r4() - 0.5);
     const perm = [...Array(NT).keys()].sort(() => r4() - 0.5);
@@ -538,9 +578,9 @@
       const d = el("div", grid, abs(0, 0, { width: TW + "px", height: TH + "px", overflow: "hidden", background: base }));
       const cd = 190 + r4() * 220;
       const circ = el("div", d, abs(r4() * TW - cd / 2, r4() * TH * 0.8 - cd / 2, { width: cd + "px", height: cd + "px", borderRadius: "50%", background: c2 }));
-      const bar = el("div", d, abs(-80, 40 + r4() * 180, { width: "560px", height: (54 + r4() * 40) + "px", background: r4() < .7 ? "#f4efe4" : "#fff" }));
+      const bar = el("div", d, abs(-80, 40 + r4() * 180, { width: "560px", height: (54 + r4() * 40) + "px", background: r4() < .7 ? C.bars[0] : C.bars[1] }));
       const bs = 110 + r4() * 110;
-      const blk = el("div", d, abs(TW * 0.45 + r4() * TW * 0.4 - bs / 2, r4() * TH * 0.6 - bs / 2, { width: bs + "px", height: bs + "px", background: INK }));
+      const blk = el("div", d, abs(TW * 0.45 + r4() * TW * 0.4 - bs / 2, r4() * TH * 0.6 - bs / 2, { width: bs + "px", height: bs + "px", background: C.blk }));
       const card = el("div", d, {}, "card");
       el("b", card).textContent = wk.title;
       el("i", card).textContent = wk.meta;
@@ -599,22 +639,22 @@
     }
 
     // ─────────────────────────────────────── 05 intersection
-    const s5 = scene(7.44, 8.53, PAPER);
+    const s5 = scene(7.44, 8.53, C.sheet);
     const s5cam = content(s5, { transformOrigin: "0 0" });
     const vsvg = sv("svg", s5cam, { width: DW, height: DH, style: "position:absolute;left:0;top:0;overflow:visible" });
     const defs = sv("defs", vsvg), clipId = "skv" + Math.random().toString(36).slice(2, 7);
     VC.forEach(([x, y], i) => { const cp = sv("clipPath", defs, { id: clipId + i }); sv("circle", cp, { cx: x, cy: y, r: VR }); });
     const vg = sv("g", vsvg);
-    VC.forEach(([x, y], i) => sv("circle", vg, { cx: x, cy: y, r: VR, fill: GCOL[i], style: "mix-blend-mode:multiply" }));
+    VC.forEach(([x, y], i) => sv("circle", vg, { cx: x, cy: y, r: VR, fill: GCOL[i], style: "mix-blend-mode:" + C.blend }));
     let cg = vg; for (let i = 0; i < 4; i++) cg = sv("g", cg, { "clip-path": `url(#${clipId}${i})` });
-    const ydot = sv("circle", cg, { cx: L5.c[0], cy: L5.c[1], r: 0, fill: Y });
-    const vstroke = VC.map(([x, y]) => sv("circle", vg, { cx: x, cy: y, r: VR, fill: "none", stroke: INK, "stroke-width": 3 }));
-    const vlabels = SC.statement.labels.map((s, i) => [s, ...[[-248, -220], [248, -220], [-248, 228], [248, 228]][i]]).map(([s, dx, dy]) => ({ s, tx: sv("text", vg, { x: L5.c[0] + dx, y: L5.c[1] + dy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 34px ${MONO};fill:${INK}` }) }));
-    const me = sv("text", vg, { x: L5.c[0], y: L5.c[1] + 4, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 46px ${SANS};letter-spacing:-0.06em;fill:#000` }); me.textContent = SC.statement.centre;
-    const quote = el("div", s5cam, abs(0, L5.quoteY, { width: DW + "px", textAlign: "center", font: `400 ${L5.quoteFs}px/1.12 ${SERIF}`, color: INK, whiteSpace: "nowrap" }));
+    const ydot = sv("circle", cg, { cx: L5.c[0], cy: L5.c[1], r: 0, fill: C.yellow });
+    const vstroke = VC.map(([x, y]) => sv("circle", vg, { cx: x, cy: y, r: VR, fill: "none", stroke: C.line, "stroke-width": 3 }));
+    const vlabels = SC.statement.labels.map((s, i) => [s, ...[[-248, -220], [248, -220], [-248, 228], [248, 228]][i]]).map(([s, dx, dy]) => ({ s, tx: sv("text", vg, { x: L5.c[0] + dx, y: L5.c[1] + dy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 34px ${MONO};fill:${C.label}` }) }));
+    const me = sv("text", vg, { x: L5.c[0], y: L5.c[1] + 4, "text-anchor": "middle", "dominant-baseline": "central", style: `font:700 46px ${SANS};letter-spacing:-0.06em;fill:${C.onYellow}` }); me.textContent = SC.statement.centre;
+    const quote = el("div", s5cam, abs(0, L5.quoteY, { width: DW + "px", textAlign: "center", font: `400 ${L5.quoteFs}px/1.12 ${SERIF}`, color: C.quote, whiteSpace: "nowrap" }));
     const QW = SC.statement.quote.split(" ");
     const qspans = QW.map((w, i) => { if (V && i === 4) el("br", quote); const s = el("span", quote, { display: "inline-block", marginRight: "0.25em" }); s.textContent = w; if (i === QW.length - 1) s.style.fontStyle = "italic"; return s; });
-    const s5y = el("div", s5, { ...bleed, background: Y, opacity: 0 });
+    const s5y = el("div", s5, { ...bleed, background: C.yellow, opacity: 0 });
     const T_S5 = [unwarp(7.44), unwarp(8.5)];
 
     function r5(t, T) {
@@ -638,20 +678,20 @@
     const L6 = V
       ? { fs: 250, x: 80, y: 740, urlFs: 76, urlY: 1160, linksY: 1278, linksFs: 22, tagY: 1432, tagFs: 22, side: [80, 510] }
       : { fs: 330, x: 150, y: 150, urlFs: 92, urlY: 716, linksY: 852, linksFs: 21, tagY: 904, tagFs: 26, side: [1196, 214] };
-    const s6 = scene(8.5, 99, "#fff");
-    const yfield = el("div", s6, { position: "absolute", top: "-40px", height: (SH + 80) + "px", background: Y });
-    const vtxt6 = el("div", s6, abs(34, 0, { writingMode: "vertical-rl", font: `400 19px/1 ${SERIF}`, color: "#000", whiteSpace: "nowrap" }));
+    const s6 = scene(8.5, 99, C.paper);
+    const yfield = el("div", s6, { position: "absolute", top: "-40px", height: (SH + 80) + "px", background: C.yellow });
+    const vtxt6 = el("div", s6, abs(34, 0, { writingMode: "vertical-rl", font: `400 19px/1 ${SERIF}`, color: C.ink, whiteSpace: "nowrap" }));
     vtxt6.textContent = VTXT;
     const s6cam = content(s6, { transformOrigin: "50% 50%" });
-    const name6 = el("div", s6cam, abs(L6.x, L6.y, { font: `900 ${L6.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: "#000", whiteSpace: "nowrap", transformOrigin: "0 0" }));
+    const name6 = el("div", s6cam, abs(L6.x, L6.y, { font: `900 ${L6.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: C.onYellow, whiteSpace: "nowrap", transformOrigin: "0 0" }));
     const K1 = letters(el("div", name6), NAME[0] || ""), K2 = letters(el("div", name6), NAME.slice(1).join(" "));
     const url = el("div", s6cam, abs(L6.x, L6.urlY, { background: "#000", color: "#fff", font: `700 ${L6.urlFs}px/0.9 ${SANS}`, letterSpacing: "-0.055em", padding: "6px 24px 16px 16px", whiteSpace: "pre" }));
     url.textContent = SC["sign-off"].url;
     const links = el("div", s6cam, abs(L6.x + 2, L6.linksY, { font: `400 ${L6.linksFs}px/1.7 ${MONO}`, color: "#000", whiteSpace: "pre" }));
     const LINKS = SC["sign-off"].links.join(V ? "\n" : "   ·   ");
-    const tag6 = el("div", s6cam, abs(L6.x, L6.tagY, { font: `700 ${L6.tagFs}px/1.2 ${MONO}`, padding: `${L6.tagFs / 5.2}px ${L6.tagFs / 2.36}px`, background: Y, color: "#000", whiteSpace: "pre", transformOrigin: "0 50%" }));
+    const tag6 = el("div", s6cam, abs(L6.x, L6.tagY, { font: `700 ${L6.tagFs}px/1.2 ${MONO}`, padding: `${L6.tagFs / 5.2}px ${L6.tagFs / 2.36}px`, background: C.yellow, color: C.onYellow, whiteSpace: "pre", transformOrigin: "0 50%" }));
     tag6.textContent = CHIP;
-    const side = el("div", s6cam, abs(L6.side[0], L6.side[1], { color: "#000" }));
+    const side = el("div", s6cam, abs(L6.side[0], L6.side[1], { color: C.onYellow }));
     el("div", side, { font: `italic 400 ${V ? 64 : 58}px/1 ${SERIF}`, whiteSpace: "nowrap" }).textContent = SC["sign-off"].aside;
     el("div", side, { font: `700 18px/1.5 ${MONO}`, marginTop: "16px", whiteSpace: "pre" }).textContent = SC["sign-off"].credits;
     const T_S6 = unwarp(8.5);
@@ -678,6 +718,8 @@
       const rt = WEB ? E.inOutExpo(P(t, 9.1, 9.4)) : E.inOutExpo(P(t, 9.22, 9.52));
       const l = lerp(-40, STR[0], rt), r = lerp(SW + 40, STR[1], rt);
       yfield.style.left = l + "px"; yfield.style.width = (r - l) + "px";
+      // the name is set on the yellow field, then stands on the page as the field draws back to the stripe
+      name6.style.color = mix(C.onYellow, C.strong, rt);
       [...K1, ...K2].forEach((s, i) => { const dt = t - (8.5 + i * 0.018), e = E.outExpo(clamp(dt / 0.34)); s.style.opacity = clamp(dt / 0.04); s.style.transform = `scale(${lerp(2.3, 1, e)}) translateY(${(1 - e) * 30}px)`; });
       vtxt6.style.transform = `translateY(${-120 - T * 60}px)`;
       if (!WEB) {
@@ -704,8 +746,8 @@
     }
 
     // ─────────────────────────────────────── signature stripe, flash
-    const stripe = el("div", stage, abs(STR[0], 0, { width: (STR[1] - STR[0]) + "px", height: SH + "px", background: Y }));
-    const flash = el("div", stage, { ...bleed, background: "#fff", opacity: 0 });
+    const stripe = el("div", stage, abs(STR[0], 0, { width: (STR[1] - STR[0]) + "px", height: SH + "px", background: C.yellow }));
+    const flash = el("div", stage, { ...bleed, background: C.flash, opacity: 0 });
 
     // ─────────────────────────────────────── timeline
     const RENDER = [r1, r2s, r3, r4s, r5, r6];
@@ -729,7 +771,7 @@
     seek(0);
     // web: the stripe breathes with the soundtrack
     const level = v => { stripe.style.transform = v > 0.002 ? `scaleX(${1 + v})` : "none"; };
-    return { seek, level, W: warp, R: unwarp, DUR, lastScene: () => lastScene };
+    return { seek, level, W: warp, R: unwarp, DUR, paper: C.paper, lastScene: () => lastScene };
   }
 
   // ─────────────────────────────────────────────────────────── the soundtrack
@@ -804,7 +846,7 @@
   // ─────────────────────────────────────────────────────────── the website overture
   const root = document.documentElement;
 
-  // Browsers only let sound start from a gesture. On a first visit the reel begins silent
+  // Browsers only let sound start from a gesture. Arriving at /?intro the reel begins silent
   // (unless the browser already allows sound) and the first click or tap brings the
   // soundtrack in like tape spinning up, landing in sync. [reel] on the front door opens
   // the audio context inside its own click and passes it here, so the reel holds its first
@@ -830,7 +872,8 @@
     document.body.appendChild(host);
     let reel;
     try {
-      reel = createReel(host, { orient: vw / vh < 1 ? "v" : "h", vw, vh, web: true, stripe });
+      reel = createReel(host, { orient: vw / vh < 1 ? "v" : "h", vw, vh, web: true, stripe, dark: root.dataset.theme === "dark" });
+      host.style.background = reel.paper;
     } catch (error) {
       host.remove(); root.classList.remove("intro"); running = false; console.error(error); return;
     }
@@ -879,7 +922,7 @@
       startSound();
     };
     if (!noSound) {
-      // Nothing on screen waits for this: a first visit starts silent, so its stems queue behind
+      // Nothing on screen waits for this: /?intro starts silent, so its stems queue behind
       // the page; [reel] holds its first frame for at most HOLD, so its stems go first.
       loadSound(MUSIC.voice, { priority: given ? "high" : "low" })
         .then(t => { track = t; startSound(); })
@@ -933,7 +976,7 @@
     raf = requestAnimationFrame(frame);
   }
   window.SatyamIntro = { play };
-  // index.html marks a first visit it wants the intro for
+  // index.html marks an arrival at /?intro, which asks for the reel
   if (window.__introAuto && !window.__introCancelled) {
     if (document.body) play(); else document.addEventListener("DOMContentLoaded", () => play(), { once: true });
   }

@@ -15,19 +15,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://satyam.lol/">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/copy-email.css?v=20260830a">
-  <link rel="stylesheet" href="/css/landing.css?v=20260927a">
+  <link rel="stylesheet" href="/css/theme.css?v=20261111c">
+  <link rel="stylesheet" href="/css/copy-email.css?v=20261111c">
+  <link rel="stylesheet" href="/css/landing.css?v=20261111d">
+  <script src="/js/theme.js?v=20261111c"></script>
   <script>
-    // The showreel plays once per tab, before the front door. It stays out of the way of
-    // deep links, back-navigation, reduced motion and automation, and gives up rather than
-    // hold the page if its script is slow to arrive. ?intro forces it.
+    // The showreel is asked for, never imposed. [reel] in the entry nav plays it (js/landing.js);
+    // /?intro, which is that link's own href and what the studio's preview opens, plays it on
+    // arrival. Coming back to that address through history does not, and it gives up rather
+    // than hold the page if its script is slow to arrive.
     (() => {
       const root = document.documentElement;
       try {
-        const forced = new URLSearchParams(location.search).has("intro");
-        const nav = performance.getEntriesByType?.("navigation")[0];
-        if (!forced && (sessionStorage.getItem("intro:seen") || location.hash || nav?.type === "back_forward" || navigator.webdriver || matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-        sessionStorage.setItem("intro:seen", "1");
+        if (!new URLSearchParams(location.search).has("intro")) return;
+        if (performance.getEntriesByType?.("navigation")[0]?.type === "back_forward") return;
       } catch {
         return;
       }
@@ -44,7 +45,7 @@
       // The config holds what the reel says; intro.js falls back to its own
       // copy without it. async = false keeps them in that order, since a
       // script created here is async by default.
-      for (const src of ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261023b"]) {
+      for (const src of ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261111d"]) {
         const script = document.createElement("script");
         script.src = src;
         script.async = false;
@@ -55,7 +56,7 @@
     })();
   </script>
   <script src="/js/copy-email.js?v=20260830a" defer></script>
-  <script src="/js/landing.js?v=20260927a" defer></script>
+  <script src="/js/landing.js?v=20261111d" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to the work index</a>

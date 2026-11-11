@@ -129,8 +129,10 @@ function layout({ title, description, canonical, image, head = '', body, bodyCla
   <link rel="canonical" href="${escapeHtml(canonical)}">
   <link rel="alternate" type="application/rss+xml" title="satyam kashyap — writing" href="${SITE}/blog/feed.xml">
   <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/copy-email.css?v=20260821a">
-  <link rel="stylesheet" href="/css/blog.css?v=20260911a">
+  <link rel="stylesheet" href="/css/theme.css?v=20261111c">
+  <link rel="stylesheet" href="/css/copy-email.css?v=20261111c">
+  <link rel="stylesheet" href="/css/blog.css?v=20261111c">
+  <script src="/js/theme.js?v=20261111c"></script>
 ${head}</head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
 ${body}
@@ -140,13 +142,15 @@ ${body}
 }
 
 // The writing index does not link to itself; [writing] is the way back up
-// from inside a post.
+// from inside a post. [dark] / [light] is the same toggle the front door
+// carries, switched by js/theme.js.
 function chrome({ writingLink = true } = {}) {
   const links = [
     '        <a href="/">[home]</a>',
     writingLink ? '        <a href="/blog/">[writing]</a>' : '',
     '        <a href="/blog/feed.xml">[rss]</a>',
-    '        <a href="/tech.html">[ononline]</a>'
+    '        <a href="/tech.html">[ononline]</a>',
+    '        <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>'
   ].filter(Boolean).join('\n');
   return `      <nav class="blog-nav" aria-label="Site">
 ${links}

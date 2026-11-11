@@ -78,8 +78,9 @@ This controls the detailed ononline profile:
 
 - `index.html`: accessible shell, SEO metadata, and no-script fallback
 - `css/landing.css`: the responsive Hypertext visual system, the work register, and the record dialogs
+- `css/theme.css`, `js/theme.js`: the light and dark (Solarized Dark) palettes shared by the front door, the 404 and the writing pages, and the `[dark]` / `[light]` toggle that chooses between them
 - `js/landing.js`: compact data loading, the two-tier work register, branch register, and native project records
-- `js/intro.js`: the 15-second showreel that opens the front door once per tab, then sets the name down on the page's own heading; the same engine renders the video cuts. `index.html` decides whether it plays; `?intro` forces it. Its soundtrack, `sounds/intro.mp3`, is rendered by the showreel kit to the engine's timing and comes in on the first click or tap. `[reel]` in the entry nav replays it with sound from the first frame
+- `js/intro.js`: the 15-second showreel, which plays only when asked for and then sets the name down on the page's own heading; the same engine renders the video cuts. `[reel]` in the entry nav, and the `reel` row under More ways through, play it with sound from the first frame. Arriving at `/?intro` plays it silent, and its soundtrack, `sounds/intro.mp3`, rendered by the showreel kit to the engine's timing, comes in on the first click or tap
 
 The front page exposes identity, current work, one two-tier work register, native writing from `content/blog.json`, long-form Letterboxd reviews, and all four deeper branches.
 
@@ -349,6 +350,7 @@ npm run sync
 - Anything above, without opening a JSON file: `/studio/`
 - Writing: `content/posts/*.md`, through `/write/` or any text editor
 - Blog appearance: `css/blog.css`; blog page structure: `scripts/build-blog.mjs`
+- Colours, in either theme, for the front door, the blog and the page scenes of the reel: `css/theme.css`
 - Writing desk: `write/index.html`, `css/editor.css`, `js/editor.js`
 - Studio: `studio/index.html`, `css/studio.css`, `js/studio/`
 - GitHub publishing and the content schema, shared by both desks: `js/lib/github.js`, `js/lib/schema.js`

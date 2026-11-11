@@ -12,9 +12,11 @@
   text-underline-offset: 2px;
 }
 
+/* The palette is css/theme.css where a page loads it; the literals are for
+   the pages that do not. */
 .copy-email:hover {
-  background: #ffef00;
-  color: #000;
+  background: var(--yellow, #ffef00);
+  color: var(--on-accent, #000);
 }
 
 .copy-toast {
@@ -23,8 +25,8 @@
   left: 0;
   top: 0;
   padding: 9px 12px;
-  background: #000;
-  color: #fff;
+  background: var(--inverse, #000);
+  color: var(--inverse-ink, #fff);
   font: 12px/1 "Courier New", monospace;
   opacity: 0;
   pointer-events: none;

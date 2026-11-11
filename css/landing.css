@@ -1,12 +1,9 @@
+/* Colours are named in css/theme.css, which every page using this sheet loads
+   first. Nothing below should carry a colour of its own. */
 :root {
-  --white: #fff;
-  --black: #000;
-  --link: #0000e7;
-  --yellow: #ffef00;
-  --green: #00d16f;
   font-family: "Times New Roman", Times, serif;
-  color: var(--black);
-  background: var(--white);
+  color: var(--ink);
+  background: var(--paper);
 }
 
 * {
@@ -22,12 +19,13 @@ html {
 
 body {
   min-width: 300px;
-  min-height: 100%;
+  /* The stripe is the body's, so a short page still carries it to the bottom. */
+  min-height: 100svh;
   margin: 0;
   background:
     linear-gradient(90deg, transparent calc(100% - 22px), var(--yellow) calc(100% - 22px) calc(100% - 16px), transparent calc(100% - 16px)),
-    var(--white);
-  color: var(--black);
+    var(--paper);
+  color: var(--ink);
   text-rendering: optimizeLegibility;
 }
 
@@ -41,9 +39,13 @@ a {
   text-underline-offset: 2px;
 }
 
+a:visited {
+  color: var(--visited);
+}
+
 a:hover {
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
 }
 
 .hyper-page .copy-email {
@@ -60,13 +62,13 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--green);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 
 ::selection {
-  background: var(--yellow);
-  color: var(--black);
+  background: var(--select);
+  color: var(--select-ink);
 }
 
 .visually-hidden {
@@ -88,9 +90,13 @@ button {
   left: 10px;
   padding: 8px;
   transform: translateY(-180%);
-  background: var(--black);
-  color: var(--white);
+  background: var(--inverse);
+  color: var(--inverse-ink);
   font: 12px/1 "Courier New", monospace;
+}
+
+.skip-link:visited {
+  color: var(--inverse-ink);
 }
 
 .skip-link:focus {
@@ -98,7 +104,8 @@ button {
 }
 
 /* The intro (js/intro.js). Until its script arrives, paint the reel's first
-   frame — white and the stripe — so the page never flashes beneath it. */
+   frame — the page's ground and the stripe, in whichever theme is on — so the
+   page never flashes beneath it. */
 html.intro {
   overflow: hidden;
 }
@@ -110,7 +117,7 @@ html.intro body::after {
   content: "";
   background:
     linear-gradient(90deg, transparent calc(100% - 22px), var(--yellow) calc(100% - 22px) calc(100% - 16px), transparent calc(100% - 16px)),
-    var(--white);
+    var(--paper);
 }
 
 html.intro-live body::after {
@@ -153,6 +160,7 @@ html.intro-live body::after {
 .hyper-intro h1 {
   max-width: 9ch;
   margin: 0;
+  color: var(--strong);
   font: 900 clamp(4.5rem, 6vw, 11rem)/0.68 Arial, Helvetica, sans-serif;
   letter-spacing: -0.09em;
 }
@@ -162,6 +170,7 @@ html.intro-live body::after {
   margin: 26px 0 8px;
   padding: 3px 6px;
   background: var(--yellow);
+  color: var(--on-accent);
   font: 700 15px/1.2 "Courier New", monospace;
 }
 
@@ -176,7 +185,7 @@ html.intro-live body::after {
   height: 4px;
   margin: 34px 0;
   border: 0;
-  background: var(--black);
+  background: var(--rule);
 }
 
 .hyper-page section {
@@ -187,8 +196,8 @@ html.intro-live body::after {
   display: inline-block;
   margin: 0 0 20px;
   padding: 2px 7px 4px;
-  background: var(--black);
-  color: var(--white);
+  background: var(--block);
+  color: var(--block-ink);
   font: 800 clamp(1.2rem, 3vw, 4.7rem)/0.9 Arial, Helvetica, sans-serif;
   letter-spacing: -0.055em;
 }
@@ -209,6 +218,7 @@ html.intro-live body::after {
 
 .hyper-now strong {
   background: var(--yellow);
+  color: var(--on-accent);
 }
 
 /* ------------------------------------------------------------------ */
@@ -223,11 +233,11 @@ html.intro-live body::after {
 
 .work-lead {
   margin: 0;
-  border-top: 1px solid var(--black);
+  border-top: 1px solid var(--rule);
 }
 
 .work-lead:last-child {
-  border-bottom: 1px solid var(--black);
+  border-bottom: 1px solid var(--rule);
 }
 
 .work-lead__link {
@@ -262,12 +272,22 @@ html.intro-live body::after {
   font: 11px/1.5 "Courier New", monospace;
 }
 
+/* A row is one link, so only its title carries the link colours. */
+.work-lead__link:visited {
+  color: inherit;
+}
+
+.work-lead__link:visited .work-lead__title {
+  color: var(--visited);
+}
+
 .work-lead__link:hover {
-  background: var(--yellow);
+  background: var(--row-hover);
+  color: var(--row-hover-ink);
 }
 
 .work-lead__link:hover .work-lead__title {
-  color: var(--black);
+  color: var(--row-hover-title);
 }
 
 .work-rest {
@@ -287,14 +307,14 @@ html.intro-live body::after {
 .hyper-page .work-rest__list {
   max-width: none;
   padding: 0;
-  border-top: 3px solid var(--black);
+  border-top: 3px solid var(--rule);
   margin: 0;
   list-style: none;
 }
 
 .work-rest__item {
   margin: 0;
-  border-bottom: 1px dotted var(--black);
+  border-bottom: 1px dotted var(--rule);
 }
 
 .work-rest__link {
@@ -327,85 +347,39 @@ html.intro-live body::after {
   white-space: nowrap;
 }
 
+.work-rest__link:visited {
+  color: inherit;
+}
+
+.work-rest__link:visited .work-rest__title {
+  color: var(--visited);
+}
+
 .work-rest__link:hover {
-  background: var(--yellow);
+  background: var(--row-hover);
+  color: var(--row-hover-ink);
 }
 
 .work-rest__link:hover .work-rest__title,
 .work-rest__link:hover .work-rest__mark {
-  color: var(--black);
+  color: var(--row-hover-title);
 }
 
 /* ------------------------------------------------------------------ */
 /* Writing and film writing                                            */
 /* ------------------------------------------------------------------ */
 
-.hyper-writing ul {
+.hyper-writing ul,
+.review-index {
   padding-left: 1.2em;
 }
 
-.review-index {
-  padding: 0;
-  border-top: 3px solid var(--black);
-  margin: 0;
-  list-style: none;
-}
-
 .review-index__entry {
-  margin: 0;
-  border-bottom: 1px dotted var(--black);
+  margin: 0.15em 0;
 }
 
-.review-index__link {
-  display: grid;
-  grid-template-columns: 106px minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 1px 14px;
-  padding: 10px 5px 11px 0;
-  color: inherit;
-  text-decoration: none;
-}
-
-.review-index__date {
-  font: 11px/1.9 "Courier New", monospace;
-}
-
-.review-index__film {
-  color: var(--link);
-  font: 700 18px/1.25 Arial, Helvetica, sans-serif;
-  letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.review-index__meta {
-  font: 700 10px/1.9 "Courier New", monospace;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.review-index__excerpt {
-  display: -webkit-box;
-  overflow: hidden;
-  grid-column: 2 / -1;
-  font-size: 13.5px;
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.review-index__link:hover {
-  background: var(--yellow);
-}
-
-.review-index__link:hover .review-index__film {
-  color: var(--black);
-}
-
-.review-index__link:hover .review-rating {
-  background: var(--black);
-  color: var(--white);
+.review-index__excerpt::before {
+  content: "— ";
 }
 
 .review-dialog .review-rating {
@@ -415,21 +389,16 @@ html.intro-live body::after {
 .review-rating {
   padding: 1px 4px;
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
   white-space: nowrap;
-}
-
-.review-index__empty {
-  padding: 18px 0;
-  border-bottom: 1px dotted var(--black);
 }
 
 .review-index__load-more {
   padding: 8px 10px;
-  border: 1px solid var(--black);
+  border: 1px solid var(--on-accent);
   margin-top: 14px;
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
   cursor: pointer;
   font: 700 11px/1.2 "Courier New", monospace;
   text-transform: lowercase;
@@ -440,7 +409,7 @@ html.intro-live body::after {
 }
 
 .hyper-more > div {
-  border-top: 3px solid var(--black);
+  border-top: 3px solid var(--rule);
 }
 
 .hyper-more article {
@@ -448,7 +417,7 @@ html.intro-live body::after {
   grid-template-columns: minmax(190px, 0.65fr) 1fr;
   gap: 24px;
   padding: 18px 0;
-  border-bottom: 1px solid var(--black);
+  border-bottom: 1px solid var(--rule);
 }
 
 .hyper-more h3,
@@ -467,12 +436,13 @@ html.intro-live body::after {
 
 .hyper-page footer {
   padding: 20px 0;
-  border-top: 8px double var(--black);
+  border-top: 8px double var(--rule);
   margin-top: 100px;
 }
 
 .hyper-page footer > p:first-child {
   max-width: 43ch;
+  color: var(--strong);
   font: 700 clamp(1.8rem, 4vw, 3.7rem)/1 Arial, Helvetica, sans-serif;
   letter-spacing: -0.05em;
 }
@@ -492,9 +462,9 @@ html.intro-live body::after {
   height: min(88svh, 900px);
   max-height: none;
   padding: 0;
-  border: 3px solid var(--black);
-  background: var(--white);
-  color: var(--black);
+  border: 3px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
   box-shadow: none;
   opacity: 0;
   transform: translateY(8px) scale(0.995);
@@ -526,7 +496,7 @@ html.intro-live body::after {
 }
 
 .record-dialog[open]::backdrop {
-  background: rgba(0, 0, 0, 0.78);
+  background: var(--scrim, rgba(0, 0, 0, 0.78));
 }
 
 @starting-style {
@@ -548,8 +518,8 @@ html.intro-live body::after {
   flex: 0 0 auto;
   gap: 12px;
   padding: 10px 12px;
-  background: var(--black);
-  color: var(--white);
+  background: var(--block);
+  color: var(--block-ink);
   font: 11px/1 "Courier New", monospace;
   text-transform: lowercase;
 }
@@ -564,7 +534,7 @@ html.intro-live body::after {
 }
 
 .record-dialog__bar :focus-visible {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
 
@@ -581,7 +551,7 @@ html.intro-live body::after {
 
 .record-dialog__nav button:hover:not(:disabled) {
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
 }
 
 .record-dialog__nav button:disabled {
@@ -601,7 +571,7 @@ html.intro-live body::after {
 
 .record-dialog__close:hover {
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
 }
 
 /* The body scrolls, not the dialog, so the bar stays put and each record
@@ -637,6 +607,7 @@ html.intro-live body::after {
   margin: 0 0 16px;
   padding: 3px 6px;
   background: var(--yellow);
+  color: var(--on-accent);
   font: 700 11px/1.2 "Courier New", monospace;
   text-transform: lowercase;
 }
@@ -644,6 +615,7 @@ html.intro-live body::after {
 .project-dialog h2 {
   max-width: 11ch;
   margin: 0;
+  color: var(--strong);
   font: 900 clamp(3.6rem, 10vw, 8.5rem)/0.72 Arial, Helvetica, sans-serif;
   letter-spacing: -0.085em;
   overflow-wrap: anywhere;
@@ -653,6 +625,7 @@ html.intro-live body::after {
 .project-dialog__summary {
   max-width: 48ch;
   margin: 34px 0 0;
+  color: var(--strong);
   font: 700 clamp(1.2rem, 2.7vw, 2rem)/1.15 Arial, Helvetica, sans-serif;
 }
 
@@ -672,8 +645,8 @@ html.intro-live body::after {
   flex-wrap: wrap;
   gap: 9px 14px;
   padding: 14px 0;
-  border-top: 3px solid var(--black);
-  border-bottom: 3px solid var(--black);
+  border-top: 3px solid var(--rule);
+  border-bottom: 3px solid var(--rule);
   margin: 34px 0;
   font: 700 13px/1.35 "Courier New", monospace;
 }
@@ -700,9 +673,9 @@ html.intro-live body::after {
   /* Reserve the box before the image loads so opening a record never reflows.
      object-fit: contain letterboxes onto the plate colour below. */
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--black);
+  border: 1px solid var(--edge);
   object-fit: contain;
-  background: #f2f2f2;
+  background: var(--plate);
 }
 
 .project-dialog__images figcaption {
@@ -738,7 +711,7 @@ html.intro-live body::after {
   max-height: 430px;
   /* Letterboxd posters are always 2:3, so this reserves the exact final box. */
   aspect-ratio: 2 / 3;
-  border: 1px solid var(--black);
+  border: 1px solid var(--edge);
   object-fit: cover;
 }
 
@@ -761,11 +734,16 @@ html.intro-live body::after {
 }
 
 @media (max-width: 700px) {
-  body,
+  body {
+    background:
+      linear-gradient(90deg, transparent calc(100% - 13px), var(--yellow) calc(100% - 13px) calc(100% - 8px), transparent calc(100% - 8px)),
+      var(--paper);
+  }
+
   html.intro body::after {
     background:
       linear-gradient(90deg, transparent calc(100% - 13px), var(--yellow) calc(100% - 13px) calc(100% - 8px), transparent calc(100% - 8px)),
-      var(--white);
+      var(--paper);
   }
 
   .hyper-page,
@@ -812,20 +790,6 @@ html.intro-live body::after {
   .work-rest__meta {
     grid-column: 2;
     text-align: left;
-  }
-
-  .review-index__link {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 2px 12px;
-  }
-
-  .review-index__date {
-    grid-column: 1 / -1;
-  }
-
-  .review-index__excerpt {
-    grid-column: 1 / -1;
-    -webkit-line-clamp: 2;
   }
 
   .hyper-more article {
@@ -881,6 +845,6 @@ html.intro-live body::after {
   }
 
   .record-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.78);
+    background: var(--scrim, rgba(0, 0, 0, 0.78));
   }
 }

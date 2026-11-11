@@ -6,6 +6,8 @@
   const reviewDialogElement = document.getElementById("review-dialog");
   if (!app || !projectDialogElement || !reviewDialogElement) return;
 
+  // The front door shows a handful of reviews; the button brings the rest in by the dozen.
+  const REVIEW_INITIAL = 4;
   const REVIEW_BATCH_SIZE = 12;
 
   const escapeHtml = (value = "") => String(value)
@@ -250,9 +252,13 @@
     return `<span class="review-rating" aria-label="${escapeHtml(`${value} out of 5 stars`)}">${escapeHtml(stars)}</span>`;
   }
 
-  function reviewExcerpt(value, maximum = 260) {
+  // One line's worth of a review, cut at a word rather than through one.
+  function reviewExcerpt(value, maximum = 90) {
     const text = String(value || "").replaceAll(/\s+/g, " ").trim();
-    return text.length > maximum ? `${text.slice(0, maximum).trimEnd()}…` : text;
+    if (text.length <= maximum) return text;
+    const cut = text.slice(0, maximum + 1);
+    const end = cut.lastIndexOf(" ");
+    return `${cut.slice(0, end > maximum / 2 ? end : maximum).replace(/[\s.,;:!?…—–-]+$/, "")}…`;
   }
 
   function reviewCharacterCount(value) {
@@ -265,12 +271,9 @@
     }
     return reviews.map((review) => `
       <li class="review-index__entry" data-review-row="${escapeHtml(review.id)}">
-        <a class="review-link review-index__link" href="${escapeHtml(reviewHref(review))}" data-review-id="${escapeHtml(review.id)}" aria-haspopup="dialog">
-          <span class="review-index__date">${escapeHtml(dateLabel(review.watchedDate))}</span>
-          <span class="review-index__film">${escapeHtml(review.film)}</span>
-          <span class="review-index__meta">${escapeHtml(review.filmYear)} ${ratingMarkup(review.rating)}</span>
-          <span class="review-index__excerpt">${escapeHtml(reviewExcerpt(review.review))}</span>
-        </a>
+        <a class="review-link review-index__link" href="${escapeHtml(reviewHref(review))}" data-review-id="${escapeHtml(review.id)}" aria-haspopup="dialog">${escapeHtml(review.film)}</a>
+        ${review.filmYear ? `(${escapeHtml(review.filmYear)})` : ""} ${ratingMarkup(review.rating)}
+        <span class="review-index__excerpt">${escapeHtml(reviewExcerpt(review.review))}</span>
       </li>`).join("");
   }
 
@@ -294,11 +297,11 @@
     const identity = home.identity || {};
     const blogHref = identity.links?.writing || "/blog/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
-    const initialReviews = reviews.slice(0, REVIEW_BATCH_SIZE);
+    const initialReviews = reviews.slice(0, REVIEW_INITIAL);
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="Primary">
-          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a>
+          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a> <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>
         </nav>
 
         <header class="hyper-intro">
@@ -332,14 +335,19 @@
         <section class="hyper-reviews" id="film-writing">
           <h2>Film writing</h2>
           <p class="section-note">Expect sometimes profound, sometimes low-brow, sometimes erudite, sometimes frustratingly colloquial, sometimes structured and sometimes akin to a scribble.</p>
-          <ol class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ol>
+          <ul class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ul>
           ${reviews.length > initialReviews.length ? `<button class="review-index__load-more" type="button" data-review-load-more aria-controls="review-index">load more reviews (${initialReviews.length}/${reviews.length})</button>` : ""}
         </section>
 
         <section class="hyper-more" id="more">
           <h2>More ways through</h2>
           <p class="section-note">The front page is the direct account. These branches are alternate visualizations for going further.</p>
-          <div>${branchRegister(home.branches)}</div>
+          <div>${branchRegister(home.branches)}
+            <article>
+              <h3><a href="/?intro" data-reel>reel →</a></h3>
+              <p>All of this in fifteen seconds, with sound.</p>
+            </article>
+          </div>
         </section>
 
         <hr>
@@ -543,7 +551,7 @@
     const list = app.querySelector("#review-index");
     const loadMore = app.querySelector("[data-review-load-more]");
     if (!list) return;
-    reviewState.visibleCount = Math.min(REVIEW_BATCH_SIZE, reviews.length);
+    reviewState.visibleCount = Math.min(REVIEW_INITIAL, reviews.length);
 
     function showUpTo(count) {
       const next = Math.min(count, reviews.length);
@@ -634,9 +642,9 @@
   /* The reel                                                                */
   /* ---------------------------------------------------------------------- */
 
-  const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261023b"];
+  const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261111d"];
 
-  // [reel] replays the intro with sound. Browsers only allow sound from a gesture, so the
+  // [reel] plays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes
   // up at once; the reel then starts from its first frame with the soundtrack unlocked.
   function playReel() {

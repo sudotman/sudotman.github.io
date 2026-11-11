@@ -2,19 +2,10 @@
  * Blog surfaces: the writing index and the post pages.
  *
  * Shares the landing page's system — Times for prose, Arial Black for display,
- * black/white with yellow and green as the only accents — so the blog reads as
- * part of the site rather than a bolted-on subdomain.
+ * two neutrals with yellow and green as the accents — so the blog reads as
+ * part of the site rather than a bolted-on subdomain. The colours themselves
+ * are named in css/theme.css, which these pages load first, in both themes.
  */
-
-:root {
-  --white: #fff;
-  --black: #000;
-  --link: #0000e7;
-  --yellow: #ffef00;
-  --green: #00d16f;
-  --rule: #000;
-  --muted: #444;
-}
 
 * {
   box-sizing: border-box;
@@ -30,8 +21,8 @@ body.blog-body {
   margin: 0;
   background:
     linear-gradient(90deg, transparent calc(100% - 22px), var(--yellow) calc(100% - 22px) calc(100% - 16px), transparent calc(100% - 16px)),
-    var(--white);
-  color: var(--black);
+    var(--paper);
+  color: var(--ink);
   font-family: "Times New Roman", Times, serif;
   text-rendering: optimizeLegibility;
 }
@@ -42,9 +33,13 @@ a {
   text-underline-offset: 2px;
 }
 
+a:visited {
+  color: var(--visited);
+}
+
 a:hover {
   background: var(--yellow);
-  color: var(--black);
+  color: var(--on-accent);
 }
 
 button,
@@ -57,13 +52,13 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--green);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 
 ::selection {
-  background: var(--yellow);
-  color: var(--black);
+  background: var(--select);
+  color: var(--select-ink);
 }
 
 .visually-hidden {
@@ -82,9 +77,13 @@ button {
   left: 10px;
   padding: 8px;
   transform: translateY(-180%);
-  background: var(--black);
-  color: var(--white);
+  background: var(--inverse);
+  color: var(--inverse-ink);
   font: 12px/1 "Courier New", monospace;
+}
+
+.skip-link:visited {
+  color: var(--inverse-ink);
 }
 
 .skip-link:focus {
@@ -111,6 +110,7 @@ button {
 
 .blog-masthead h1 {
   margin: 0;
+  color: var(--strong);
   font: 900 clamp(4.5rem, 13vw, 11rem)/0.7 Arial, Helvetica, sans-serif;
   letter-spacing: -0.09em;
 }
@@ -141,9 +141,9 @@ button {
 .post-filter__search input {
   width: min(38vw, 260px);
   padding: 6px 8px;
-  border: 1px solid var(--black);
-  background: var(--white);
-  color: var(--black);
+  border: 1px solid var(--edge);
+  background: var(--field);
+  color: var(--ink);
   font: 12px/1.3 "Courier New", monospace;
 }
 
@@ -159,21 +159,24 @@ button {
 
 .post-filter__tags button {
   padding: 4px 8px;
-  border: 1px solid var(--black);
-  background: var(--white);
-  color: var(--black);
+  border: 1px solid var(--edge);
+  background: var(--field);
+  color: var(--ink);
   cursor: pointer;
   font: 11px/1.2 "Courier New", monospace;
   text-transform: lowercase;
 }
 
 .post-filter__tags button:hover {
+  border-color: var(--yellow);
   background: var(--yellow);
+  color: var(--on-accent);
 }
 
 .post-filter__tags button.is-active {
-  background: var(--black);
-  color: var(--white);
+  border-color: var(--inverse);
+  background: var(--inverse);
+  color: var(--inverse-ink);
 }
 
 .post-list {
@@ -224,6 +227,14 @@ button {
   text-decoration: none;
 }
 
+.post-list h3 a:visited {
+  color: var(--visited);
+}
+
+.post-list h3 a:hover {
+  color: var(--on-accent);
+}
+
 .post-list h3 a:hover {
   text-decoration: underline;
 }
@@ -255,6 +266,7 @@ button {
 .post-header__tags li {
   padding: 1px 5px;
   background: var(--yellow);
+  color: var(--on-accent);
   font: 10px/1.5 "Courier New", monospace;
 }
 
@@ -298,12 +310,14 @@ button {
   margin: 0 0 18px;
   padding: 3px 6px;
   background: var(--yellow);
+  color: var(--on-accent);
   font: 700 11px/1.2 "Courier New", monospace;
   text-transform: lowercase;
 }
 
 .post-header h1 {
   margin: 0;
+  color: var(--strong);
   font: 900 clamp(2.4rem, 7vw, 4.6rem)/0.92 Arial, Helvetica, sans-serif;
   letter-spacing: -0.05em;
   overflow-wrap: break-word;
@@ -334,14 +348,14 @@ button {
 .post-cover img {
   display: block;
   width: 100%;
-  border: 1px solid var(--black);
+  border: 1px solid var(--edge);
 }
 
 .post-outline {
   margin-bottom: 40px;
   padding: 14px 16px;
-  border: 1px solid var(--black);
-  background: #fafafa;
+  border: 1px solid var(--edge);
+  background: var(--well);
 }
 
 .post-outline__title {
@@ -374,6 +388,7 @@ button {
 .post-body h3,
 .post-body h4 {
   margin: 1.9em 0 0.55em;
+  color: var(--strong);
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -382,8 +397,8 @@ button {
 .post-body h2 {
   display: inline-block;
   padding: 2px 7px 4px;
-  background: var(--black);
-  color: var(--white);
+  background: var(--block);
+  color: var(--block-ink);
   font-size: clamp(1.5rem, 3.4vw, 2.3rem);
   font-weight: 800;
 }
@@ -408,10 +423,14 @@ button {
   margin: 0.3em 0;
 }
 
+.post-body strong {
+  color: var(--strong);
+}
+
 .post-body blockquote {
   margin: 1.6em 0;
   padding: 4px 0 4px 22px;
-  border-left: 5px solid var(--black);
+  border-left: 5px solid var(--rule);
   font-size: 1.05em;
   font-style: italic;
 }
@@ -428,8 +447,8 @@ button {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--black);
-  background: #f2f2f2;
+  border: 1px solid var(--edge);
+  background: var(--plate);
 }
 
 .post-body figcaption {
@@ -444,8 +463,9 @@ button {
 
 .post-body code {
   padding: 1px 4px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
+  background: var(--code);
+  border: 1px solid var(--code-edge);
+  color: var(--code-ink);
   font: 0.85em/1.4 "Courier New", monospace;
 }
 
@@ -453,14 +473,15 @@ button {
   overflow-x: auto;
   margin: 1.6em 0;
   padding: 14px 16px;
-  border: 1px solid var(--black);
-  background: #fafafa;
+  border: 1px solid var(--edge);
+  background: var(--well);
 }
 
 .post-body pre code {
   padding: 0;
   border: 0;
   background: none;
+  color: inherit;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -469,7 +490,7 @@ button {
   height: 3px;
   margin: 2.4em 0;
   border: 0;
-  background: var(--black);
+  background: var(--rule);
 }
 
 .post-body table {
@@ -482,12 +503,13 @@ button {
 .post-body th,
 .post-body td {
   padding: 7px 9px;
-  border: 1px solid var(--black);
+  border: 1px solid var(--rule);
   text-align: left;
 }
 
 .post-body th {
   background: var(--yellow);
+  color: var(--on-accent);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.85em;
   text-transform: lowercase;
@@ -539,6 +561,7 @@ button {
 .blog-footer__statement {
   max-width: 40ch;
   margin: 0 0 14px;
+  color: var(--strong);
   font: 700 clamp(1.5rem, 3.4vw, 2.6rem)/1 Arial, Helvetica, sans-serif;
   letter-spacing: -0.045em;
 }
@@ -552,7 +575,7 @@ button {
   body.blog-body {
     background:
       linear-gradient(90deg, transparent calc(100% - 13px), var(--yellow) calc(100% - 13px) calc(100% - 8px), transparent calc(100% - 8px)),
-      var(--white);
+      var(--paper);
   }
 
   .blog-page,

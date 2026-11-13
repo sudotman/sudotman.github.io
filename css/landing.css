@@ -722,6 +722,50 @@ html.intro-live body::after {
   line-height: 1.5;
 }
 
+/* The stripe plays the reel. The body still paints it; this link lies over it
+   and the margin to its right, and hovers as every link here does, by turning
+   yellow — so the stripe opens out to the edge and says what it is for, in the
+   vertical mono of the welcome on the other side. It repeats [reel], so it
+   stays out of the tab order and the accessibility tree. Keep its width in
+   step with the body's stripe. */
+.stripe-reel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+}
+
+.stripe-reel:hover {
+  background: none;
+}
+
+.stripe-reel span {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  visibility: hidden;
+  color: var(--on-accent);
+  font: 11px/1 "Courier New", monospace;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: translateX(-50%);
+}
+
+@media (hover: hover) {
+  .stripe-reel:hover {
+    background: var(--yellow);
+  }
+
+  .stripe-reel:hover span {
+    visibility: visible;
+  }
+}
+
+html.intro .stripe-reel {
+  display: none;
+}
+
 @media (min-width: 1000px) {
   .hyper-page::before {
     position: fixed;
@@ -744,6 +788,14 @@ html.intro-live body::after {
     background:
       linear-gradient(90deg, transparent calc(100% - 13px), var(--yellow) calc(100% - 13px) calc(100% - 8px), transparent calc(100% - 8px)),
       var(--paper);
+  }
+
+  .stripe-reel {
+    width: 13px;
+  }
+
+  .stripe-reel span {
+    display: none;
   }
 
   .hyper-page,

@@ -355,6 +355,7 @@
           <p>${escapeHtml(identity.statement)}</p>
           <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}</p>
         </footer>
+        <a class="stripe-reel" href="/?intro" data-reel tabindex="-1" aria-hidden="true"><span>got nerves touching the spine. you wanna see things, huh?</span></a>
       </main>`;
   }
 

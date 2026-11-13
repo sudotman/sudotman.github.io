@@ -58,6 +58,14 @@
     }));
   }
 
+  // Lettering that overhangs its own box (nastaliq does, a long way) can be left behind
+  // on screen when it is replaced. Asking for the page to be painted afresh, once, on the
+  // frame after a change, clears anything that was.
+  function repaint() {
+    main.style.opacity = "0.999";
+    requestAnimationFrame(() => requestAnimationFrame(() => main.style.removeProperty("opacity")));
+  }
+
   function apply() {
     if (!main) return;
     const language = shown();
@@ -86,6 +94,7 @@
     }
 
     if (nameButton) nameButton.title = order.map((code) => text(strings[code]?.label) || code).join(" · ");
+    repaint();
     document.dispatchEvent(new CustomEvent("landing:said", { detail: { language } }));
   }
 

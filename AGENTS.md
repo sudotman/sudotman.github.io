@@ -57,7 +57,7 @@ order their links join the entry nav.
   pad made of oscillators, not a recording: each part of the page holds one of the reel's
   chords, scrolling picks out its notes and touching a link or button strums them. It gives
   the page's events sounds of their own (`CUES`: a record opening and closing, the language
-  changing, stars, marks, the door) and draws a faint dithered haze behind the page while on
+  changing, stars, marks, the door) and while on, makes the stripe breathe and fray into the margin in dithered yellow and stands a dithered range of hills along the foot of the window; a touch ripples through both
 - `js/door.js`: note from the previous visitor under the door and one word each, talking to `scripts/door/`
 - `scripts/door/core.mjs`: all of the door's logic; `worker.mjs` runs it on Cloudflare with D1,
   `server.mjs` on Node with `node:sqlite`. `scripts/test-door.mjs` pins its rules

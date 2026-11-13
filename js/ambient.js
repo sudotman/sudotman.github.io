@@ -16,9 +16,14 @@
  * always sit in it: a record opening and closing, the language changing, a star, a mark, a
  * note slid under the door. Each is told to this script by an event; nothing calls it.
  *
- * While it plays there is something to see as well: a few dots drifting behind the page,
- * dithered on a coarse grid, slow enough to miss. They take the page's ink, so they belong
- * to whichever theme is on, and they move a little more when the sound is louder.
+ * While it plays there are two things to see, both dithered as an old one-bit screen would
+ * draw them. The stripe thickens and thins with the sound, as it does in the reel, and where
+ * the window has a margin beside the text its edge frays into it in yellow. And three ranges
+ * of hills stand along the foot of the window, one behind another, sliding past very slowly
+ * in the page's ink. At the very end of the page a small sun comes up among them, under the
+ * footer's links, as the chord turns major; left there, it climbs clear of the hills and
+ * throws its rays. Touching anything sends a ripple out from where it was touched: along
+ * the hills to either side, and up and down the stripe.
  *
  * It never starts unasked. [sound] at the top right, beside [reel], and `sound` in the
  * footer's line turn it on and off, and the audio context is opened inside that click, the only
@@ -241,6 +246,15 @@
     },
     sweep() {
       swish(3200, 180, 0.65, 0.08);
+    },
+    // The end of the page: the chord has just turned major, and this climbs it slowly.
+    sun() {
+      [1, 3, 5, 7].forEach((index, order) => pluck(n(index), 0.11, 0.25 + order * 0.22, order * 0.3 - 0.45));
+    },
+    // Its rays coming out: air opening upward, and the top of the chord, scattered.
+    rays() {
+      swish(1800, 6400, 0.9, 0.022);
+      [5, 7, 6, 7].forEach((index, order) => pluck(n(index) + (order > 1 ? 12 : 0), 0.06, order * 0.1, order % 2 ? 0.5 : -0.5));
     }
   };
 
@@ -289,7 +303,9 @@
   const SPOKEN_FOR = "[data-language-next], [data-star], [data-lift], .project-link, .review-link, [data-dialog-close], [data-dialog-prev], [data-dialog-next], [data-door-form] button, [data-door-sweep], [data-ambient-toggle]";
 
   function onTouch(event) {
-    if (!sound || !event.target.closest?.("a, button, input, summary") || event.target.closest(SPOKEN_FOR)) return;
+    if (!sound || !event.target.closest?.("a, button, input, summary")) return;
+    ripple(event.clientX, event.clientY);
+    if (event.target.closest(SPOKEN_FOR)) return;
     const start = Math.floor(Math.random() * 3);
     [0, 2, 4].forEach((offset, index) => {
       pluck(sound.scale[(start + offset) % sound.scale.length], 0.16, index * 0.06, index * 0.4 - 0.4);
@@ -312,68 +328,298 @@
   }
 
   /* ---------------------------------------------------------------------- */
-  /* The haze: a few dithered dots behind the page while it plays            */
+  /* What it looks like: the stripe frays, and hills stand along the foot    */
   /* ---------------------------------------------------------------------- */
 
-  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
-  const CELL = 4;             // screen pixels per dot
-  const THIN = 0.11;          // how much of the densest patch is ever lit
+  // An 8 x 8 ordered-dither matrix, built the usual way from the 2 x 2 one. A flat tone
+  // through it comes out as an even weave, which is the whole look.
+  const BAYER = (() => {
+    let matrix = [[0]];
+    for (let size = 1; size < 8; size *= 2) {
+      const next = [];
+      for (let y = 0; y < size * 2; y++) {
+        next.push([]);
+        for (let x = 0; x < size * 2; x++) {
+          next[y].push(4 * matrix[y % size][x % size] + [[0, 2], [3, 1]][Math.floor(y / size)][Math.floor(x / size)]);
+        }
+      }
+      matrix = next;
+    }
+    return matrix.flat();
+  })();
+
+  const CELL = 2;             // screen pixels per dot
+  const REACH = 120;          // the furthest the stripe frays, in screen pixels
+  const CLEAR = 14;           // and how far short of the text it always stops
+  // The hills, far to near. Each is a tone of its own, lighter the further away, and thins
+  // out below its crest, which is what reads as mist lying between one range and the next.
+  const RIDGES = [
+    { rise: 0.94, grain: 1, drift: 3, tone: 0.09, seed: 1.3 },
+    { rise: 0.62, grain: 1.6, drift: 6, tone: 0.17, seed: 4.1 },
+    { rise: 0.34, grain: 2.4, drift: 11, tone: 0.28, seed: 7.7 }
+  ];
+  // At the very end of the page a small sun comes up between the far hills and the near
+  // ones, under the footer's links, and the near hills dip to let it.
+  // Left there a moment longer it climbs clear of them, and then throws rays.
+  const SUN = { radius: 17, glow: 2.3, clear: 7, climb: 2.9, rays: 12, reach: 4.4 };
+  const SKY = 150;            // screen pixels of empty canvas above the hills, for the sun to climb into
+  // A touch sends a ripple out from where it landed: along the hills to either side, and
+  // up and down the stripe. These are the ones still travelling.
+  const RIPPLE = { life: 2.2, speed: 560, width: 70 };
+  let ripples = [];
   let haze = null;
 
+  function ripple(x, y, strength = 1) {
+    if (!sound) return;
+    ripples.push({ x, y, strength, born: performance.now() / 1000 });
+    if (ripples.length > 8) ripples.shift();
+  }
+
+  // How much the ripples lift a point `at` along their line of travel, given where each
+  // started on that line. Two crests leave every touch, one each way, fading as they go.
+  function lifted(at, origin, now) {
+    let lift = 0;
+    for (const one of ripples) {
+      const age = now - one.born;
+      const gone = age * RIPPLE.speed;
+      const fade = one.strength * Math.exp(-age * 1.7);
+      const a = (at - one[origin] - gone) / RIPPLE.width;
+      const b = (at - one[origin] + gone) / RIPPLE.width;
+      lift += fade * (Math.exp(-a * a) + Math.exp(-b * b));
+    }
+    return lift;
+  }
+
   function startHaze() {
-    const canvas = document.createElement("canvas");
-    canvas.className = "ambient-haze";
-    canvas.setAttribute("aria-hidden", "true");
-    document.body.prepend(canvas);
-    const context = canvas.getContext("2d");
+    const stripe = document.querySelector(".stripe-reel");
+    const make = (className, first) => {
+      const canvas = document.createElement("canvas");
+      canvas.className = className;
+      canvas.setAttribute("aria-hidden", "true");
+      if (first) document.body.prepend(canvas);
+      else document.body.append(canvas);
+      return { canvas, context: canvas.getContext("2d"), image: null };
+    };
+    const fray = make("ambient-fray", false);
+    const hills = make("ambient-hills", true);
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const wave = new Uint8Array(256);
-    let image = null;
+    let crests = null;
     let level = 0;
+    let risen = 0;            // 0 below the hills, 1 standing on them
+    let high = 0;             // then 0 to 1 as it climbs above them
+    let rays = 0;             // then 0 to 1 as its rays come out
+    let dwell = 0;            // seconds it has stood on the hills
+    let wasAtEnd = false;
 
     const size = () => {
-      canvas.width = Math.ceil(window.innerWidth / CELL);
-      canvas.height = Math.ceil(window.innerHeight / CELL);
-      image = context.createImageData(canvas.width, canvas.height);
-      draw();
+      // The fray lives in the empty margin between the text and the stripe and nowhere
+      // else. Where the window is too narrow to have one, only the stripe moves.
+      const box = fray.canvas.getBoundingClientRect();
+      const room = Math.min(REACH, box.right - main.getBoundingClientRect().right - CLEAR);
+      fray.image = null;
+      fray.canvas.hidden = room < 16;
+      if (!fray.canvas.hidden) {
+        fray.canvas.style.width = `${room}px`;
+        fray.canvas.width = Math.ceil(room / CELL);
+        fray.canvas.height = Math.ceil(window.innerHeight / CELL);
+        fray.image = fray.context.createImageData(fray.canvas.width, fray.canvas.height);
+      }
+
+      const foot = hills.canvas.getBoundingClientRect();
+      hills.canvas.width = Math.max(1, Math.ceil(foot.width / CELL));
+      hills.canvas.height = Math.max(1, Math.ceil(foot.height / CELL));
+      hills.image = hills.context.createImageData(hills.canvas.width, hills.canvas.height);
+      crests = RIDGES.map(() => new Float32Array(hills.canvas.width));
     };
 
-    function draw() {
-      if (!sound || !image || document.hidden) return;
-      // The page's ink, whichever theme that is today.
-      const [r, g, b] = (getComputedStyle(document.body).color.match(/\d+/g) || [0, 0, 0]).map(Number);
-      sound.meter.getByteTimeDomainData(wave);
-      let energy = 0;
-      for (let i = 0; i < wave.length; i++) energy += ((wave[i] - 128) / 128) ** 2;
-      level += (Math.min(1, Math.sqrt(energy / wave.length) * 5) - level) * 0.2;
+    const colour = (context, value, fallback) => {
+      context.fillStyle = fallback;
+      context.fillStyle = value;
+      return [1, 3, 5].map((at) => parseInt(context.fillStyle.slice(at, at + 2), 16) || 0);
+    };
 
-      const t = still.matches ? 0 : performance.now() / 1000;
+    function drawFray(t, now, [r, g, b]) {
+      const { context, image } = fray;
+      if (!image) return;
       const { width, height, data } = image;
-      const thin = THIN * (0.75 + level * 0.9);
+      const swell = 0.55 + level * 0.9;
       for (let y = 0; y < height; y++) {
+        // How far the fray reaches at this height: three slow waves climbing the stripe,
+        // and whatever ripples are passing.
+        const reach = width * (swell * Math.max(0, 0.42
+          + 0.3 * Math.sin(y * 0.021 + t * 0.5)
+          + 0.2 * Math.sin(y * 0.047 - t * 0.33 + 2)
+          + 0.12 * Math.sin(y * 0.11 + t * 0.9 + 4))
+          + 0.85 * lifted(y * CELL, "y", now));
         for (let x = 0; x < width; x++) {
-          // Two slow waves leaning on each other, which reads as drift rather than stripes.
-          const a = Math.sin(x * 0.043 + t * 0.09 + 1.7 * Math.sin(y * 0.031 - t * 0.06));
-          const c = Math.sin(y * 0.052 - t * 0.07 + 1.3 * Math.sin(x * 0.027 + t * 0.05));
-          const density = ((a * c + 1) / 2) ** 2 * thin;
-          const lit = density * 16 > BAYER[(y & 3) * 4 + (x & 3)] + 0.5;
+          const away = width - 1 - x;   // the stripe is at the canvas's right edge
+          const tone = away < reach ? 0.85 * (1 - away / reach) ** 1.5 : 0;
           const at = (y * width + x) * 4;
           data[at] = r;
           data[at + 1] = g;
           data[at + 2] = b;
-          data[at + 3] = lit ? 255 : 0;
+          data[at + 3] = tone * 64 > BAYER[(y & 7) * 8 + (x & 7)] + 0.5 ? 255 : 0;
         }
       }
       context.putImageData(image, 0, 0);
     }
 
+    function drawHills(t, now, yellow) {
+      const { context, image, canvas } = hills;
+      // The page's ink, whichever theme that is today.
+      const [r, g, b] = (getComputedStyle(document.body).color.match(/\d+/g) || [0, 0, 0]).map(Number);
+      const { width, height, data } = image;
+      const swell = 0.88 + level * 0.3;
+      // The hills keep to the foot of the canvas; above them is sky.
+      const sky = Math.min(height - 1, Math.round(SKY / CELL));
+      const band = height - sky;
+
+      // Where each range's crest stands in every column: a long roll, a shorter one, and
+      // a run of peaks, sliding sideways, the near range fastest. A ripple lifts the near
+      // range most, as a wave lifts whatever floats nearest.
+      RIDGES.forEach((ridge, index) => {
+        const crest = crests[index];
+        const give = 0.13 * (index + 1);
+        for (let x = 0; x < width; x++) {
+          const p = ((x * CELL + t * ridge.drift) / 1000) * ridge.grain;
+          const shape = 0.46
+            + 0.26 * Math.sin(p * 2.1 + ridge.seed)
+            + 0.15 * Math.sin(p * 5.3 + ridge.seed * 2)
+            + 0.13 * (1 - Math.abs(Math.sin(p * 9.1 + ridge.seed * 3)));
+          crest[x] = sky + band * (1 - ridge.rise * shape * swell - give * lifted(x * CELL, "x", now));
+        }
+      });
+
+      // The sun. It comes up over the highest hill under the middle of the footer's links,
+      // never closer to them than SUN.clear. It is in front of the far range and behind
+      // the others, which sink around it wherever they would hide it.
+      let sun = null;
+      if (risen > 0.004) {
+        const links = main.querySelector("footer > p:last-child");
+        const box = canvas.getBoundingClientRect();
+        if (links) {
+          const run = document.createRange();
+          run.selectNodeContents(links);
+          const line = run.getBoundingClientRect();
+          const radius = (SUN.radius / CELL) * (1 + level * 0.08);
+          const x = (line.left + line.width / 2 - box.left) / CELL;
+          const column = Math.max(0, Math.min(width - 1, Math.round(x)));
+          const ceiling = (line.bottom + SUN.clear - box.top) / CELL + radius;   // as near the links as it may come
+          const up = Math.min(height - radius * 0.4, Math.max(ceiling, Math.min(crests[0][column], crests[1][column]) - radius * 0.45));
+          const eased = 1 - (1 - risen) ** 3;
+          const climbed = high * high * (3 - 2 * high);
+          const y = height + radius * 1.6 + (up - height - radius * 1.6) * eased - Math.max(0, Math.min(radius * SUN.climb, up - ceiling)) * climbed;
+          // Its rays stop short of the links too, and lengthen as they come out.
+          const from = radius * 1.5;
+          const most = Math.min(radius * SUN.reach, y - (line.bottom + 3 - box.top) / CELL);
+          sun = { x, y, radius, from, to: from + Math.max(0, most - from) * (1 - (1 - rays) ** 2), most };
+          for (let index = 1; index < RIDGES.length; index++) {
+            const sill = up + radius * (0.3 + 0.55 * (index - 1));
+            const crest = crests[index];
+            for (let at = Math.max(0, Math.floor(x - radius * 7)); at < Math.min(width, x + radius * 7); at++) {
+              const near = Math.exp(-(((at - x) / (radius * 2.6)) ** 2)) * eased;
+              if (crest[at] < sill) crest[at] += (sill - crest[at]) * near;
+            }
+          }
+        }
+      }
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const weave = BAYER[(y & 7) * 8 + (x & 7)] + 0.5;
+          const at = (y * width + x) * 4;
+          // The nearest range that reaches this high is the one seen; the sun is between
+          // the far one and the rest.
+          let tone = 0;
+          let lit = false;
+          for (let index = RIDGES.length - 1; index >= 0; index--) {
+            if (index === 0 && sun) {
+              const far = Math.hypot(x - sun.x, y - sun.y);
+              const away = far / sun.radius;
+              let glow = away < 1 ? 0.94 : away < SUN.glow ? 0.3 * (1 - (away - 1) / (SUN.glow - 1)) ** 2 : 0;
+              // The rays: spokes turning slowly, with brightness running outward along them.
+              if (far > sun.from && far < sun.to) {
+                const spoke = Math.cos(Math.atan2(y - sun.y, x - sun.x) * SUN.rays + t * 0.3);
+                if (spoke > 0.45) {
+                  const run = 0.5 + 0.5 * Math.sin(far * 0.6 - t * 5);
+                  glow = Math.max(glow, 0.85 * ((spoke - 0.45) / 0.55) * (0.35 + 0.65 * run) * (1 - (far - sun.from) / (sun.most - sun.from)) ** 0.6);
+                }
+              }
+              if (glow * 64 > weave) {
+                lit = true;
+                break;
+              }
+            }
+            const top = crests[index][x];
+            if (y < top) continue;
+            tone = RIDGES[index].tone * (1 - 0.6 * ((y - top) / Math.max(1, height - top)));
+            break;
+          }
+          data[at] = lit ? yellow[0] : r;
+          data[at + 1] = lit ? yellow[1] : g;
+          data[at + 2] = lit ? yellow[2] : b;
+          // The hills are half there; the sun is all there.
+          data[at + 3] = lit ? 255 : tone * 64 > weave ? 128 : 0;
+        }
+      }
+      context.putImageData(image, 0, 0);
+    }
+
+    function draw() {
+      if (!sound || document.hidden) return;
+      const now = performance.now() / 1000;
+      ripples = ripples.filter((one) => now - one.born < RIPPLE.life);
+      sound.meter.getByteTimeDomainData(wave);
+      let energy = 0;
+      for (let i = 0; i < wave.length; i++) energy += ((wave[i] - 128) / 128) ** 2;
+      level += (Math.min(1, Math.sqrt(energy / wave.length) * 5) - level) * 0.18;
+
+      // The stripe itself thickens with the sound, and jumps when something is touched.
+      const jump = ripples.reduce((most, one) => Math.max(most, one.strength * Math.exp(-(now - one.born) * 5)), 0);
+      stripe?.style.setProperty("--ambient-level", (still.matches ? 0 : level * 0.9 + jump * 1.4).toFixed(3));
+
+      // Reaching the end of the page brings the sun up, and leaving it lets it set.
+      const atEnd = window.scrollY + window.innerHeight >= root.scrollHeight - 8;
+      if (atEnd && !wasAtEnd) cue("sun");
+      wasAtEnd = atEnd;
+      if (still.matches) {
+        risen = high = rays = Number(atEnd);
+      } else if (atEnd) {
+        // Up onto the hills, a pause, on into the sky, and then the rays.
+        risen = Math.min(1, risen + 0.022);
+        if (risen >= 1) dwell += 0.04;
+        if (dwell > 1.2) high = Math.min(1, high + 0.011);
+        if (high >= 1) {
+          if (!rays) cue("rays");
+          rays = Math.min(1, rays + 0.018);
+        }
+      } else {
+        // And back the way it came, rays first.
+        dwell = 0;
+        if (rays > 0) rays = Math.max(0, rays - 0.09);
+        else if (high > 0) high = Math.max(0, high - 0.05);
+        else risen = Math.max(0, risen - 0.05);
+      }
+
+      // The stripe's own yellow, whichever theme that is today.
+      const yellow = colour(hills.context, getComputedStyle(root).getPropertyValue("--yellow").trim(), "#ffef00");
+      const t = still.matches ? 0 : now;
+      drawFray(t, now, yellow);
+      drawHills(t, now, yellow);
+    }
+
     size();
+    draw();
     addEventListener("resize", size);
-    const timer = setInterval(draw, 110);
+    const timer = setInterval(draw, 40);
     haze = () => {
       clearInterval(timer);
       removeEventListener("resize", size);
-      canvas.remove();
+      stripe?.style.removeProperty("--ambient-level");
+      fray.canvas.remove();
+      hills.canvas.remove();
+      ripples = [];
       haze = null;
     };
   }

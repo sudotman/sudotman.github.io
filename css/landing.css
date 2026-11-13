@@ -231,9 +231,17 @@ html.intro-live body::after {
   display: inline;
 }
 
-/* Its dots hang lower than its line; lifted so they clear the chip. */
+/* Its dots hang lower than its line; lifted so they clear the chip. Nastaliq
+   also draws well above and below the line it is given, and a browser only
+   repaints the box it knows about, which left a scrap of the name on screen
+   after the language changed. So the box is stretched over all of it, by
+   padding that the same margin takes back: nothing moves, but the whole of the
+   lettering is inside what gets repainted. */
 .hyper-intro h1:lang(ur) .name-switch {
-  transform: translateY(-0.14em);
+  position: relative;
+  top: -0.14em;
+  padding: 0.7em 0.3em 0.5em;
+  margin: -0.7em -0.3em -0.5em;
 }
 
 .hyper-subtitle:lang(hi),
@@ -1154,24 +1162,67 @@ html[data-marker="on"] .work-rest__link:hover .work-rest__mark {
   color: var(--on-accent);
 }
 
-/* The haze (js/ambient.js): while the sound is on, a few dithered dots drift
-   behind the page. The canvas is a quarter of the window's size and scaled up
-   without smoothing, which is what keeps the dots square. It sits under the
-   body, so the body gives up its paper for as long as it is there; the paper
-   is still on the root beneath both. */
-.ambient-haze {
+/* While the sound is on (js/ambient.js) there are two things to see, both
+   canvases drawn at half size and scaled up without smoothing so the dither
+   stays square.
+
+   The stripe breathes with the sound, as it does in the reel, and frays into
+   the margin beside the text in yellow. That canvas's right edge is the
+   stripe's left edge, so keep it in step with the body's stripe; the script
+   sizes it to the margin and never lets it reach the text.
+
+   Hills stand along the foot of the window in the page's ink. That canvas
+   sits under the body, so the body gives up its paper for as long as it is
+   there; the paper is still on the root beneath both. */
+html[data-ambient="on"] .stripe-reel::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  background: var(--yellow);
+  content: "";
+  transform: scaleX(calc(1 + var(--ambient-level, 0)));
+}
+
+.ambient-fray {
   position: fixed;
-  z-index: -1;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  right: 22px;
+  width: 0;
   height: 100%;
   image-rendering: pixelated;
-  opacity: 0.2;
+  pointer-events: none;
+}
+
+.ambient-hills {
+  position: fixed;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* The hills' 26vh, and SKY in js/ambient.js above them for the sun. */
+  height: calc(26vh + 150px);
+  image-rendering: pixelated;
   pointer-events: none;
 }
 
 html[data-ambient="on"] body {
   background-color: transparent;
+}
+
+/* The hills take the foot of the window, so while they are there the page is
+   given that much more to scroll: at its end the footer's links stand clear
+   above them, with the sun between. The hills' own height, and a little air. */
+html[data-ambient="on"] .hyper-page {
+  padding-bottom: calc(26vh + 56px);
+}
+
+.ambient-fray[hidden],
+html.intro .ambient-fray,
+html.intro .ambient-hills {
+  display: none;
 }
 
 /* The stripe plays the reel. The body still paints it; this link lies over it
@@ -1284,6 +1335,14 @@ html.intro .stripe-reel {
 
   .stripe-reel span {
     display: none;
+  }
+
+  html[data-ambient="on"] .stripe-reel::before {
+    width: 5px;
+  }
+
+  .ambient-fray {
+    right: 13px;
   }
 
   .visitor-toast {
@@ -1424,7 +1483,8 @@ html.intro .stripe-reel {
   .visitor-toast,
   .bracket-button,
   .footer-extra,
-  .ambient-haze,
+  .ambient-fray,
+  .ambient-hills,
   .section-note,
   .hyper-more,
   .hyper-door,

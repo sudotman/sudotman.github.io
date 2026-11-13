@@ -1,0 +1,19 @@
+# The door on Cloudflare. Run wrangler from this folder; README.md has the steps.
+name = "satyam-door"
+main = "worker.mjs"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "satyam-door"
+# Printed by `wrangler d1 create satyam-door`. It is an id, not a secret.
+database_id = "6058bfa1-e51b-4dc3-a9ff-bb53f95b288e"
+
+[vars]
+# Pages allowed to write, comma-separated.
+ORIGINS = "https://satyam.lol"
+
+# Secrets are not kept here. Set them with `wrangler secret put`:
+#   SALT       mixed into the visitor hash
+#   ADMIN_KEY  bearer key for removing a word or a note
+#   BLOCK      comma-separated terms nothing may contain (optional)

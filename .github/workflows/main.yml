@@ -43,6 +43,12 @@ jobs:
         run: node scripts/sync-external-feeds.mjs --skip-archive
         if: github.event_name == 'push'
 
+      # The words visitors left at the door, so the page has them even when the
+      # door is not answering. It never fails: with no door, or none answering,
+      # the committed snapshot is what ships.
+      - name: Refresh the door's words
+        run: node scripts/sync-door.mjs
+
       - name: Build the blog from content/posts
         run: node scripts/build-blog.mjs
 
@@ -54,6 +60,9 @@ jobs:
 
       - name: Check the studio's libraries
         run: node scripts/test-studio.mjs
+
+      - name: Check the door
+        run: node scripts/test-door.mjs
 
       - name: Validate site content
         run: node scripts/validate-content.mjs

@@ -82,6 +82,11 @@
     .map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
     .join("");
 
+  // The visitor's layer (js/visitor.js), the language switch (js/language.js), the score
+  // (js/score.js) and the door (js/door.js) are scripts of their own. This is all they are
+  // told: that the page exists, that a record is on screen, that more rows arrived.
+  const announce = (name, detail = {}) => document.dispatchEvent(new CustomEvent(name, { detail }));
+
   const ordinal = (index, total) => `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
 
   const yearFor = (work) => work.sortDate
@@ -298,26 +303,34 @@
     const blogHref = identity.links?.writing || "/blog/";
     const letterboxdHref = identity.links?.letterboxd || "https://letterboxd.com/satyamkashyap/";
     const initialReviews = reviews.slice(0, REVIEW_INITIAL);
+    // On paper the page has to say where it lives. The canonical link knows.
+    let siteHost = location.host;
+    try {
+      siteHost = new URL(document.querySelector('link[rel="canonical"]').href).host;
+    } catch {
+      /* no canonical: the address it was opened at will do */
+    }
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="Primary">
           <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a> <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>
         </nav>
 
-        <header class="hyper-intro">
-          <h1>${escapeHtml(identity.name)}</h1>
-          <p class="hyper-subtitle"><strong>${escapeHtml(identity.role)}</strong> — ${escapeHtml(identity.location)}</p>
+        <header class="hyper-intro" data-mark-scope="intro">
+          <h1 data-say="name">${escapeHtml(identity.name)}</h1>
+          <p class="hyper-subtitle"><strong data-say="role">${escapeHtml(identity.role)}</strong> — <span data-say="location">${escapeHtml(identity.location)}</span></p>
+          <p class="print-only">${escapeHtml(identity.email)} · ${escapeHtml(siteHost)}</p>
           <p>${escapeHtml(identity.intro)}</p>
         </header>
 
-        <section class="hyper-now">
-          <h2>Right now</h2>
+        <section class="hyper-now" data-mark-scope="now">
+          <h2 data-say="now">Right now</h2>
           <ul>${(home.now || []).map((item) => `<li><strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.text)}</li>`).join("")}</ul>
         </section>
 
-        <section class="hyper-work" id="work">
-          <h2>Work</h2>
-          <p class="section-note">★ marks the ones I am <i>currently</i> most proud of. Open any row to read the record, ← and → move between them.</p>
+        <section class="hyper-work" id="work" data-mark-scope="work">
+          <h2 data-say="work">Work</h2>
+          <p class="section-note">★ marks the ones I am <i>currently</i> most proud of. Open any row to read the record, ← and → move between them.<span class="section-note__stars"> ☆ at the end of a row keeps it as one of yours.</span></p>
           <ol class="work-lead-list">${leadRegister(lead)}</ol>
           ${rest.length ? `
           <div class="work-rest">
@@ -326,21 +339,21 @@
           </div>` : ""}
         </section>
 
-        <section class="hyper-writing" id="writing">
-          <h2>Writing</h2>
+        <section class="hyper-writing" id="writing" data-mark-scope="writing">
+          <h2 data-say="writing">Writing</h2>
           <p class="section-note">Essays and notes. <a href="${escapeHtml(safeHref(blogHref))}">Read them all →</a></p>
           <ul>${writingList(writing, blogHref)}</ul>
         </section>
 
-        <section class="hyper-reviews" id="film-writing">
-          <h2>Film writing</h2>
+        <section class="hyper-reviews" id="film-writing" data-mark-scope="film-writing">
+          <h2 data-say="reviews">Film writing</h2>
           <p class="section-note">Expect sometimes profound, sometimes low-brow, sometimes erudite, sometimes frustratingly colloquial, sometimes structured and sometimes akin to a scribble.</p>
           <ul class="review-index" id="review-index">${reviewList(initialReviews, letterboxdHref)}</ul>
           ${reviews.length > initialReviews.length ? `<button class="review-index__load-more" type="button" data-review-load-more aria-controls="review-index">load more reviews (${initialReviews.length}/${reviews.length})</button>` : ""}
         </section>
 
-        <section class="hyper-more" id="more">
-          <h2>More ways through</h2>
+        <section class="hyper-more" id="more" data-mark-scope="more">
+          <h2 data-say="more">More ways through</h2>
           <p class="section-note">The front page is the direct account. These branches are alternate visualizations for going further.</p>
           <div>${branchRegister(home.branches)}
             <article>
@@ -351,9 +364,9 @@
         </section>
 
         <hr>
-        <footer>
+        <footer data-mark-scope="footer">
           <p>${escapeHtml(identity.statement)}</p>
-          <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}</p>
+          <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}<span class="footer-print"> · <button type="button" class="bracket-button" data-print>print</button></span></p>
         </footer>
         <a class="stripe-reel" href="/?intro" data-reel tabindex="-1" aria-hidden="true"><span>got nerves touching the spine. you wanna see things, huh?</span></a>
       </main>`;
@@ -402,7 +415,7 @@
       const record = records.get(id);
       if (!record) return false;
       currentId = id;
-      shellBody.innerHTML = `<article class="record-dialog__record">${renderRecord(record)}</article>`;
+      shellBody.innerHTML = `<article class="record-dialog__record" data-mark-scope="${escapeHtml(`${hashKey}:${id}`)}">${renderRecord(record)}</article>`;
       shellBody.querySelectorAll("img").forEach((image) => {
         image.addEventListener("error", () => image.closest("figure")?.remove(), { once: true });
       });
@@ -419,6 +432,7 @@
         closeButton.focus({ preventScroll: true });
       }
       onNavigate?.(id);
+      announce("landing:record", { kind: hashKey, id, root: shellBody });
       return true;
     }
 
@@ -471,6 +485,7 @@
       returnToRow();
       shellBody.replaceChildren();
       currentId = "";
+      announce("landing:record-closed", { kind: hashKey });
     });
 
     return {
@@ -559,6 +574,7 @@
       if (next <= reviewState.visibleCount) return;
       list.insertAdjacentHTML("beforeend", reviewList(reviews.slice(reviewState.visibleCount, next), letterboxdHref));
       reviewState.visibleCount = next;
+      announce("landing:rows");
       if (!loadMore) return;
       if (reviewState.visibleCount >= reviews.length) loadMore.remove();
       else loadMore.textContent = `load more reviews (${reviewState.visibleCount}/${reviews.length})`;
@@ -645,6 +661,29 @@
 
   const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261111d"];
 
+  // The config carries what the reel says and has to run first; a script made
+  // here is async by default, so the order is set explicitly. A config that
+  // fails to load is survivable — intro.js keeps its own copy — so only the
+  // reel itself rejects. The score (js/score.js) plays through the reel's mixer
+  // and asks for the same scripts here, so they are only ever fetched once.
+  let reelLoading = null;
+  function loadReel() {
+    if (window.SatyamIntro) return Promise.resolve();
+    reelLoading ||= Promise.all(REEL_SOURCES.map((src) => new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = false;
+      script.onload = resolve;
+      script.onerror = src.includes("intro.js") ? reject : resolve;
+      document.head.appendChild(script);
+    }))).catch((error) => {
+      reelLoading = null;
+      throw error;
+    });
+    return reelLoading;
+  }
+  window.SatyamLanding = { loadReel };
+
   // [reel] plays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes
   // up at once; the reel then starts from its first frame with the soundtrack unlocked.
@@ -661,19 +700,7 @@
     }
     root.classList.add("intro");
     window.scrollTo({ top: 0, behavior: "instant" });
-    // The config carries what the reel says and has to run first; a script made
-    // here is async by default, so the order is set explicitly. A config that
-    // fails to load is survivable — intro.js keeps its own copy — so only the
-    // reel itself rejects.
-    const ready = window.SatyamIntro ? Promise.resolve() : Promise.all(REEL_SOURCES.map((src) => new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.async = false;
-      script.onload = resolve;
-      script.onerror = src.includes("intro.js") ? reject : resolve;
-      document.head.appendChild(script);
-    })));
-    ready
+    loadReel()
       .then(() => window.SatyamIntro.play({ ctx }))
       .catch((error) => {
         console.error(error);
@@ -687,6 +714,11 @@
       if (event.target.closest("[data-reel]")) {
         event.preventDefault();
         playReel();
+        return;
+      }
+
+      if (event.target.closest("[data-print]")) {
+        window.print();
         return;
       }
 
@@ -725,6 +757,7 @@
       reviewDialog.setSequence(portfolio.reviews.map((review) => review.id));
       render(portfolio);
       bindInteractions(portfolio);
+      announce("landing:ready", { home: portfolio.home, works: portfolio.workMap, reviews: portfolio.reviews });
       if (arrivedByHistory()) applySavedPosition();
       syncDialogFromUrl();
     })

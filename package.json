@@ -14,8 +14,10 @@
     "validate": "node scripts/validate-content.mjs",
     "sync": "node scripts/sync-external-feeds.mjs",
     "sync:rss": "node scripts/sync-external-feeds.mjs --skip-archive",
+    "sync:door": "node scripts/sync-door.mjs",
+    "door": "node scripts/door/server.mjs",
     "check": "node scripts/check-syntax.mjs",
     "soundtrack": "python3 scripts/soundtrack/render.py",
-    "test": "npm run check && node scripts/test-markdown.mjs && node scripts/test-post.mjs && node scripts/test-substack.mjs && node scripts/test-studio.mjs && npm run build:check && npm run validate"
+    "test": "npm run check && node scripts/test-markdown.mjs && node scripts/test-post.mjs && node scripts/test-substack.mjs && node scripts/test-studio.mjs && node scripts/test-door.mjs && npm run build:check && npm run validate"
   }
 }

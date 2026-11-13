@@ -10,6 +10,7 @@ import { REEL_VOICES, checkReel } from '../js/lib/schema.js';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = 'content.json';
 const HOME_PATH = 'content/home.json';
+const DOOR_PATH = 'content/door.json';
 const PROFILE_PATH = 'profile.json';
 const CREATIVE_PATH = 'content/creative.json';
 const REEL_PATH = 'content/reel.json';
@@ -765,6 +766,35 @@ function validateHome(home, knownSourcePaths) {
     });
   }
 
+  // What the front door's fixed words say in other languages (js/language.js).
+  // English is the page as written, so its entry only carries the welcome.
+  if (home.languages !== undefined) {
+    if (!isObject(home.languages)) {
+      addError(`${HOME_PATH}.languages`, 'must be an object');
+    } else {
+      Object.entries(home.languages).forEach(([code, said]) => {
+        const location = `${HOME_PATH}.languages.${code}`;
+        if (!/^[a-z]{2,3}$/.test(code)) addError(location, 'must be keyed by a language code such as "hi"');
+        if (!isObject(said)) {
+          addError(location, 'must be an object');
+          return;
+        }
+        Object.entries(said).forEach(([key, value]) => validateText(value, `${location}.${key}`, key));
+        if (code !== 'en' && said.name === undefined) addError(`${location}.name`, 'name is required: the name is the switch');
+      });
+    }
+  }
+
+  // The door's address (scripts/door/). Empty until it is deployed, and the
+  // front door shows nothing of it while it is.
+  if (home.door !== undefined) {
+    if (!isObject(home.door) || typeof home.door.endpoint !== 'string') {
+      addError(`${HOME_PATH}.door.endpoint`, 'must be a string; leave it empty until the door is deployed');
+    } else if (home.door.endpoint && !/^https:\/\/[^\s/]+/.test(home.door.endpoint)) {
+      addError(`${HOME_PATH}.door.endpoint`, 'must be an https address');
+    }
+  }
+
   if (!isObject(home.externalFeeds)) {
     addError(`${HOME_PATH}.externalFeeds`, 'must be an object');
   } else {
@@ -782,6 +812,24 @@ function validateHome(home, knownSourcePaths) {
       addError(`${location}.reviewMinCharacters`, 'must be a positive integer');
     }
   }
+}
+
+// content/door.json is the committed snapshot of the words left at the door,
+// written by scripts/sync-door.mjs. The front door reads it before the door
+// itself, so a malformed one would show before anything could correct it.
+async function validateDoorSnapshot() {
+  const snapshot = await readJson(DOOR_PATH);
+  if (!snapshot) return;
+  if (!isObject(snapshot)) {
+    addError(DOOR_PATH, 'root must be an object');
+    return;
+  }
+  if (!Array.isArray(snapshot.words) || snapshot.words.some((word) => !hasText(word) || /\s/.test(word.trim()))) {
+    addError(`${DOOR_PATH}.words`, 'must be an array of single words');
+  } else if (snapshot.total !== snapshot.words.length) {
+    addError(`${DOOR_PATH}.total`, 'must equal the number of words');
+  }
+  if (snapshot.syncedAt !== null && !isValidDate(snapshot.syncedAt)) addError(`${DOOR_PATH}.syncedAt`, 'must be null or a valid date');
 }
 
 function validateExternalContent(content, config, contentPath) {
@@ -1074,6 +1122,8 @@ async function main() {
   if (creativeArchive) validateCreativeArchive(creativeArchive, seenWorkIds);
 
   await validateReel();
+
+  if (home?.door !== undefined) await validateDoorSnapshot();
 
   if (hasText(home?.externalFeeds?.blog)) await validateBlog(home.externalFeeds.blog);
 

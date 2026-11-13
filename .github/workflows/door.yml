@@ -1,0 +1,46 @@
+name: Keep the door's words
+
+# The door (scripts/door/) holds the words visitors leave on the front door.
+# This copies them into content/door.json and commits the file, so the
+# repository always has them and nothing depends on the service for its only
+# copy. With no door configured in content/home.json it does nothing.
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "door-words"
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Copy the door's words
+        run: node scripts/sync-door.mjs
+
+      - name: Commit them if they changed
+        shell: bash
+        run: |
+          if git diff --quiet -- content/door.json; then
+            echo "Nothing new at the door."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/door.json
+          git commit -m "Keep the words left at the door"
+          git push

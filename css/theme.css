@@ -87,6 +87,47 @@
   --scrim: rgba(0, 16, 21, 0.84);
 }
 
+/* Paper is light. Whatever theme is on screen, print wears the light palette,
+   so a page printed from the dark theme does not come out as grey on white. */
+@media print {
+  :root[data-theme="dark"] {
+    color-scheme: light;
+
+    --paper: #fff;        /* the page */
+    --ink: #000;          /* running text */
+    --strong: #000;       /* display type and emphasis */
+    --muted: #444;        /* asides and captions */
+
+    --rule: #000;         /* rules and row lines */
+    --edge: #000;         /* outlines on boxes, images and inputs */
+    --well: #fafafa;      /* boxes set into the page */
+    --plate: #f2f2f2;     /* behind a letterboxed image */
+    --field: #fff;        /* inputs and filter buttons */
+    --code: #f0f0f0;
+    --code-edge: #ddd;
+    --code-ink: inherit;
+
+    --block: #000;        /* heading chips and the record bar */
+    --block-ink: #fff;
+    --inverse: #000;      /* the toast, the skip link, the chosen filter */
+    --inverse-ink: #fff;
+
+    --link: #0000e7;
+    --visited: #551a8b;
+    --yellow: #ffef00;
+    --green: #00d16f;
+    --on-accent: #000;    /* what is written on yellow and green */
+
+    --row-hover: #ffef00;
+    --row-hover-ink: #000;
+    --row-hover-title: #000;
+    --select: #ffef00;
+    --select-ink: #000;
+    --focus: #00d16f;
+    --scrim: rgba(0, 0, 0, 0.78);
+  }
+}
+
 /* [dark] / [light], a bracket link like the others around it. It only shows
    once js/theme.js has run, since it does nothing without it. */
 .theme-toggle {

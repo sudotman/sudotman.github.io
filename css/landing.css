@@ -157,12 +157,116 @@ html.intro-live body::after {
   font: 12px/1.45 "Courier New", monospace;
 }
 
+.hyper-intro {
+  --name-size: clamp(4.5rem, 6vw, 11rem);
+}
+
 .hyper-intro h1 {
   max-width: 9ch;
   margin: 0;
   color: var(--strong);
-  font: 900 clamp(4.5rem, 6vw, 11rem)/0.68 Arial, Helvetica, sans-serif;
+  font: 900 var(--name-size)/0.68 Arial, Helvetica, sans-serif;
   letter-spacing: -0.09em;
+}
+
+/* The name is the language switch (js/language.js): english, then hindi, then
+   urdu. Neither script can wear the latin setting. The tight tracking breaks
+   urdu's joins and collides hindi's marks, and the crushed leading clips both,
+   so each gets its own, sized so the name stays about as tall as it was and
+   the page beneath it does not jump. Urdu runs right to left but the name
+   stays on the left edge. */
+.name-switch {
+  display: block;
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+}
+
+.name-line {
+  display: block;
+}
+
+.hyper-intro h1:lang(hi),
+.hyper-intro h1:lang(ur) {
+  width: fit-content;
+  max-width: none;
+  letter-spacing: 0;
+}
+
+/* Two lines, as in english. 0.8 x 0.85 x 2 is the latin 0.68 x 2: the same
+   height. The leading is tight because this name has nothing above its
+   headline or below its base. */
+.hyper-intro h1:lang(hi) {
+  font-family: "Kohinoor Devanagari", "Noto Sans Devanagari", "Nirmala UI", Mangal, sans-serif;
+  font-size: calc(var(--name-size) * 0.8);
+  font-weight: 700;
+  line-height: 0.85;
+}
+
+/* Nastaliq climbs and falls, and reads badly stacked, so the name is one line
+   with the room of two: 0.68 x 2 again. */
+.hyper-intro h1:lang(ur) {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Naskh Arabic", serif;
+  font-size: calc(var(--name-size) * 0.68);
+  font-weight: 700;
+  line-height: 2;
+  white-space: nowrap;
+}
+
+.hyper-intro h1:lang(ur) .name-line {
+  display: inline;
+}
+
+/* Its dots hang lower than its line; lifted so they clear the chip. */
+.hyper-intro h1:lang(ur) .name-switch {
+  transform: translateY(-0.14em);
+}
+
+.hyper-subtitle:lang(hi),
+.hyper-page section h2:lang(hi) {
+  font-family: "Kohinoor Devanagari", "Noto Sans Devanagari", "Nirmala UI", Mangal, sans-serif;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.hyper-subtitle:lang(ur),
+.hyper-page section h2:lang(ur) {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Naskh Arabic", serif;
+  letter-spacing: 0;
+  line-height: 1.9;
+}
+
+/* The chips are set smaller and looser in these scripts, and give back in
+   margin what they take in height, so nothing below them moves when the
+   language changes. */
+.hyper-subtitle:lang(hi) {
+  margin-bottom: 6.5px;
+}
+
+.hyper-subtitle:lang(ur) {
+  margin: 21px 0 2.5px;
+}
+
+.hyper-page section h2:lang(hi),
+.hyper-page section h2:lang(ur) {
+  padding: 2px 9px 3px;
+  font-weight: 700;
+}
+
+.hyper-page section h2:lang(hi) {
+  margin-bottom: calc(21px - var(--heading-size) * 0.036);
+  font-size: calc(var(--heading-size) * 0.72);
+}
+
+.hyper-page section h2:lang(ur) {
+  margin-bottom: calc(23px - var(--heading-size) * 0.278);
+  font-size: calc(var(--heading-size) * 0.62);
 }
 
 .hyper-subtitle {
@@ -172,6 +276,28 @@ html.intro-live body::after {
   background: var(--yellow);
   color: var(--on-accent);
   font: 700 15px/1.2 "Courier New", monospace;
+}
+
+/* The chip is where the highlighter is kept (js/visitor.js). Picked up, the
+   chip goes dark: the pen has left its slot. */
+.marker-pen {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+}
+
+html[data-marker="on"] .hyper-subtitle {
+  background: var(--inverse);
+  color: var(--inverse-ink);
+}
+
+.print-only {
+  display: none;
 }
 
 .hyper-intro > p:last-child {
@@ -193,12 +319,13 @@ html.intro-live body::after {
 }
 
 .hyper-page section h2 {
+  --heading-size: clamp(1.2rem, 3vw, 4.7rem);
   display: inline-block;
   margin: 0 0 20px;
   padding: 2px 7px 4px;
   background: var(--block);
   color: var(--block-ink);
-  font: 800 clamp(1.2rem, 3vw, 4.7rem)/0.9 Arial, Helvetica, sans-serif;
+  font: 800 var(--heading-size)/0.9 Arial, Helvetica, sans-serif;
   letter-spacing: -0.055em;
 }
 
@@ -722,6 +849,315 @@ html.intro-live body::after {
   line-height: 1.5;
 }
 
+/* ------------------------------------------------------------------ */
+/* The visitor's layer: stars, the highlighter, your copy               */
+/* ------------------------------------------------------------------ */
+
+/* A button that reads as a link, for things that act rather than go anywhere. */
+.bracket-button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.bracket-button:hover {
+  background: var(--yellow);
+  color: var(--on-accent);
+}
+
+/* A row is its link and, after it, the visitor's star. The author's ★ leads a
+   row; the visitor's closes it, and only shows itself under the pointer until
+   it is given. */
+.work-lead,
+.work-rest__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.work-star {
+  appearance: none;
+  align-self: start;
+  width: 30px;
+  padding: 14px 0 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font: 14px/1.2 Arial, Helvetica, sans-serif;
+  opacity: 0;
+}
+
+.work-rest__item > .work-star {
+  padding-top: 8px;
+}
+
+.work-star::before {
+  padding: 1px 4px;
+  content: "☆";
+}
+
+.work-star[aria-pressed="true"]::before {
+  background: var(--yellow);
+  color: var(--on-accent);
+  content: "★";
+}
+
+.work-star[aria-pressed="true"],
+li:hover > .work-star,
+.work-star:focus-visible {
+  opacity: 1;
+}
+
+.work-star:hover::before {
+  background: var(--yellow);
+  color: var(--on-accent);
+}
+
+/* Without a pointer to hover with, a row is starred from inside its record. */
+@media (hover: none) {
+  .work-star[aria-pressed="false"] {
+    display: none;
+  }
+}
+
+.work-star--record {
+  margin-left: 8px;
+  font: 700 11px/1.2 "Courier New", monospace;
+  vertical-align: top;
+}
+
+.section-note__stars {
+  display: none;
+}
+
+@media (hover: hover) {
+  html[data-visitor] .section-note__stars {
+    display: inline;
+  }
+}
+
+/* Marks are drawn over the page's own text, never written into it. */
+::highlight(visitor-mark) {
+  background-color: var(--yellow);
+  color: var(--on-accent);
+}
+
+/* The marker does not work on [redacted]. */
+::highlight(visitor-redacted) {
+  background-color: var(--block);
+  color: var(--block);
+}
+
+/* With the marker in hand a row should take a selection, not light up or
+   drag away as a link. */
+html[data-marker="on"] a,
+html[data-marker="on"] a * {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-user-drag: none;
+}
+
+html[data-marker="on"] .work-lead__link:hover,
+html[data-marker="on"] .work-rest__link:hover {
+  background: none;
+  color: inherit;
+}
+
+html[data-marker="on"] .work-lead__link:hover .work-lead__title,
+html[data-marker="on"] .work-rest__link:hover .work-rest__title {
+  color: var(--link);
+}
+
+html[data-marker="on"] .work-rest__link:hover .work-rest__mark {
+  color: var(--green);
+}
+
+.visitor-toast {
+  position: fixed;
+  z-index: 900;
+  inset: auto auto 16px 26px;
+  display: none;
+  max-width: min(560px, calc(100% - 60px));
+  padding: 9px 12px;
+  border: 0;
+  margin: 0;
+  background: var(--inverse);
+  color: var(--inverse-ink);
+  font: 12px/1.5 "Courier New", monospace;
+}
+
+.visitor-toast.is-on {
+  display: block;
+}
+
+.visitor-toast__button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.visitor-toast__button:hover {
+  background: var(--yellow);
+  color: var(--on-accent);
+}
+
+/* Your copy: the page cut down to what the visitor starred and marked. */
+.hyper-page.is-copy > section:not(.your-copy) {
+  display: none;
+}
+
+.your-copy .work-rest__heading {
+  margin-top: 34px;
+}
+
+.your-copy .work-rest__heading .bracket-button {
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+.hyper-page .copy-marks {
+  max-width: 780px;
+  padding: 0;
+  border-top: 3px solid var(--rule);
+  margin: 0;
+  list-style: none;
+}
+
+.hyper-page .copy-mark {
+  padding: 14px 0 12px;
+  border-bottom: 1px dotted var(--rule);
+  margin: 0;
+}
+
+.copy-mark blockquote {
+  margin: 0 0 8px;
+  font-size: 1.15em;
+  line-height: 1.4;
+}
+
+.copy-mark mark {
+  padding: 1px 2px;
+  background: var(--yellow);
+  box-decoration-break: clone;
+  color: var(--on-accent);
+  -webkit-box-decoration-break: clone;
+}
+
+.copy-mark .redacted {
+  background: var(--block);
+  color: var(--block);
+}
+
+.copy-mark__from {
+  margin: 0;
+  font: 11px/1.5 "Courier New", monospace;
+}
+
+/* ------------------------------------------------------------------ */
+/* Under the door: one note at a time, and one word each (js/door.js)  */
+/* ------------------------------------------------------------------ */
+
+.hyper-door h3 {
+  margin-top: 34px;
+}
+
+.door-note,
+.door-words {
+  max-width: 780px;
+  padding: 14px 0 4px;
+  border-top: 3px solid var(--rule);
+}
+
+.door-note blockquote {
+  padding-left: 14px;
+  border-left: 6px solid var(--yellow);
+  margin: 0 0 10px;
+  color: var(--strong);
+  font-size: clamp(1.25rem, 2.4vw, 1.9rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.door-meta,
+.door-status {
+  margin: 0 0 10px;
+  font: 11px/1.6 "Courier New", monospace;
+}
+
+.door-status:empty {
+  display: none;
+}
+
+.door-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin: 0 0 10px;
+  font: 13px/1.5 "Courier New", monospace;
+}
+
+.door-form input {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 0;
+  border-bottom: 1px solid var(--edge);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+}
+
+.door-run {
+  margin: 0 0 10px;
+  font: 13px/1.9 "Courier New", monospace;
+  overflow-wrap: anywhere;
+}
+
+.door-run .door-form {
+  display: inline-flex;
+  margin: 0;
+  vertical-align: baseline;
+}
+
+.door-run .door-form input {
+  flex: 0 0 13ch;
+  width: 13ch;
+  padding: 0 4px;
+}
+
+.door-run__mine {
+  background: var(--yellow);
+  color: var(--on-accent);
+}
+
+/* The score (js/score.js): while it plays, the stripe breathes with it, as it
+   does in the reel. */
+html[data-score="on"] .stripe-reel::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  background: var(--yellow);
+  content: "";
+  transform: scaleX(calc(1 + var(--score-level, 0)));
+}
+
 /* The stripe plays the reel. The body still paints it; this link lies over it
    and the margin to its right, and hovers as every link here does, by turning
    yellow — so the stripe opens out to the edge and says what it is for, in the
@@ -766,6 +1202,13 @@ html.intro .stripe-reel {
   display: none;
 }
 
+/* The welcome down the left edge greets in the languages the page is not
+   currently in, and is the other way to change it (js/language.js). Until that
+   script has the languages, the line is only painted. */
+.welcome-line {
+  display: none;
+}
+
 @media (min-width: 1000px) {
   .hyper-page::before {
     position: fixed;
@@ -774,6 +1217,35 @@ html.intro .stripe-reel {
     content: "मेरे डिजिटल स्पेस में आपका स्वागत है! میری ڈیجیٹل دنیا میں خوش آمدید! ";
     font: 11px/1 "Courier New", monospace;
     writing-mode: vertical-rl;
+  }
+
+  html[data-languages] .hyper-page::before {
+    content: none;
+  }
+
+  .welcome-line {
+    position: fixed;
+    top: 44%;
+    left: 8px;
+    display: block;
+    appearance: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font: 11px/1 "Courier New", monospace;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+  }
+
+  .welcome-line:hover {
+    background: var(--yellow);
+    color: var(--on-accent);
+  }
+
+  html.intro .welcome-line {
+    display: none;
   }
 }
 
@@ -798,6 +1270,15 @@ html.intro .stripe-reel {
     display: none;
   }
 
+  html[data-score="on"] .stripe-reel::before {
+    width: 5px;
+  }
+
+  .visitor-toast {
+    inset: auto auto 12px 17px;
+    max-width: calc(100% - 40px);
+  }
+
   .hyper-page,
   .landing-loading,
   .landing-error,
@@ -814,8 +1295,8 @@ html.intro .stripe-reel {
     margin-bottom: 50px;
   }
 
-  .hyper-intro h1 {
-    font-size: 21vw;
+  .hyper-intro {
+    --name-size: 21vw;
   }
 
   .hyper-page section {
@@ -898,5 +1379,261 @@ html.intro .stripe-reel {
 
   .record-dialog::backdrop {
     background: var(--scrim, rgba(0, 0, 0, 0.78));
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Print: the front door as a CV, or the visitor's copy as theirs      */
+/* ------------------------------------------------------------------ */
+
+/* css/theme.css puts the light palette back for print, whatever is on screen. */
+@media print {
+  @page {
+    margin: 13mm 15mm;
+  }
+
+  html {
+    scrollbar-gutter: auto;
+  }
+
+  body {
+    min-height: 0;
+    background: none;
+  }
+
+  .skip-link,
+  .hyper-entry-nav,
+  .stripe-reel,
+  .welcome-line,
+  .record-dialog,
+  .review-index__load-more,
+  .review-index__excerpt,
+  .work-star,
+  .visitor-toast,
+  .bracket-button,
+  .footer-print,
+  .section-note,
+  .hyper-more,
+  .hyper-door,
+  .hyper-page hr,
+  .copy-toast {
+    display: none !important;
+  }
+
+  .hyper-page::before {
+    content: none;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .hyper-page {
+    width: auto;
+    padding: 0;
+    font-size: 10pt;
+    line-height: 1.3;
+  }
+
+  .hyper-page a,
+  .hyper-page .copy-email {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .hyper-intro {
+    --name-size: 34pt;
+  }
+
+  .hyper-intro h1 {
+    max-width: none;
+    line-height: 0.9;
+  }
+
+  .hyper-subtitle,
+  html[data-marker="on"] .hyper-subtitle {
+    margin: 7pt 0 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-size: 9pt;
+  }
+
+  .hyper-intro .print-only {
+    margin: 2pt 0 0;
+    font: 8.5pt/1.4 "Courier New", monospace;
+  }
+
+  .hyper-intro > p:last-child {
+    max-width: none;
+    margin: 8pt 0 0;
+    font-size: 11pt;
+    line-height: 1.25;
+  }
+
+  .hyper-page section {
+    margin: 13pt 0 0;
+  }
+
+  .hyper-page section h2 {
+    display: block;
+    padding: 0 0 2pt;
+    border-bottom: 1.5pt solid var(--rule);
+    margin: 0 0 5pt;
+    background: none;
+    color: inherit;
+    font: 700 8pt/1.2 "Courier New", monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .hyper-page ul {
+    max-width: none;
+  }
+
+  .hyper-page li {
+    margin: 1.5pt 0;
+  }
+
+  .hyper-now ul {
+    padding-left: 12pt;
+    margin: 0;
+  }
+
+  .hyper-now strong {
+    background: none;
+  }
+
+  .work-lead {
+    border-color: var(--code-edge);
+    break-inside: avoid;
+  }
+
+  .work-lead__link {
+    grid-template-columns: 10pt minmax(0, 0.42fr) 1fr;
+    gap: 8pt;
+    padding: 3.5pt 0;
+  }
+
+  .work-lead__mark {
+    font-size: 7pt;
+    line-height: 1.9;
+  }
+
+  .work-lead__title {
+    color: inherit;
+    font-size: 10pt;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .work-lead__body {
+    font-size: 8.5pt;
+    line-height: 1.3;
+  }
+
+  .work-lead__body small {
+    font-size: 7pt;
+  }
+
+  .work-rest {
+    margin-top: 9pt;
+  }
+
+  .work-rest__heading {
+    font-size: 8pt;
+  }
+
+  .hyper-page .work-rest__list {
+    border-top-width: 1pt;
+    column-gap: 18pt;
+    columns: 2;
+  }
+
+  .work-rest__item {
+    border-color: var(--code-edge);
+    break-inside: avoid;
+  }
+
+  .work-rest__link {
+    grid-template-columns: 9pt minmax(0, 1fr) auto;
+    gap: 4pt;
+    padding: 1.5pt 0;
+  }
+
+  .work-rest__mark {
+    font-size: 7pt;
+  }
+
+  .work-rest__title {
+    color: inherit;
+    font-size: 8.5pt;
+    text-decoration: none;
+  }
+
+  .work-rest__meta {
+    font-size: 6.5pt;
+  }
+
+  .hyper-writing ul,
+  .review-index {
+    padding-left: 12pt;
+    margin: 0;
+    column-gap: 18pt;
+    columns: 2;
+    font-size: 9pt;
+  }
+
+  .hyper-writing li,
+  .review-index__entry {
+    break-inside: avoid;
+  }
+
+  .review-rating {
+    padding: 0;
+    background: none;
+  }
+
+  .hyper-page footer {
+    padding: 6pt 0 0;
+    border-top: 1.5pt solid var(--rule);
+    margin-top: 14pt;
+    break-inside: avoid;
+  }
+
+  .hyper-page footer > p:first-child {
+    max-width: none;
+    margin: 0 0 3pt;
+    font-size: 11pt;
+    letter-spacing: -0.02em;
+  }
+
+  .hyper-page footer > p:last-child {
+    margin: 0;
+    font-size: 7.5pt;
+  }
+
+  /* On paper a link is only as good as its address. */
+  .hyper-page footer a[href^="http"]::after {
+    content: " " attr(href);
+  }
+
+  /* The visitor's copy keeps its yellow: that is what makes it theirs. */
+  .your-copy .work-rest__heading {
+    margin-top: 12pt;
+  }
+
+  .copy-mark {
+    break-inside: avoid;
+  }
+
+  .copy-mark blockquote {
+    font-size: 10.5pt;
+  }
+
+  .copy-mark mark,
+  .copy-mark .redacted {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

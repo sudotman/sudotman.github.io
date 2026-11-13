@@ -17,5 +17,9 @@ node_modules/
 _site/
 *.tmp
 
+# The door's local database and wrangler's working folder
+scripts/door/*.sqlite*
+.wrangler/
+
 # Local preview scaffolding (not part of the site)
 .claude/

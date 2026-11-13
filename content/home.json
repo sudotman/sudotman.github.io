@@ -13,6 +13,38 @@
       "x": "https://x.com/satyamkashyapp"
     }
   },
+  "languages": {
+    "en": {
+      "label": "english",
+      "welcome": "welcome to my digital space!"
+    },
+    "hi": {
+      "label": "हिन्दी",
+      "name": "सत्यम कश्यप",
+      "role": "क्रिएटिव टेक्नोलॉजिस्ट और फ़िल्मकार",
+      "location": "मुंबई, भारत",
+      "welcome": "मेरे डिजिटल स्पेस में आपका स्वागत है!",
+      "now": "अभी",
+      "work": "काम",
+      "writing": "लेखन",
+      "reviews": "फ़िल्मों पर लेखन",
+      "more": "और रास्ते",
+      "door": "दरवाज़े के नीचे"
+    },
+    "ur": {
+      "label": "اردو",
+      "name": "ستیم کشیپ",
+      "role": "تخلیقی ٹیکنالوجسٹ اور فلم ساز",
+      "location": "ممبئی، بھارت",
+      "welcome": "میری ڈیجیٹل دنیا میں خوش آمدید!",
+      "now": "ابھی",
+      "work": "کام",
+      "writing": "تحریریں",
+      "reviews": "فلموں پر تحریریں",
+      "more": "مزید راستے",
+      "door": "دروازے کے نیچے"
+    }
+  },
   "now": [
     {
       "title": "film 03",
@@ -63,6 +95,9 @@
     "letterboxdArchive": "https://letterboxd.com/satyamkashyap/reviews/films/",
     "reviewMinCharacters": 900,
     "blog": "content/blog.json"
+  },
+  "door": {
+    "endpoint": "https://satyam-door.satyamsudo.workers.dev"
   },
   "sources": [
     "content/programming.json"
@@ -117,7 +152,7 @@
       "medium": "learning tool",
       "year": "ongoing",
       "summary": "A browser piano teacher with real Web MIDI, lessons, a songbook and MIDI import.",
-      "body": "There are some great free piano lessons online and some great 'midi playbacks' but a gradual, step-by-step, guided midi learning platform doesn't really exist anywhere which isn't behind a subscription and so OpenPiano was born. OpenPiano teaches piano in the browser with your actual keyboard plugged in. Web MIDI carries the note-on and note-off messages. On-screen keys are there for anyone without hardware.\n\nThe curriculum runs 32 lessons across 8 units, from finding middle C to counterpoint, rubato and a capstone performance, with 14 arrangements in the songbook to practise against. Watch falling tiles, read a grand staff, or show both at once. Wait mode holds the timeline until every note in a chord is down. Flow mode keeps moving and scores timing, misses, accuracy and streak.\n\nAny .mid file can be imported. It picks the pitched tracks, drops percussion, infers the hands, normalises the start time and engraves the result into readable notation.\n\nThe piano voice is modelled rather than sampled: hammer attack, inharmonic string partials, stereo placement across the keyboard, natural decay and a little room behind it. Keyboard presets cover 49, 61, 76 and 88 keys, including a Yamaha PSR-E383 profile because that is the keyboard I own, two-note calibration for anything else, and a toggle between Yamaha C3 and scientific C4 octave naming.\n\nLearner profiles are local and password-free. Progress, songs, theory scores and practice history live in your browser and nowhere else.",
+      "body": "There are some great free piano lessons online and some great 'midi playbacks' but a gradual, step-by-step, guided midi learning platform doesn't really exist anywhere which isn't behind a subscription and so OpenPiano was born. OpenPiano teaches piano in the browser with your actual keyboard plugged in. Web MIDI carries note from the previous visitor-on and note-off messages. On-screen keys are there for anyone without hardware.\n\nThe curriculum runs 32 lessons across 8 units, from finding middle C to counterpoint, rubato and a capstone performance, with 14 arrangements in the songbook to practise against. Watch falling tiles, read a grand staff, or show both at once. Wait mode holds the timeline until every note in a chord is down. Flow mode keeps moving and scores timing, misses, accuracy and streak.\n\nAny .mid file can be imported. It picks the pitched tracks, drops percussion, infers the hands, normalises the start time and engraves the result into readable notation.\n\nThe piano voice is modelled rather than sampled: hammer attack, inharmonic string partials, stereo placement across the keyboard, natural decay and a little room behind it. Keyboard presets cover 49, 61, 76 and 88 keys, including a Yamaha PSR-E383 profile because that is the keyboard I own, two-note calibration for anything else, and a toggle between Yamaha C3 and scientific C4 octave naming.\n\nLearner profiles are local and password-free. Progress, songs, theory scores and practice history live in your browser and nowhere else.",
       "links": {
         "live": "https://www.satyam.lol/openpiano/",
         "source": "https://github.com/sudotman/openpiano"

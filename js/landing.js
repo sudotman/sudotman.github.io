@@ -82,8 +82,8 @@
     .map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
     .join("");
 
-  // The visitor's layer (js/visitor.js), the language switch (js/language.js), the score
-  // (js/score.js) and the door (js/door.js) are scripts of their own. This is all they are
+  // The visitor's layer (js/visitor.js), the language switch (js/language.js),
+  // the sound (js/ambient.js) and the door (js/door.js) are scripts of their own. This is all they are
   // told: that the page exists, that a record is on screen, that more rows arrived.
   const announce = (name, detail = {}) => document.dispatchEvent(new CustomEvent(name, { detail }));
 
@@ -313,7 +313,8 @@
     app.innerHTML = `
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="Primary">
-          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a> <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>
+          <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>
+          <span class="hyper-entry-nav__right"><a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a></span>
         </nav>
 
         <header class="hyper-intro" data-mark-scope="intro">
@@ -366,7 +367,7 @@
         <hr>
         <footer data-mark-scope="footer">
           <p>${escapeHtml(identity.statement)}</p>
-          <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}<span class="footer-print"> · <button type="button" class="bracket-button" data-print>print</button></span></p>
+          <p>${socialLinks(identity)} · ${copyEmailMarkup(identity.email)}<span class="footer-extra"> · <button type="button" class="bracket-button" data-print>print</button></span></p>
         </footer>
         <a class="stripe-reel" href="/?intro" data-reel tabindex="-1" aria-hidden="true"><span>got nerves touching the spine. you wanna see things, huh?</span></a>
       </main>`;
@@ -664,8 +665,7 @@
   // The config carries what the reel says and has to run first; a script made
   // here is async by default, so the order is set explicitly. A config that
   // fails to load is survivable — intro.js keeps its own copy — so only the
-  // reel itself rejects. The score (js/score.js) plays through the reel's mixer
-  // and asks for the same scripts here, so they are only ever fetched once.
+  // reel itself rejects.
   let reelLoading = null;
   function loadReel() {
     if (window.SatyamIntro) return Promise.resolve();
@@ -682,7 +682,6 @@
     });
     return reelLoading;
   }
-  window.SatyamLanding = { loadReel };
 
   // [reel] plays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes

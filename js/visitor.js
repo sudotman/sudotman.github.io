@@ -68,6 +68,9 @@
     && typeof mark.exact === "string" && mark.exact.length > 0 && mark.exact.length <= MAX_LENGTH
     && typeof mark.prefix === "string" && typeof mark.suffix === "string";
 
+  // For js/ambient.js, which gives each of these a sound.
+  const said = (kind) => document.dispatchEvent(new CustomEvent("visitor:kept", { detail: { kind } }));
+
   let page = null;
   let main = null;
   let stars = new Set();
@@ -110,6 +113,7 @@
   function toggleStar(id) {
     if (stars.has(id)) stars.delete(id);
     else stars.add(id);
+    said(stars.has(id) ? "star" : "unstar");
     write(STARS_KEY, [...stars]);
     document.querySelectorAll("[data-star]").forEach(syncStar);
     changed();
@@ -268,6 +272,7 @@
       marks.push(mark);
       if (marks.length > MAX_MARKS) marks.shift();
       write(MARKS_KEY, marks);
+      said("mark");
     }
     paint();
     changed();
@@ -285,6 +290,7 @@
 
   function lift(id) {
     marks = marks.filter((mark) => mark.id !== id);
+    said("lift");
     write(MARKS_KEY, marks);
     paint();
     changed();
@@ -366,12 +372,27 @@
   /* ---------------------------------------------------------------------- */
 
   let copyLink = null;
+  let copyFoot = null;
 
+  // The way in is at both ends of the page: a bracket link in the entry nav, and a word
+  // in the footer's line of links, for whoever has read to the bottom.
   function mountNav() {
     const nav = main.querySelector(".hyper-entry-nav");
-    if (!nav || nav.querySelector("[data-copy-toggle]")) return;
-    copyLink = el("button", { type: "button", className: "bracket-button", hidden: true, data: { copyToggle: "" } });
-    nav.append(" ", copyLink);
+    if (nav && !nav.querySelector("[data-copy-toggle]")) {
+      copyLink = el("button", { type: "button", className: "bracket-button", hidden: true, data: { copyToggle: "" } });
+      // After the links that go somewhere, before the ones on the right that play.
+      const right = nav.querySelector(".hyper-entry-nav__right");
+      if (right) right.before(copyLink, " ");
+      else nav.append(" ", copyLink);
+    }
+    const line = main.querySelector("footer > p:last-child");
+    if (line && !line.querySelector(".footer-copy")) {
+      copyFoot = el("span", { className: "footer-extra footer-copy", hidden: true }, [
+        " · ",
+        el("button", { type: "button", className: "bracket-button", data: { copyToggle: "" } })
+      ]);
+      line.append(copyFoot);
+    }
   }
 
   function sourceOf(mark) {
@@ -460,10 +481,17 @@
   }
 
   function syncNav() {
-    if (!copyLink) return;
-    copyLink.hidden = !(stars.size || marks.length);
-    copyLink.textContent = copyOpen ? "[the whole page]" : "[your copy]";
-    copyLink.setAttribute("aria-pressed", String(copyOpen));
+    const label = copyOpen ? "the whole page" : "your copy";
+    const none = !(stars.size || marks.length);
+    if (copyLink) {
+      copyLink.hidden = none;
+      copyLink.textContent = `[${label}]`;
+      copyLink.setAttribute("aria-pressed", String(copyOpen));
+    }
+    if (copyFoot) {
+      copyFoot.hidden = none;
+      copyFoot.querySelector("button").textContent = label;
+    }
   }
 
   // Something the visitor keeps has changed: the nav link and, if it is open, their copy.
@@ -542,6 +570,26 @@
   }, true);
 
   if (SUPPORTED) {
+    // A work row is one link, and a browser will not start a selection inside a link:
+    // some drag the link away, some do nothing. So for as long as the button is held the
+    // link is not one. Its address is taken off on the way down and put back on the way
+    // up, before the click, so a plain click still goes where it always went.
+    let held = null;
+    const giveBack = () => {
+      if (held) held.link.setAttribute("href", held.href);
+      held = null;
+    };
+    document.addEventListener("mousedown", (event) => {
+      giveBack();
+      if (!markerOn() || event.button !== 0) return;
+      const link = event.target.closest?.("a[href]");
+      if (!link || !link.closest("[data-mark-scope]")) return;
+      held = { link, href: link.getAttribute("href") };
+      link.removeAttribute("href");
+    }, true);
+    addEventListener("mouseup", giveBack, true);
+    addEventListener("blur", giveBack);
+
     // With a mouse the mark is made the moment the selection is let go of.
     document.addEventListener("mouseup", (event) => {
       if (!markerOn() || coarse || event.button !== 0) return;

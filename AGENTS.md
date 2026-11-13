@@ -39,7 +39,10 @@ This repository powers the complete static portfolio network at `satyam.lol`. Th
 `js/landing.js` renders the page and then says so with three events on `document`:
 `landing:ready` (the page exists; carries `home`, the works map and the reviews),
 `landing:record` / `landing:record-closed` (a record dialog rendered or closed) and
-`landing:rows` (more review rows arrived). Everything below listens for those and hangs its
+`landing:rows` (more review rows arrived). The scripts below add their own for what a
+visitor did: `language:switched`, `visitor:kept` (star, unstar, mark, lift) and `door:left`
+(note, word, sweep); `js/ambient.js` turns each into a sound, so a new action that should be
+heard dispatches one of these and gets an entry in `CUES`. Everything below listens for those and hangs its
 own controls on the page; none of them is called by `landing.js`, and each can fail to load
 without taking the page with it. They are loaded before `landing.js` in `index.html`, in the
 order their links join the entry nav.
@@ -50,8 +53,11 @@ order their links join the entry nav.
   `data-mark-scope`), and `[your copy]`, the page cut down to those two
 - `js/language.js`: the name is the language switch. It rewrites every `[data-say]` element
   from `languages` in `content/home.json`, and the welcome line down the left edge
-- `js/score.js`: `[score]` plays the reel's soundtrack through `SatyamReel.sound`, looped and
-  mixed by which section is on screen
+- `js/ambient.js`: `[sound]` at the top right beside `[reel]`, and `sound` in the footer line. A synth
+  pad made of oscillators, not a recording: each part of the page holds one of the reel's
+  chords, scrolling picks out its notes and touching a link or button strums them. It gives
+  the page's events sounds of their own (`CUES`: a record opening and closing, the language
+  changing, stars, marks, the door) and draws a faint dithered haze behind the page while on
 - `js/door.js`: note from the previous visitor under the door and one word each, talking to `scripts/door/`
 - `scripts/door/core.mjs`: all of the door's logic; `worker.mjs` runs it on Cloudflare with D1,
   `server.mjs` on Node with `node:sqlite`. `scripts/test-door.mjs` pins its rules
@@ -107,8 +113,8 @@ studio diff into a whole-file rewrite.
 - The front door, the 404 and the writing pages take every colour from `css/theme.css`, which each loads before its own stylesheet; `css/landing.css` and `css/blog.css` name tokens, never colours. Light is the default and dark is Solarized Dark, chosen with the `[dark]` / `[light]` bracket link (any element carrying `data-theme-toggle`) and kept in localStorage by `js/theme.js`, which is loaded in the head without `defer` so the choice is on `<html>` before first paint. Do not make it follow `prefers-color-scheme`. A new colour goes into both palettes in `theme.css`; the dark values stay on the Solarized palette. The blog's copy of the toggle lives in `chrome()` in `scripts/build-blog.mjs`.
 - The reel wears the page's theme on the site. In `createReel`, `C` holds the colours of the scenes drawn as the page (01 front door, 04 tools, 05 intersection, 06 sign-off, the stripe, the flash): `LIGHT` is the cut as authored and what the video renders always use; in the dark theme `play` passes `dark` and the same roles are read from the `css/theme.css` tokens on `<html>`, with the Solarized literals as fallback. The xr and film scenes (02, 03) keep their own colours in both. A colour added to those page scenes goes through `C`, not a literal, or the dark reel will show a light patch; the name is set in `onYellow` while it sits on the slab or the field and mixes to `strong` as they leave. After touching it, step through both themes with `SatyamReel.create(host, { web: true, dark })` and `seek`.
 - The name is the language switch (`js/language.js`): english, hindi, urdu. A new fixed word on the front door gets a `data-say` key in `render` and an entry per language in `content/home.json`; a language without one leaves the english. Each script has its own setting of the name in `landing.css` (`:lang(hi)`, `:lang(ur)`) because neither can wear the latin tracking or leading; the name's size is `--name-size` on `.hyper-intro`, so change that, not the `h1`. The reel is english and lands on the name, so the page is english for as long as `html.intro` is set and returns to the chosen language after: keep that, or the landing will not match.
-- A section the highlighter may mark carries `data-mark-scope`; a record dialog gets one per record. `js/score.js` reads the same attribute to know which section is on screen, so a new section needs it for both, and a balance in `BALANCE` if it should sound like anything but the default. Text a visitor wrote (the door) is deliberately not markable.
-- The score loops the first 24 beats of the reel's stems, which end on the dominant just before the lift. If the arrangement in `scripts/soundtrack/audio.py` moves its sections, move `LOOP_BEATS` in `js/score.js` with it.
+- A section the highlighter may mark carries `data-mark-scope`; a record dialog gets one per record. `js/ambient.js` reads the same attribute to know which part of the page is on screen, so a new section needs it for both, and a chord in `WHERE` if it should hold anything but the default. Text a visitor wrote (the door) is deliberately not markable.
+- The sound never starts unasked and is not remembered between visits. Its chords mirror `CH` in `scripts/soundtrack/audio.py`; if the reel changes key, change `CHORDS` in `js/ambient.js` with it. The entry nav has two sides: links that go somewhere and how the page reads on the left, what plays (`[reel]`, `[sound]`) in `.hyper-entry-nav__right`. Keep it to those; anything else goes in the footer line.
 - The front door prints as a CV (`@media print` at the end of `landing.css`), and `css/theme.css` puts the light palette back for print. A new block on the page is either set for print there or added to its hidden list.
 - Both landing dialogs share `createRecordDialog` in `js/landing.js`. Add behaviour there rather than to one dialog, so the project and review records stay identical.
 - The front door restores its own scroll position because it renders after fetching. If you change when `render` runs, keep `applySavedPosition` after it, or back-navigation from the blog and the branches lands at the top again.

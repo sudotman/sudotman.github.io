@@ -95,6 +95,8 @@
       localStorage.setItem(KEY, chosen);
     } catch {}
     apply();
+    // Only a switch the visitor made: apply() also runs on load and around the reel.
+    document.dispatchEvent(new CustomEvent("language:switched", { detail: { language: chosen, index: order.indexOf(chosen) } }));
   }
 
   document.addEventListener("landing:ready", (event) => {

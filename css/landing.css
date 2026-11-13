@@ -157,6 +157,14 @@ html.intro-live body::after {
   font: 12px/1.45 "Courier New", monospace;
 }
 
+/* Where to go and how to read sit on the left; what plays (the reel, the
+   sound) is set apart on the right. */
+.hyper-entry-nav__right {
+  display: flex;
+  gap: 0 8px;
+  margin-left: auto;
+}
+
 .hyper-intro {
   --name-size: clamp(4.5rem, 6vw, 11rem);
 }
@@ -862,6 +870,7 @@ html[data-marker="on"] .hyper-subtitle {
   color: var(--link);
   cursor: pointer;
   font: inherit;
+  letter-spacing: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
@@ -1145,17 +1154,24 @@ html[data-marker="on"] .work-rest__link:hover .work-rest__mark {
   color: var(--on-accent);
 }
 
-/* The score (js/score.js): while it plays, the stripe breathes with it, as it
-   does in the reel. */
-html[data-score="on"] .stripe-reel::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 6px;
-  background: var(--yellow);
-  content: "";
-  transform: scaleX(calc(1 + var(--score-level, 0)));
+/* The haze (js/ambient.js): while the sound is on, a few dithered dots drift
+   behind the page. The canvas is a quarter of the window's size and scaled up
+   without smoothing, which is what keeps the dots square. It sits under the
+   body, so the body gives up its paper for as long as it is there; the paper
+   is still on the root beneath both. */
+.ambient-haze {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+html[data-ambient="on"] body {
+  background-color: transparent;
 }
 
 /* The stripe plays the reel. The body still paints it; this link lies over it
@@ -1268,10 +1284,6 @@ html.intro .stripe-reel {
 
   .stripe-reel span {
     display: none;
-  }
-
-  html[data-score="on"] .stripe-reel::before {
-    width: 5px;
   }
 
   .visitor-toast {
@@ -1411,7 +1423,8 @@ html.intro .stripe-reel {
   .work-star,
   .visitor-toast,
   .bracket-button,
-  .footer-print,
+  .footer-extra,
+  .ambient-haze,
   .section-note,
   .hyper-more,
   .hyper-door,

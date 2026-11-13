@@ -46,6 +46,10 @@
     }
   })();
 
+  // For js/ambient.js, which gives each of these a sound.
+  const left = (kind) => document.dispatchEvent(new CustomEvent("door:left", { detail: { kind } }));
+  const announce = left;
+
   const remember = () => {
     try {
       localStorage.setItem(KEY, JSON.stringify(local));
@@ -224,6 +228,7 @@
       const answer = await ask("/word", { word });
       if (answer.ok && typeof answer.json.word?.word === "string") {
         words.push(answer.json.word.word);
+        left("word");
         total = Number.isInteger(answer.json.total) ? answer.json.total : total + 1;
         local.word = { text: answer.json.word.word, day: today() };
         delete local.pending;
@@ -252,6 +257,7 @@
         note = left;
         noteRead = true;
         local.mine = left.id;
+        announce("note");
         local.last = left;
         remember();
         ui.noteStatus = "";
@@ -282,6 +288,7 @@
     sweepArmed = 0;
     try {
       const answer = await ask("/note/sweep", { id: Number(button.dataset.doorSweep) });
+      if (answer.ok) left("sweep");
       if (answer.ok || answer.status === 409) {
         note = validNote(answer.json.note);
         noteRead = false;

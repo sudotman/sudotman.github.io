@@ -434,7 +434,9 @@
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const wave = new Uint8Array(256);
     let crests = null;
+    let snow = null;
     let level = 0;
+    let terrainLevel = 0;
     let risen = 0;            // 0 below the hills, 1 standing on them
     let high = 0;             // then 0 to 1 as it climbs above them
     let rays = 0;             // then 0 to 1 as its rays come out
@@ -461,6 +463,7 @@
       hills.canvas.height = Math.max(1, Math.ceil(foot.height / CELL));
       hills.image = hills.context.createImageData(hills.canvas.width, hills.canvas.height);
       crests = RIDGES.map(() => new Float32Array(hills.canvas.width));
+      snow = RIDGES.slice(0, 2).map(() => new Float32Array(hills.canvas.width));
     };
 
     const colour = (context, value, fallback) => {
@@ -519,7 +522,8 @@
       // The page's ink, whichever theme that is today.
       const [r, g, b] = (getComputedStyle(document.body).color.match(/\d+/g) || [0, 0, 0]).map(Number);
       const { width, height, data } = image;
-      const swell = 0.88 + level * 0.3;
+      // Rock breathes slowly; the stripe can follow the sound's quicker changes.
+      const swell = 0.94 + (still.matches ? 0 : terrainLevel * 0.08);
       // The hills keep to the foot of the canvas; above them is sky.
       const sky = Math.min(height - 1, Math.round(SKY / CELL));
       const band = height - sky;
@@ -556,17 +560,22 @@
         const give = 0.13 * (index + 1);
         // Peaks stand taller than hills, and the far water sits lower than the far hills.
         const rise = ridge.rise * (1.16 - 0.16 * toHills);
+        const snowline = ridge.rise * (0.64 + 0.6 * toHills);
         for (let x = 0; x < width; x++) {
           const along = x * CELL + t * ridge.drift;
           const p = (along / 1000) * ridge.grain;
           const inland = LAND[0](p, ridge.seed) * (1 - toHills) + LAND[1](p, ridge.seed) * toHills;
           const shape = inland * (1 - toSea) + LAND[2](p, ridge.seed, t, index) * toSea;
-          crest[x] = sky + band * (1 - rise * shape * swell - give * lifted(x * CELL, "x", now));
+          const lift = still.matches ? 0 : give * lifted(x * CELL, "x", now);
+          crest[x] = sky + band * (1 - rise * shape * swell - lift);
+          if (index < snow.length) {
+            // Snow belongs to the terrain, before sound or a touch lifts it. Its depth
+            // and ragged edge travel with the same range, rather than a screen-fixed line.
+            const depth = Math.max(0, rise * shape - snowline) * band * swell * 0.7;
+            snow[index][x] = depth + Math.sin(along / CELL * 0.8 + index * 2) * Math.min(1.3, depth * 0.2);
+          }
         }
       });
-      // Above this line a range is under snow. It is low on the peaks and climbs out of
-      // reach as they become hills.
-      const snowline = RIDGES.map((ridge) => sky + band * (1 - ridge.rise * (0.64 + 0.6 * toHills)));
 
       // The sun. It comes up over the highest hill under the middle of the footer's links,
       // never closer to them than SUN.clear. It is in front of the far range and behind
@@ -633,13 +642,17 @@
             // dots are one's and some the other's.
             paint = toHills * 64 > shade ? green : ink;
             if (toSea * 64 > shade) paint = blue;
-            if (index < 2 && top < snowline[index]) {
+            const depth = snow[index]?.[x] || 0;
+            if (depth > 0) {
               // Snow: the crest drawn as a line, and under it nothing, down to a ragged edge.
-              const edge = 1 + Math.abs(top - crests[index][Math.min(width - 1, x + 1)]);
-              if (y - top < edge) {
-                tone = 1;
+              // Join steep steps on either side, using the same snapped crest as the fill.
+              const edge = Math.max(1, Math.ceil(Math.max(
+                crests[index][Math.max(0, x - 1)], crests[index][Math.min(width - 1, x + 1)]
+              )) - Math.ceil(top));
+              if (y - Math.ceil(top) < edge) {
+                tone += (1 - tone) * Math.min(1, depth / 2);
                 paint = ink;
-              } else if (y - top < (snowline[index] - top) * 0.7 + Math.sin(x * 0.8 + index * 2) * 1.3) {
+              } else if (y - top < depth) {
                 tone = 0;
               }
             }
@@ -726,6 +739,7 @@
       let energy = 0;
       for (let i = 0; i < wave.length; i++) energy += ((wave[i] - 128) / 128) ** 2;
       level += (Math.min(1, Math.sqrt(energy / wave.length) * 5) - level) * 0.18;
+      terrainLevel += (level - terrainLevel) * 0.035;
 
       // The stripe itself thickens with the sound, and jumps when something is touched.
       const jump = ripples.reduce((most, one) => Math.max(most, one.strength * Math.exp(-(now - one.born) * 5)), 0);

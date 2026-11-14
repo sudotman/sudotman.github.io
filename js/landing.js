@@ -314,7 +314,7 @@
       <main class="hyper-page" id="landing-main">
         <nav class="hyper-entry-nav" aria-label="Primary">
           <a href="${escapeHtml(safeHref(blogHref))}">[writing]</a> ${copyEmailMarkup(identity.email, "[email]")} <button type="button" class="theme-toggle" data-theme-toggle><span class="theme-toggle__dark">[dark]</span><span class="theme-toggle__light">[light]</span></button>
-          <span class="hyper-entry-nav__right"><a href="/?intro" data-reel title="the 15-second reel, with sound">[reel]</a></span>
+          <span class="hyper-entry-nav__right"></span>
         </nav>
 
         <header class="hyper-intro" data-mark-scope="intro">
@@ -683,7 +683,7 @@
     return reelLoading;
   }
 
-  // [reel] plays the intro with sound. Browsers only allow sound from a gesture, so the
+  // A data-reel link plays the intro with sound. Browsers only allow sound from a gesture, so the
   // audio context is opened inside this click and handed to the intro, and the cover goes
   // up at once; the reel then starts from its first frame with the soundtrack unlocked.
   function playReel() {

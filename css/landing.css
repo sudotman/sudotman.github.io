@@ -157,8 +157,8 @@ html.intro-live body::after {
   font: 12px/1.45 "Courier New", monospace;
 }
 
-/* Where to go and how to read sit on the left; what plays (the reel, the
-   sound) is set apart on the right. */
+/* Where to go and how to read sit on the left; what plays (the sound) is
+   set apart on the right. */
 .hyper-entry-nav__right {
   display: flex;
   gap: 0 8px;
@@ -1216,7 +1216,7 @@ html[data-ambient="on"] body {
    given that much more to scroll: at its end the footer's links stand clear
    above them, with the sun between. The hills' own height, and a little air. */
 html[data-ambient="on"] .hyper-page {
-  padding-bottom: calc(26vh + 56px);
+  padding-bottom: calc(10vh + 96px);
 }
 
 .ambient-fray[hidden],
@@ -1228,7 +1228,7 @@ html.intro .ambient-hills {
 /* The stripe plays the reel. The body still paints it; this link lies over it
    and the margin to its right, and hovers as every link here does, by turning
    yellow — so the stripe opens out to the edge and says what it is for, in the
-   vertical mono of the welcome on the other side. It repeats [reel], so it
+   vertical mono of the welcome on the other side. It repeats the reel row, so it
    stays out of the tab order and the accessibility tree. Keep its width in
    step with the body's stripe. */
 .stripe-reel {
@@ -1344,6 +1344,7 @@ html.intro .stripe-reel {
   .ambient-fray {
     right: 13px;
   }
+
 
   .visitor-toast {
     inset: auto auto 12px 17px;

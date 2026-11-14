@@ -18,14 +18,17 @@
  *
  * While it plays there are two things to see, both dithered as an old one-bit screen would
  * draw them. The stripe thickens and thins with the sound, as it does in the reel, and where
- * the window has a margin beside the text its edge frays into it in yellow. And three ranges
- * of hills stand along the foot of the window, one behind another, sliding past very slowly
- * in the page's ink. At the very end of the page a small sun comes up among them, under the
- * footer's links, as the chord turns major; left there, it climbs clear of the hills and
- * throws its rays. Touching anything sends a ripple out from where it was touched: along
- * the hills to either side, and up and down the stripe.
+ * the window has a margin beside the text its edge frays into it in yellow. And a landscape
+ * stands along the foot of the window, three ranges deep, which makes the journey the
+ * reel's credits name as the page is scrolled: Himalayan peaks under snow at the top, in the
+ * page's ink; green hills through the middle; and at the end the sea off Mumbai, blue. At
+ * the end the sun comes up out of the water
+ * under the footer's links as the chord turns major; left there, it climbs and throws its
+ * rays. After dark, or in the dark theme, every word left at the door is a star over it,
+ * and a note left there crosses as a paper boat. Touching anything sends a ripple out from
+ * where it was touched: along the land to either side, and up and down the stripe.
  *
- * It never starts unasked. [sound] at the top right, beside [reel], and `sound` in the
+ * It never starts unasked. [sound] at the top right, and `sound` in the
  * footer's line turn it on and off, and the audio context is opened inside that click, the only
  * place a browser allows it. It is not remembered between visits, for the same reason.
  * The reel has a soundtrack of its own, so playing the reel turns this off.
@@ -363,6 +366,32 @@
   // Left there a moment longer it climbs clear of them, and then throws rays.
   const SUN = { radius: 17, glow: 2.3, clear: 7, climb: 2.9, rays: 12, reach: 4.4 };
   const SKY = 150;            // screen pixels of empty canvas above the hills, for the sun to climb into
+  // A note left at the door crosses as a paper boat. Its shape, and how long the crossing takes.
+  const BOAT = {
+    crossing: 16,
+    shape: [
+      "......#......",
+      ".....###.....",
+      "....#####....",
+      "...#######...",
+      "#############",
+      ".###########.",
+      "..#########.."
+    ]
+  };
+  let boats = [];
+  // How many words have been left at the door, as js/door.js last said. Each is a star.
+  let wordsLeft = 0;
+  // A fixed, scattered number between 0 and 1 for the nth thing, so a star keeps its place.
+  const scatter = (n, salt) => {
+    const x = Math.sin(n * 127.1 + salt * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  // After dark by the visitor's own clock, or whenever the page is.
+  const isNight = () => {
+    const hour = new Date().getHours();
+    return root.dataset.theme === "dark" || hour >= 19 || hour < 6;
+  };
   // A touch sends a ripple out from where it landed: along the hills to either side, and
   // up and down the stripe. These are the ones still travelling.
   const RIPPLE = { life: 2.2, speed: 560, width: 70 };
@@ -411,6 +440,7 @@
     let rays = 0;             // then 0 to 1 as its rays come out
     let dwell = 0;            // seconds it has stood on the hills
     let wasAtEnd = false;
+    let journey = 0;          // 0 at the top of the page, 1 at the end of it
 
     const size = () => {
       // The fray lives in the empty margin between the text and the stripe and nowhere
@@ -465,6 +495,25 @@
       context.putImageData(image, 0, 0);
     }
 
+    // How high a range stands at a point along it, for each of the three countries the
+    // page passes through. `p` is distance along the range; all three come out around 0..1.
+    const LAND = [
+      // The Himalayas: nothing but peaks, a big one, smaller ones on its shoulders.
+      (p, seed) => 0.26
+        + 0.4 * (1 - Math.abs(Math.sin(p * 3.1 + seed)))
+        + 0.22 * (1 - Math.abs(Math.sin(p * 7.3 + seed * 2)))
+        + 0.12 * (1 - Math.abs(Math.sin(p * 13.7 + seed * 3))),
+      // The hills between: a long roll, a shorter one, and a run of small peaks.
+      (p, seed) => 0.46
+        + 0.26 * Math.sin(p * 2.1 + seed)
+        + 0.15 * Math.sin(p * 5.3 + seed * 2)
+        + 0.13 * (1 - Math.abs(Math.sin(p * 9.1 + seed * 3))),
+      // The sea off Mumbai: nearly level, and never still.
+      (p, seed, t, index) => 0.36
+        + 0.05 * Math.sin(p * 15 + seed + t * (0.9 + index * 0.5))
+        + 0.028 * Math.sin(p * 34 - t * (1.6 + index * 0.4) + seed * 2)
+    ];
+
     function drawHills(t, now, yellow) {
       const { context, image, canvas } = hills;
       // The page's ink, whichever theme that is today.
@@ -474,36 +523,59 @@
       // The hills keep to the foot of the canvas; above them is sky.
       const sky = Math.min(height - 1, Math.round(SKY / CELL));
       const band = height - sky;
+      // Each country has its colour, all three from the page's own palette: rock in its
+      // ink, hills in its green, water in the blue of its links.
+      const ink = [r, g, b];
+      const styles = getComputedStyle(root);
+      const green = colour(context, styles.getPropertyValue("--green").trim(), "#00d16f");
+      const blue = colour(context, styles.getPropertyValue("--link").trim(), "#0000e7");
 
-      // Where each range's crest stands in every column: a long roll, a shorter one, and
-      // a run of peaks, sliding sideways, the near range fastest. A ripple lifts the near
-      // range most, as a wave lifts whatever floats nearest.
+      // Where the sun comes up: under the middle of the footer's links.
+      const box = canvas.getBoundingClientRect();
+      const links = main.querySelector("footer > p:last-child");
+      let line = null;
+      if (links) {
+        const run = document.createRange();
+        run.selectNodeContents(links);
+        line = run.getBoundingClientRect();
+      }
+      const sunX = line ? (line.left + line.width / 2 - box.left) / CELL : width * 0.3;
+      const sunR = SUN.radius / CELL;
+
+      // Where on the journey the page is: the first half of the scroll takes the peaks
+      // down into hills, the second lays the hills out into sea.
+      const leg = Math.min(1, journey * 2);
+      const last = Math.max(0, journey * 2 - 1);
+      const toHills = leg * leg * (3 - 2 * leg);
+      const toSea = last * last * (3 - 2 * last);
+
+      // Where each range's crest stands in every column, sliding sideways, the near range
+      // fastest. A ripple lifts the near range most, as a wave lifts whatever floats nearest.
       RIDGES.forEach((ridge, index) => {
         const crest = crests[index];
         const give = 0.13 * (index + 1);
+        // Peaks stand taller than hills, and the far water sits lower than the far hills.
+        const rise = ridge.rise * (1.16 - 0.16 * toHills);
         for (let x = 0; x < width; x++) {
-          const p = ((x * CELL + t * ridge.drift) / 1000) * ridge.grain;
-          const shape = 0.46
-            + 0.26 * Math.sin(p * 2.1 + ridge.seed)
-            + 0.15 * Math.sin(p * 5.3 + ridge.seed * 2)
-            + 0.13 * (1 - Math.abs(Math.sin(p * 9.1 + ridge.seed * 3)));
-          crest[x] = sky + band * (1 - ridge.rise * shape * swell - give * lifted(x * CELL, "x", now));
+          const along = x * CELL + t * ridge.drift;
+          const p = (along / 1000) * ridge.grain;
+          const inland = LAND[0](p, ridge.seed) * (1 - toHills) + LAND[1](p, ridge.seed) * toHills;
+          const shape = inland * (1 - toSea) + LAND[2](p, ridge.seed, t, index) * toSea;
+          crest[x] = sky + band * (1 - rise * shape * swell - give * lifted(x * CELL, "x", now));
         }
       });
+      // Above this line a range is under snow. It is low on the peaks and climbs out of
+      // reach as they become hills.
+      const snowline = RIDGES.map((ridge) => sky + band * (1 - ridge.rise * (0.64 + 0.6 * toHills)));
 
       // The sun. It comes up over the highest hill under the middle of the footer's links,
       // never closer to them than SUN.clear. It is in front of the far range and behind
       // the others, which sink around it wherever they would hide it.
       let sun = null;
       if (risen > 0.004) {
-        const links = main.querySelector("footer > p:last-child");
-        const box = canvas.getBoundingClientRect();
-        if (links) {
-          const run = document.createRange();
-          run.selectNodeContents(links);
-          const line = run.getBoundingClientRect();
-          const radius = (SUN.radius / CELL) * (1 + level * 0.08);
-          const x = (line.left + line.width / 2 - box.left) / CELL;
+        if (line) {
+          const radius = sunR * (1 + level * 0.08);
+          const x = sunX;
           const column = Math.max(0, Math.min(width - 1, Math.round(x)));
           const ceiling = (line.bottom + SUN.clear - box.top) / CELL + radius;   // as near the links as it may come
           const up = Math.min(height - radius * 0.4, Math.max(ceiling, Math.min(crests[0][column], crests[1][column]) - radius * 0.45));
@@ -528,11 +600,14 @@
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const weave = BAYER[(y & 7) * 8 + (x & 7)] + 0.5;
+          // The same weave, shifted, for choosing a colour, so colour and tone do not line up.
+          const shade = BAYER[((y + 3) & 7) * 8 + ((x + 5) & 7)] + 0.5;
           const at = (y * width + x) * 4;
           // The nearest range that reaches this high is the one seen; the sun is between
           // the far one and the rest.
           let tone = 0;
           let lit = false;
+          let paint = ink;
           for (let index = RIDGES.length - 1; index >= 0; index--) {
             if (index === 0 && sun) {
               const far = Math.hypot(x - sun.x, y - sun.y);
@@ -554,15 +629,92 @@
             const top = crests[index][x];
             if (y < top) continue;
             tone = RIDGES[index].tone * (1 - 0.6 * ((y - top) / Math.max(1, height - top)));
+            // Its colour is woven the way its tone is: part-way between two countries, some
+            // dots are one's and some the other's.
+            paint = toHills * 64 > shade ? green : ink;
+            if (toSea * 64 > shade) paint = blue;
+            if (index < 2 && top < snowline[index]) {
+              // Snow: the crest drawn as a line, and under it nothing, down to a ragged edge.
+              const edge = 1 + Math.abs(top - crests[index][Math.min(width - 1, x + 1)]);
+              if (y - top < edge) {
+                tone = 1;
+                paint = ink;
+              } else if (y - top < (snowline[index] - top) * 0.7 + Math.sin(x * 0.8 + index * 2) * 1.3) {
+                tone = 0;
+              }
+            }
+            // On water the sun lays a broken path of light towards the shore.
+            if (sun && index > 0 && toSea > 0.3 && y > sun.y) {
+              const spread = sun.radius * (0.55 + 0.012 * (y - sun.y)) * (1 + 0.35 * Math.sin(y * 1.9 + t * 3.1));
+              const glint = 0.5 * toSea * risen * (1 - Math.abs(x - sun.x) / spread) * (0.55 + 0.45 * Math.sin(y * 2.7 - t * 4.3 + x * 0.4));
+              if (Math.abs(x - sun.x) < spread && glint * 64 > weave) lit = true;
+            }
             break;
           }
-          data[at] = lit ? yellow[0] : r;
-          data[at + 1] = lit ? yellow[1] : g;
-          data[at + 2] = lit ? yellow[2] : b;
-          // The hills are half there; the sun is all there.
-          data[at + 3] = lit ? 255 : tone * 64 > weave ? 128 : 0;
+          const shown = lit ? yellow : paint;
+          data[at] = shown[0];
+          data[at + 1] = shown[1];
+          data[at + 2] = shown[2];
+          // The land is half there, a drawn line or the sun all there.
+          data[at + 3] = lit || tone >= 1 ? 255 : tone * 64 > weave ? 140 : 0;
         }
       }
+
+      // Anything drawn over the land goes into whatever the land left empty.
+      const dot = (x, y, colour) => {
+        if (x < 0 || y < 0 || x >= width || y >= height) return;
+        const at = (y * width + x) * 4;
+        if (data[at + 3]) return;
+        data[at] = colour[0];
+        data[at + 1] = colour[1];
+        data[at + 2] = colour[2];
+        data[at + 3] = 255;
+      };
+
+      // The stars: one for every word left at the door, each always in its own place, out
+      // after dark or in the dark theme, and gone as the sun gets up. They twinkle by
+      // going out for a moment, one at a time.
+      const dark = (isNight() ? 1 : 0) * (1 - high);
+      if (dark > 0 && wordsLeft > 0) {
+        const count = Math.min(wordsLeft, 500);
+        for (let index = 0; index < count; index++) {
+          if (scatter(index, 3) > dark) continue;
+          if (Math.sin(t * (0.4 + scatter(index, 4) * 1.3) + scatter(index, 5) * 40) > 0.93) continue;
+          const x = Math.floor(scatter(index, 1) * width);
+          const y = 1 + Math.floor(scatter(index, 2) ** 1.4 * (sky + band * 0.35));
+          dot(x, y, ink);
+          // The newest few are a little bigger, so a word just left can be found.
+          if (index >= wordsLeft - 3 || index % 9 === 0) {
+            dot(x - 1, y, ink);
+            dot(x + 1, y, ink);
+            dot(x, y - 1, ink);
+            dot(x, y + 1, ink);
+          }
+        }
+      }
+
+      // A note that was just left sails across as a paper boat, riding the middle range
+      // and passing behind the near one.
+      boats = boats.filter((boat) => now - boat.launched < BOAT.crossing);
+      for (const boat of boats) {
+        const along = (now - boat.launched) / BOAT.crossing;
+        const left = Math.round(-BOAT.shape[0].length + along * (width + BOAT.shape[0].length * 2));
+        const keel = Math.max(0, Math.min(width - 1, left + Math.floor(BOAT.shape[0].length / 2)));
+        const top = Math.round(crests[1][keel] - BOAT.shape.length + 2 + Math.sin(now * 2.3 + boat.launched) * 1.2);
+        BOAT.shape.forEach((row, dy) => {
+          for (let dx = 0; dx < row.length; dx++) {
+            const x = left + dx;
+            const y = top + dy;
+            if (row[dx] !== "#" || x < 0 || x >= width || y < 0 || y >= height || y >= crests[2][x]) continue;
+            const at = (y * width + x) * 4;
+            data[at] = r;
+            data[at + 1] = g;
+            data[at + 2] = b;
+            data[at + 3] = 255;
+          }
+        });
+      }
+
       context.putImageData(image, 0, 0);
     }
 
@@ -578,6 +730,11 @@
       // The stripe itself thickens with the sound, and jumps when something is touched.
       const jump = ripples.reduce((most, one) => Math.max(most, one.strength * Math.exp(-(now - one.born) * 5)), 0);
       stripe?.style.setProperty("--ambient-level", (still.matches ? 0 : level * 0.9 + jump * 1.4).toFixed(3));
+
+      // The landscape follows the scroll, a little behind it, so it is seen to change.
+      const far = Math.max(1, root.scrollHeight - window.innerHeight);
+      const here = Math.max(0, Math.min(1, window.scrollY / far));
+      journey = still.matches ? here : journey + (here - journey) * 0.12;
 
       // Reaching the end of the page brings the sun up, and leaving it lets it set.
       const atEnd = window.scrollY + window.innerHeight >= root.scrollHeight - 8;
@@ -749,7 +906,14 @@
   });
   document.addEventListener("language:switched", (event) => cue("language", event.detail));
   document.addEventListener("visitor:kept", (event) => cue(event.detail.kind));
-  document.addEventListener("door:left", (event) => cue(event.detail.kind));
+  document.addEventListener("door:left", (event) => {
+    cue(event.detail.kind);
+    if (sound && event.detail.kind === "note") boats.push({ launched: performance.now() / 1000 });
+  });
+  // Kept whether or not the sound is on, so the sky is right the moment it is.
+  document.addEventListener("door:words", (event) => {
+    wordsLeft = Math.max(0, Number(event.detail.total) || 0);
+  });
 
   document.addEventListener("visibilitychange", () => {
     if (!sound) return;

@@ -10,7 +10,7 @@
  * drift) keeps running on `T`. Holds are whole beats, so every cut stays on the
  * 116 bpm grid of the soundtrack.
  *
- * Nothing plays unasked. [reel] on the front door plays it with sound from the
+ * Nothing plays unasked. The reel links on the front door plays it with sound from the
  * first frame; arriving at /?intro plays it silent, and index.html adds
  * `html.intro` there, which paints a matching cover until this script takes
  * over. Any key or scroll skips; on a silent start the first click or tap
@@ -848,7 +848,7 @@
 
   // Browsers only let sound start from a gesture. Arriving at /?intro the reel begins silent
   // (unless the browser already allows sound) and the first click or tap brings the
-  // soundtrack in like tape spinning up, landing in sync. [reel] on the front door opens
+  // soundtrack in like tape spinning up, landing in sync. A reel link on the front door opens
   // the audio context inside its own click and passes it here, so the reel holds its first
   // frame until the soundtrack is ready and both start together. Either way, once sound
   // plays the picture follows the audio clock.
@@ -923,7 +923,7 @@
     };
     if (!noSound) {
       // Nothing on screen waits for this: /?intro starts silent, so its stems queue behind
-      // the page; [reel] holds its first frame for at most HOLD, so its stems go first.
+      // the page; a reel link holds its first frame for at most HOLD, so its stems go first.
       loadSound(MUSIC.voice, { priority: given ? "high" : "low" })
         .then(t => { track = t; startSound(); })
         .catch(() => { noSound = true; setHint(); });

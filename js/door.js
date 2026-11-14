@@ -208,6 +208,8 @@
     else if (!status && mine) status = `"${mine}" is yours for today. come back tomorrow for another.`;
 
     section.querySelector("[data-door-total]").textContent = total ? `(${total})` : "";
+    // For js/ambient.js, where every word is a star.
+    document.dispatchEvent(new CustomEvent("door:words", { detail: { total: Math.max(total, words.length) + (waiting ? 1 : 0) } }));
     wordsBox.replaceChildren(run, el("p", { className: "door-status", textContent: status, attrs: { role: "status" } }));
   }
 

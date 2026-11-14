@@ -11,8 +11,8 @@
  * The welcome down the left edge follows by greeting in the languages the page is not in, so
  * in english it reads exactly as it always has, and it is the second way to switch.
  *
- * The reel is in english and ends by landing on the name, so for as long as it is on screen
- * (html.intro) the page is english too, and goes back to the chosen language afterwards.
+ * The reel ends by landing on the name, and says it in whichever language the page is in
+ * (sayAsPage in js/intro.js), so the page keeps its language while the reel plays.
  */
 (() => {
   "use strict";
@@ -40,7 +40,7 @@
 
   const text = (value) => (typeof value === "string" && value.trim() ? value.trim() : "");
 
-  const shown = () => (root.classList.contains("intro") || !order.includes(chosen) ? "en" : chosen);
+  const shown = () => (order.includes(chosen) ? chosen : "en");
 
   // The name breaks into its two words by its own measure in english. The other scripts
   // are given their lines, since the measure was set for latin letters.
@@ -104,7 +104,7 @@
       localStorage.setItem(KEY, chosen);
     } catch {}
     apply();
-    // Only a switch the visitor made: apply() also runs on load and around the reel.
+    // Only a switch the visitor made: apply() also runs on load and from other tabs.
     document.dispatchEvent(new CustomEvent("language:switched", { detail: { language: chosen, index: order.indexOf(chosen) } }));
   }
 
@@ -143,11 +143,6 @@
   document.addEventListener("click", (event) => {
     if (event.target.closest?.("[data-language-next]")) next();
   });
-
-  // The reel coming and going.
-  new MutationObserver(() => {
-    if (main && root.dataset.language !== shown()) apply();
-  }).observe(root, { attributes: true, attributeFilter: ["class"] });
 
   addEventListener("storage", (event) => {
     if (event.key !== KEY) return;

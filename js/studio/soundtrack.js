@@ -19,7 +19,7 @@ import { button, el } from './dom.js';
 import * as store from './store.js';
 
 // Keep in step with the version index.html loads js/intro.js at.
-const ENGINE = '/js/intro.js?v=20261111d';
+const ENGINE = '/js/intro.js?v=20261114c';
 const KIT = '/sounds/reel/stems.json';
 const BPM = 116;
 const TAPE = 0.35;

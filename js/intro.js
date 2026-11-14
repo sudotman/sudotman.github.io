@@ -684,7 +684,8 @@
     vtxt6.textContent = VTXT;
     const s6cam = content(s6, { transformOrigin: "50% 50%" });
     const name6 = el("div", s6cam, abs(L6.x, L6.y, { font: `900 ${L6.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", color: C.onYellow, whiteSpace: "nowrap", transformOrigin: "0 0" }));
-    const K1 = letters(el("div", name6), NAME[0] || ""), K2 = letters(el("div", name6), NAME.slice(1).join(" "));
+    const sayName6 = () => [...letters(el("div", name6), NAME[0] || ""), ...letters(el("div", name6), NAME.slice(1).join(" "))];
+    let K6 = sayName6(), fs6 = L6.fs, step6 = 0.018;
     const url = el("div", s6cam, abs(L6.x, L6.urlY, { background: "#000", color: "#fff", font: `700 ${L6.urlFs}px/0.9 ${SANS}`, letterSpacing: "-0.055em", padding: "6px 24px 16px 16px", whiteSpace: "pre" }));
     url.textContent = SC["sign-off"].url;
     const links = el("div", s6cam, abs(L6.x + 2, L6.linksY, { font: `400 ${L6.linksFs}px/1.7 ${MONO}`, color: "#000", whiteSpace: "pre" }));
@@ -695,7 +696,51 @@
     el("div", side, { font: `italic 400 ${V ? 64 : 58}px/1 ${SERIF}`, whiteSpace: "nowrap" }).textContent = SC["sign-off"].aside;
     el("div", side, { font: `700 18px/1.5 ${MONO}`, marginTop: "16px", whiteSpace: "pre" }).textContent = SC["sign-off"].credits;
     const T_S6 = unwarp(8.5);
-    let land = null, landTried = false;
+    let land = null, landTried = false, said6 = "en";
+
+    // Web only: the name on the page may be in hindi or urdu (js/language.js), and the end
+    // card lands on it, so it says the name in that language and sets it as the page does:
+    // the page's font, weight, leading and lines, at the size english would have here. Those
+    // scripts are shaped across their letters, so they arrive a word at a time, not a letter.
+    function sayAsPage() {
+      const h1 = document.querySelector(".hyper-intro h1[data-say]"), sub = document.querySelector(".hyper-subtitle");
+      if (!h1 || !sub) return;
+      const lang = h1.lang && h1.lang !== "en" ? h1.lang : "en";
+      if (lang === said6) return;
+      said6 = lang;
+      name6.replaceChildren();
+      if (lang === "en") {
+        Object.assign(name6.style, { font: `900 ${L6.fs}px/0.68 ${SANS}`, letterSpacing: "-0.09em", direction: "ltr" });
+        Object.assign(tag6.style, { fontFamily: MONO, lineHeight: "1.2", letterSpacing: "", direction: "ltr" });
+        K6 = sayName6(); fs6 = L6.fs; step6 = 0.018; tag6.textContent = CHIP;
+        return;
+      }
+      const hs = getComputedStyle(h1), fs = parseFloat(hs.fontSize);
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;font-size:var(--name-size)";
+      h1.parentNode.appendChild(probe);
+      const english = parseFloat(getComputedStyle(probe).fontSize) || fs;
+      probe.remove();
+      const em = v => (parseFloat(v) || 0) / fs + "em";
+      fs6 = L6.fs * fs / english;
+      Object.assign(name6.style, { font: `${hs.fontWeight} ${fs6}px/${parseFloat(hs.lineHeight) / fs || 1} ${hs.fontFamily}`, letterSpacing: hs.letterSpacing === "normal" ? "0" : em(hs.letterSpacing), direction: hs.direction });
+      // Where the lettering starts inside the name's box, which landing.css moves for urdu.
+      const button = h1.querySelector(".name-switch") || h1, bs = getComputedStyle(button), hr = h1.getBoundingClientRect(), br = button.getBoundingClientRect();
+      const inset = (edge, side) => br[edge] + parseFloat(bs[`padding${side}`]) + parseFloat(bs[`border${side}Width`]) - hr[edge];
+      const inner = el("div", name6, { position: "relative", left: em(inset("left", "Left")), top: em(inset("top", "Top")) });
+      const lines = [...h1.querySelectorAll(".name-line")];
+      K6 = (lines.length ? lines : [h1]).map((line, i) => {
+        const block = getComputedStyle(line).display === "block";
+        if (i && !block) inner.append(" ");
+        const word = el(block ? "div" : "span", inner, { display: block ? "block" : "inline-block", width: "fit-content", whiteSpace: "pre" });
+        word.textContent = line.textContent.trim();
+        return word;
+      });
+      step6 = 0.06;
+      const ss = getComputedStyle(sub), sfs = parseFloat(ss.fontSize);
+      Object.assign(tag6.style, { fontFamily: ss.fontFamily, lineHeight: String(parseFloat(ss.lineHeight) / sfs || 1.2), letterSpacing: ss.letterSpacing === "normal" ? "0" : (parseFloat(ss.letterSpacing) || 0) / sfs + "em", direction: ss.direction });
+      tag6.textContent = sub.textContent.trim();
+    }
 
     // Web only: measure where the page's own name and subtitle sit, in stage units.
     function measureLanding() {
@@ -706,7 +751,7 @@
       if (!hr.width || hr.bottom < 0 || hr.top > o.vh) return;
       const cs6 = getComputedStyle(sub);
       land = {
-        x: hr.left / sc - OX, y: hr.top / sc - OY, k: fs / sc / L6.fs,
+        x: hr.left / sc - OX, y: hr.top / sc - OY, k: fs / sc / fs6,
         sub: { x: sr.left / sc - OX, y: sr.top / sc - OY, w: sr.width / sc, fs: parseFloat(cs6.fontSize) / sc, pad: `${parseFloat(cs6.paddingTop) / sc}px ${parseFloat(cs6.paddingLeft) / sc}px` },
       };
     }
@@ -720,7 +765,8 @@
       yfield.style.left = l + "px"; yfield.style.width = (r - l) + "px";
       // the name is set on the yellow field, then stands on the page as the field draws back to the stripe
       name6.style.color = mix(C.onYellow, C.strong, rt);
-      [...K1, ...K2].forEach((s, i) => { const dt = t - (8.5 + i * 0.018), e = E.outExpo(clamp(dt / 0.34)); s.style.opacity = clamp(dt / 0.04); s.style.transform = `scale(${lerp(2.3, 1, e)}) translateY(${(1 - e) * 30}px)`; });
+      if (WEB && t < 9.05) sayAsPage();
+      K6.forEach((s, i) => { const dt = t - (8.5 + i * step6), e = E.outExpo(clamp(dt / 0.34)); s.style.opacity = clamp(dt / 0.04); s.style.transform = `scale(${lerp(2.3, 1, e)}) translateY(${(1 - e) * 30}px)`; });
       vtxt6.style.transform = `translateY(${-120 - T * 60}px)`;
       if (!WEB) {
         url.style.clipPath = `inset(0 ${(1 - E.outExpo(P(t, 8.76, 9.0))) * 100}% 0 0)`;
@@ -735,7 +781,7 @@
       const se = E.outExpo(P(t, 8.72, 9.0)), gone = 1 - P(t, 9.1, 9.24);
       side.style.opacity = se * gone; side.style.transform = `translateY(${(1 - se) * 24}px)`;
       vtxt6.style.opacity = 0;
-      if (t >= 9.05 && !landTried) measureLanding();
+      if (t >= 9.05 && !landTried) { sayAsPage(); measureLanding(); }
       if (!land) { tag6.style.opacity = 0; return 1 - P(t, 9.1, 9.4); }
       const f = E.inOutCubic(P(t, 9.1, 9.5));
       name6.style.transform = `translate(${(land.x - L6.x) * f}px, ${(land.y - L6.y) * f}px) scale(${lerp(1, land.k, f)})`;
@@ -847,7 +893,7 @@
   const root = document.documentElement;
 
   // Browsers only let sound start from a gesture. Arriving at /?intro the reel begins silent
-  // (unless the browser already allows sound) and the first click or tap brings the
+  // and the first click or tap brings the
   // soundtrack in like tape spinning up, landing in sync. A reel link on the front door opens
   // the audio context inside its own click and passes it here, so the reel holds its first
   // frame until the soundtrack is ready and both start together. Either way, once sound
@@ -857,6 +903,35 @@
   const VOLUME = clamp(MUSIC.volume), PULSE = clamp(MUSIC.pulse, 0, 2);
   const TAPE = 0.35, TAPE_FROM = 1 - clamp(MUSIC.spinUp, 0, 0.9), HOLD = 1.2;
   let running = false;
+
+  // Sound that plays as playback (see audioSession above) shows on the lock screen and, on an
+  // iPhone, in the Dynamic Island, so it says what it is and wears the site's cover
+  // (images/cover, rendered by scripts/cover.swift: the reel wears its sign-off, the page its own top). Pause there stops it. Each player clears
+  // only what it set, so one ending does not wipe the other's card.
+  const cover = (name) => [96, 256, 512].map((n) => ({ src: `/images/cover/${name}-${n}.png`, sizes: `${n}x${n}`, type: "image/png" }));
+  function nowPlaying(title, artist, art, onStop) {
+    const session = navigator.mediaSession;
+    if (!session || !window.MediaMetadata) return () => {};
+    let metadata = null;
+    try {
+      metadata = new MediaMetadata({ title, artist, album: "satyam.lol", artwork: cover(art) });
+      session.metadata = metadata;
+      session.playbackState = "playing";
+      for (const action of ["pause", "stop"]) session.setActionHandler(action, onStop);
+    } catch {
+      /* a browser that knows the API but not every action */
+    }
+    return () => {
+      if (session.metadata !== metadata) return;
+      try {
+        session.metadata = null;
+        session.playbackState = "none";
+        for (const action of ["pause", "stop"]) session.setActionHandler(action, null);
+      } catch {
+        /* as above */
+      }
+    };
+  }
 
   function play({ ctx: given = null } = {}) {
     if (running) return;
@@ -885,6 +960,7 @@
     let T = 0, last = 0, raf = 0, leaving = 0, done = false, waiting = !!given;
     let track = null, board = null, noSound = !MUSIC.on || !(window.AudioContext || window.webkitAudioContext), want = !!given, ctx = given, gain = null, meter = null, sound = null, lvl = 0;
     const began = performance.now();
+    let leaveCard = () => {};
     const setHint = () => {
       const offer = !want && !noSound;
       hint.textContent = coarse ? (offer ? "tap for sound · swipe to skip" : "tap to skip") : (offer ? "click for sound · any key to skip" : "any key to skip");
@@ -905,6 +981,7 @@
       board.onended = () => { if (done) ctx.close().catch(() => {}); };
       board.start(now, offset, tape ? TAPE_FROM : 1, tape ? TAPE : 0);
       sound = { now, lat, offset, tape }; waiting = false;
+      leaveCard = nowPlaying("showreel", "satyam kashyap", "reel", () => skip());
     };
     // where the listener is in the soundtrack
     const since = () => ctx.currentTime - sound.lat - sound.now;
@@ -914,6 +991,7 @@
       if (want || noSound) return;
       want = true; setHint();
       try {
+        if (navigator.audioSession) navigator.audioSession.type = "playback";   // asked for: through the silent switch
         ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
         ctx.resume();
       } catch {
@@ -927,7 +1005,6 @@
       loadSound(MUSIC.voice, { priority: given ? "high" : "low" })
         .then(t => { track = t; startSound(); })
         .catch(() => { noSound = true; setHint(); });
-      if (!given && navigator.getAutoplayPolicy?.("audiocontext") === "allowed") enableSound();
     }
     if (noSound) waiting = false;
 
@@ -937,6 +1014,7 @@
       removeEventListener("keydown", skip, true); removeEventListener("wheel", skip, true); removeEventListener("touchmove", skip, true);
       removeEventListener("click", onClick, true); removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", onVisibility);
       if (ctx && !sound) ctx.close().catch(() => {});   // with sound, the last chord rings out over the page
+      leaveCard();
     };
     const skip = () => {
       if (leaving || done) return;

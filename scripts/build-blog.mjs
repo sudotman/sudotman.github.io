@@ -128,7 +128,9 @@ function layout({ title, description, canonical, image, head = '', body, bodyCla
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="${escapeHtml(canonical)}">
   <link rel="alternate" type="application/rss+xml" title="satyam kashyap — writing" href="${SITE}/blog/feed.xml">
-  <link rel="icon" href="/cardIcon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/cover/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/images/cover/satyam-96.png" sizes="96x96" type="image/png">
+  <link rel="apple-touch-icon" href="/images/cover/apple-touch-icon.png">
   <link rel="stylesheet" href="/css/theme.css?v=20261111c">
   <link rel="stylesheet" href="/css/copy-email.css?v=20261111c">
   <link rel="stylesheet" href="/css/blog.css?v=20261111c">

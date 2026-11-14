@@ -795,10 +795,41 @@
     };
   }
 
+  // Sound that plays as playback (see audioSession in start) shows on the lock screen and, on an
+  // iPhone, in the Dynamic Island, so it says what it is and wears the site's cover
+  // (images/cover, rendered by scripts/cover.swift: the reel wears its sign-off, the page its own top). Pause there stops it. Each player clears
+  // only what it set, so one ending does not wipe the other's card.
+  const cover = (name) => [96, 256, 512].map((n) => ({ src: `/images/cover/${name}-${n}.png`, sizes: `${n}x${n}`, type: "image/png" }));
+  function nowPlaying(title, artist, art, onStop) {
+    const session = navigator.mediaSession;
+    if (!session || !window.MediaMetadata) return () => {};
+    let metadata = null;
+    try {
+      metadata = new MediaMetadata({ title, artist, album: "satyam.lol", artwork: cover(art) });
+      session.metadata = metadata;
+      session.playbackState = "playing";
+      for (const action of ["pause", "stop"]) session.setActionHandler(action, onStop);
+    } catch {
+      /* a browser that knows the API but not every action */
+    }
+    return () => {
+      if (session.metadata !== metadata) return;
+      try {
+        session.metadata = null;
+        session.playbackState = "none";
+        for (const action of ["pause", "stop"]) session.setActionHandler(action, null);
+      } catch {
+        /* as above */
+      }
+    };
+  }
+  let leaveCard = () => {};
+
   function stop() {
     const ending = sound;
     haze?.();
     sound = null;
+    leaveCard();
     delete root.dataset.ambient;
     label();
     if (!ending) return;
@@ -817,6 +848,8 @@
     if (sound || !AudioContextClass || root.classList.contains("intro")) return;
     let ctx = null;
     try {
+      // Sound was asked for, so it is playback, not a page chime: iOS lets it through the silent switch.
+      if (navigator.audioSession) navigator.audioSession.type = "playback";
       ctx = new AudioContextClass({ latencyHint: "interactive" });
       ctx.resume().catch(() => {});
     } catch {
@@ -869,6 +902,7 @@
     moveTo(partNow() || WHERE.intro);
     startHaze();
     label();
+    leaveCard = nowPlaying("the front door", "satyam kashyap", "satyam", stop);
   }
 
   document.addEventListener("landing:ready", () => {

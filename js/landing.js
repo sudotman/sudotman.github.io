@@ -660,7 +660,7 @@
   /* The reel                                                                */
   /* ---------------------------------------------------------------------- */
 
-  const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261111d"];
+  const REEL_SOURCES = ["/js/reel-config.js?v=20261023b", "/js/intro.js?v=20261114c"];
 
   // The config carries what the reel says and has to run first; a script made
   // here is async by default, so the order is set explicitly. A config that
@@ -692,6 +692,8 @@
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let ctx = null;
     try {
+      // Sound was asked for, so it is playback, not a page chime: iOS lets it through the silent switch.
+      if (navigator.audioSession) navigator.audioSession.type = "playback";
       ctx = AudioContextClass ? new AudioContextClass({ latencyHint: "interactive" }) : null;
       ctx?.resume().catch(() => {});
     } catch {
